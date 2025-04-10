@@ -6,21 +6,22 @@
 \usage{
 GCP_AssignGroups(
   GCPlist,
-  automatic_assignment = c("no", "groupfirst", "samplefirst"),
+  automatic_assignment = c("no", "groupfirst", "replicatefirst"),
   separator_automatic_assignment = "_",
   sample_names = pull(GCPlist$sampleINFO, 1),
   group_names = rep("not_assigned", length(sample_names)),
   sample_group_table = NULL,
   name_column_groups = "Condition",
-  factorlevels = NULL
+  factorlevels = NULL,
+  name_column_replicates = "Replicates"
 )
 }
 \arguments{
 \item{GCPlist}{a list created with the ImportOutputMaxQuant function.}
 
-\item{automatic_assignment}{One of the following: "no", "groupfirst", "samplefirst". If "no" is selected, groups will be assigned considering the other following arguments; if "group_first" or "samplefirst", the groups will be automatically created from sample names, considering the separator passed to}
+\item{automatic_assignment}{One of the following: "no", "groupfirst", "replicatefirst". If "no" is selected, groups will be assigned considering the other following arguments; if "groupfirst" or "replicatefirst", the groups will be automatically created from sample names, considering the separator passed to separator_automatic_assignment, and an additional column called as name_column_replicates will be also created.}
 
-\item{separator_automatic_assignment}{character of length 1. If automatic_assignment is "groupfirst" or "samplefirst", this separator will be used to distinguish group from sample names. Example: if sample names are "control_sam01", "control_sam02", "disease_sam03", "disease_sam04"; automatic_assignment is "groupfirst"; and separator_automatic_assignment is "_", the samples "sam01" and sam02" will be assigned to the "control" group and the samples "sam03" and sam04" will be assigned to the "disease" group.}
+\item{separator_automatic_assignment}{character of length 1. If automatic_assignment is "groupfirst" or "replicatefirst", this separator will be used to distinguish group from sample names. Example: if sample names are "control_01", "control_02", "disease_03", "disease_04"; automatic_assignment is "groupfirst"; and separator_automatic_assignment is "_", the samples "control_01", "control_02", will be assigned to the "control" group and the samples "disease_03", "disease_04" will be assigned to the "disease" group. An additional column, called as name_column_replicates, with "01", "02", "03", "04" will be also created.}
 
 \item{sample_names}{character vector containing the existing name of samples (Will be considered if automatic_assignment is "no").}
 
@@ -31,6 +32,8 @@ GCP_AssignGroups(
 \item{name_column_groups}{character of length 1. The name of the new column that will contain the groups.}
 
 \item{factorlevels}{NULL or character. You can specify here the levels of the groups (the reference group should be put as first element). If NULL, it will just apply the function as.factor (in which the order of levels is assigned in appearing order).}
+
+\item{name_column_replicates}{character of length 1. The name of the new column that will contain the replicates (it will be used if automatic_assignment is not "no").}
 }
 \value{
 the GCPlist with an additional column in the sampleINFO data frames containing the assigned groups.

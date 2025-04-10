@@ -3,33 +3,32 @@
 #' It assigns each samples to a desired groups.
 #'
 #' @param GCPlist a list created with the ImportOutputMaxQuant function.
-#' @param automatic_assignment One of the following: "no", "groupfirst", "samplefirst". If "no" is selected, groups will be assigned considering the other following arguments; if "group_first" or "samplefirst", the groups will be automatically created from sample names, considering the separator passed to
-#' @param separator_automatic_assignment character of length 1. If automatic_assignment is "groupfirst" or "samplefirst", this separator will be used to distinguish group from sample names. Example: if sample names are "control_sam01", "control_sam02", "disease_sam03", "disease_sam04"; automatic_assignment is "groupfirst"; and separator_automatic_assignment is "_", the samples "sam01" and sam02" will be assigned to the "control" group and the samples "sam03" and sam04" will be assigned to the "disease" group.
+#' @param automatic_assignment One of the following: "no", "groupfirst", "replicatefirst". If "no" is selected, groups will be assigned considering the other following arguments; if "groupfirst" or "replicatefirst", the groups will be automatically created from sample names, considering the separator passed to separator_automatic_assignment, and an additional column called as name_column_replicates will be also created.
+#' @param separator_automatic_assignment character of length 1. If automatic_assignment is "groupfirst" or "replicatefirst", this separator will be used to distinguish group from sample names. Example: if sample names are "control_01", "control_02", "disease_03", "disease_04"; automatic_assignment is "groupfirst"; and separator_automatic_assignment is "_", the samples "control_01", "control_02", will be assigned to the "control" group and the samples "disease_03", "disease_04" will be assigned to the "disease" group. An additional column, called as name_column_replicates, with "01", "02", "03", "04" will be also created.
 #' @param sample_names character vector containing the existing name of samples (Will be considered if automatic_assignment is "no").
 #' @param group_names character vector containing the groups corresponding to the samples passed to sample_names (Will be considered if automatic_assignment is "no").
 #' @param sample_group_table alternatively, you can pass here a table with the sample names in the first column and the relative group in the second column. If you pass an argument here (and if automatic_assignment is "no"), this will be considered instead of sample_names and group_names.
 #' @param name_column_groups character of length 1. The name of the new column that will contain the groups.
 #' @param factorlevels NULL or character. You can specify here the levels of the groups (the reference group should be put as first element). If NULL, it will just apply the function as.factor (in which the order of levels is assigned in appearing order).
+#' @param name_column_replicates character of length 1. The name of the new column that will contain the replicates (it will be used if automatic_assignment is not "no").
 #'
 #' @return the GCPlist with an additional column in the sampleINFO data frames containing the assigned groups.
 #'
 #' @export
-GCP_AssignGroups <- function(GCPlist, automatic_assignment = c("no", "groupfirst", "samplefirst"), separator_automatic_assignment = "_", sample_names = pull(GCPlist$sampleINFO, 1), group_names = rep("not_assigned", length(sample_names)), sample_group_table = NULL, name_column_groups = "Condition", factorlevels = NULL) {
+GCP_AssignGroups <- function(GCPlist, automatic_assignment = c("no", "groupfirst", "replicatefirst"), separator_automatic_assignment = "_", sample_names = pull(GCPlist$sampleINFO, 1), group_names = rep("not_assigned", length(sample_names)), sample_group_table = NULL, name_column_groups = "Condition", factorlevels = NULL, name_column_replicates = "Replicates") {
 
   checkGCPlist(GCPlist)
 
-  if (!identical(tolower(automatic_assignment), c("no", "groupfirst", "samplefirst"))) {
-    if (length(automatic_assignment) != 1) {stop('automatic_assignment must be one of "no", "groupfirst", "samplefirst"')}
-    if (is.na(automatic_assignment)) {stop('automatic_assignment must be one of "no", "groupfirst", "samplefirst"')}
+  if (!identical(tolower(automatic_assignment), c("no", "groupfirst", "replicatefirst"))) {
+    if (length(automatic_assignment) != 1) {stop('automatic_assignment must be one of "no", "groupfirst", "replicatefirst"')}
+    if (is.na(automatic_assignment)) {stop('automatic_assignment must be one of "no", "groupfirst", "replicatefirst"')}
   }
   automatic_assignment <- tolower(automatic_assignment)
-  automatic_assignment <- match.arg(automatic_assignment, c("no", "groupfirst", "samplefirst"))
+  automatic_assignment <- match.arg(automatic_assignment, c("no", "groupfirst", "replicatefirst"))
 
-  if (!is.null(name_column_groups)) {
-    if (length(name_column_groups)!=1) {stop("name_column_groups must be a character of length 1")}
-    if (!is.character(name_column_groups)) {stop("name_column_groups must be a character of length 1")}
-    if (is.na(name_column_groups)) {stop("name_column_groups must a character of length 1, not a missing value")}
-  }
+  if (length(name_column_groups)!=1) {stop("name_column_groups must be a character of length 1")}
+  if (!is.character(name_column_groups)) {stop("name_column_groups must be a character of length 1")}
+  if (is.na(name_column_groups)) {stop("name_column_groups must a character of length 1, not a missing value")}
 
   if (!is.null(factorlevels)) {
     if (!is.character(factorlevels)) {stop("factorlevels must be a character")}
@@ -42,29 +41,30 @@ GCP_AssignGroups <- function(GCPlist, automatic_assignment = c("no", "groupfirst
     if (!is.character(separator_automatic_assignment)) {stop("separator_automatic_assignment must be a character of length 1 with the separator to separe group names from sample names")}
     if (is.na(separator_automatic_assignment)) {stop("separator_automatic_assignment must be a character of length 1 with the separator to separe group names from sample names, not a NA")}
 
+    if (length(name_column_replicates)!=1) {stop("name_column_replicates must be a character of length 1")}
+    if (!is.character(name_column_replicates)) {stop("name_column_replicates must be a character of length 1")}
+    if (is.na(name_column_replicates)) {stop("name_column_replicates must a character of length 1, not a missing value")}
+
     names_first_parts <- str_remove(pull(GCPlist[["sampleINFO"]], 1), paste0(separator_automatic_assignment, ".*"))
     names_second_parts <- str_remove(pull(GCPlist[["sampleINFO"]], 1), paste0(names_first_parts, "_"))
 
     GCPoutput <- GCPlist
 
     GCPoutput$sampleINFO[, name_column_groups] <- rep(as.character(NA), length(pull(GCPoutput$sampleINFO, 1)))
+    GCPoutput$sampleINFO[, name_column_replicates] <- rep(as.character(NA), length(pull(GCPoutput$sampleINFO, 1)))
 
     if (automatic_assignment == "groupfirst") {
       GCPoutput$sampleINFO[, name_column_groups] <- names_first_parts
-      GCPoutput$sampleINFO[, 1] <- names_second_parts
+      GCPoutput$sampleINFO[, name_column_replicates] <- names_second_parts
     }
-    if (automatic_assignment == "samplefirst") {
-      GCPoutput$sampleINFO[, 1] <- names_first_parts
+    if (automatic_assignment == "replicatefirst") {
       GCPoutput$sampleINFO[, name_column_groups]  <- names_second_parts
+      GCPoutput$sampleINFO[, name_column_replicates] <- names_first_parts
     }
 
     if (any(duplicated(pull(GCPoutput$sampleINFO, 1)))) {
       stop(paste0('Duplicated names have been introduced in samples names. In particular, the following are duplicated: "', paste0(unique(pull(GCPoutput$sampleINFO, 1)[which(duplicated(pull(GCPoutput$sampleINFO, 1)))]), collapse = '", "'), '"'))
     }
-
-    colnames(GCPoutput$quant_raw)[which(colnames(GCPoutput$quant_raw) != "protid")] <- pull(GCPoutput$sampleINFO, 1)
-    colnames(GCPoutput$quant_LFQ)[which(colnames(GCPoutput$quant_LFQ) != "protid")] <- pull(GCPoutput$sampleINFO, 1)
-
   }
 
   if (automatic_assignment == "no") {
@@ -163,7 +163,12 @@ GCP_AssignGroups <- function(GCPlist, automatic_assignment = c("no", "groupfirst
   cat("______\n")
   cat(paste0("The groups have been assigned in the sampleINFO dataframes in the column named ", name_column_groups, ", in this way:\n"))
 
-  print(as.data.frame(GCPoutput$sampleINFO[, c(1, which(colnames(GCPoutput$sampleINFO) == name_column_groups))]))
+  if (automatic_assignment == "no") {
+    print(as.data.frame(GCPoutput$sampleINFO[, c(1, which(colnames(GCPoutput$sampleINFO) == name_column_groups))]))
+  } else {
+    print(as.data.frame(GCPoutput$sampleINFO[, c(1, which(colnames(GCPoutput$sampleINFO) == name_column_groups), which(colnames(GCPoutput$sampleINFO) == name_column_replicates))]))
+  }
+
 
   cat("______\n")
 
