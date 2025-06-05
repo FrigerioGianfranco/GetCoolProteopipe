@@ -169,10 +169,10 @@ ImportOutputMaxQuant <- function(MaxQuant_table_name, samples_info = NULL, fasta
   if (!is.null(fasta_database)) {
     if (!is.na(fasta_database)) {
       if (fasta_database == "human") {
-        fasta_database_loaded <- read_tsv(system.file("extdata", "Database_Human_ref.txt", package = "GetCoolproteompipe"))
+        fasta_database_loaded <- read_tsv(system.file("extdata", "Database_Human_ref.txt", package = "GetCoolproteopipe"))
 
       } else if (fasta_database == "mouse") {
-        fasta_database_loaded <- read_tsv(system.file("extdata", "Database_Mouse_ref.txt", package = "GetCoolproteompipe"))
+        fasta_database_loaded <- read_tsv(system.file("extdata", "Database_Mouse_ref.txt", package = "GetCoolproteopipe"))
       }
 
       if (!(all(c("Accession", "Protein names", "Gene names") %in% colnames(fasta_database_loaded))))  {stop('The fasta database loaded must contain at least these columns: "Accession", "Protein names", and "Gene names"')}
