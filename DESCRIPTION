@@ -1,6 +1,6 @@
 Package: GetCoolProteopipe
 Title: Pipeline for the elaboration of proteomics data!
-Version: 0.2.1
+Version: 0.2.2
 Authors@R: c(
     person("Gianfranco", "Frigerio", email = "frigerio.gianfranco@hsr.it", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-3538-1443")),
