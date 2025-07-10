@@ -23,6 +23,8 @@ GCP_NAimputation <- function(GCPlist, quant_rate = 0.5, name_column_groups = NUL
   if (is.na(quant_rate)) {stop("quant_rate must be a numeric of length 1, not a missing value")}
   if (quant_rate<0 | quant_rate>1) {stop("quant_rate must be between 0 and 1 (included)")}
 
+  allwiththis_created <- FALSE
+
   if (!is.null(name_column_groups)) {
     if (length(name_column_groups)!=1) {stop("name_column_groups must be NULL or a character of length 1")}
     if (!is.character(name_column_groups)) {stop("name_column_groups must be NULL or a character of length 1")}
@@ -39,6 +41,8 @@ GCP_NAimputation <- function(GCPlist, quant_rate = 0.5, name_column_groups = NUL
     GCPlist$sampleINFO <- mutate(GCPlist$sampleINFO, allwiththis = as.factor("theOnlyGroup"))
 
     name_column_groups <- "allwiththis"
+
+    allwiththis_created <- TRUE
   }
 
   if (length(seed)!=1) {stop("seed must be a numeric of length 1")}
@@ -72,7 +76,7 @@ GCP_NAimputation <- function(GCPlist, quant_rate = 0.5, name_column_groups = NUL
       stop("For some reason there was not a matrix inside the created ppe object... that's wired, ask Gianfranco to check!!")
     }
     if (!identical(colnames(ppe_object@assays@data@listData[[the_matrix_type]]), colnames(GCPtable)[which(colnames(GCPtable)!="protid")])) {
-      stop("For some reason the column names were change while creating the ppe object... that's wired, ask Gianfranco to check!!")
+      stop("For some reason the column names were changed while creating the ppe object... that's wired, ask Gianfranco to check!!")
     }
     if (nrow(ppe_object@assays@data@listData[[the_matrix_type]]) != nrow(GCPtable)) {
       stop("For some reason the row numbers were changed while creating the ppe object... that's wired, ask Gianfranco to check!!")
@@ -116,7 +120,11 @@ GCP_NAimputation <- function(GCPlist, quant_rate = 0.5, name_column_groups = NUL
 
   if (do_timpute) {
 
-    ppe_raw <- tImpute(ppe_raw, assay = "imputed")
+    if (do_scimpute) {
+      ppe_raw <- tImpute(ppe_raw, assay = "imputed")
+    } else {
+      ppe_raw <- tImpute(ppe_raw)
+    }
 
     check_ppe_object(ppe_raw, "raw", "imputed")
 
@@ -154,7 +162,12 @@ GCP_NAimputation <- function(GCPlist, quant_rate = 0.5, name_column_groups = NUL
 
   if (do_timpute) {
 
-    ppe_LFQ <- tImpute(ppe_LFQ, assay = "imputed")
+    if (do_scimpute) {
+      ppe_LFQ <- tImpute(ppe_LFQ, assay = "imputed")
+    } else {
+      ppe_LFQ <- tImpute(ppe_LFQ)
+    }
+
 
     check_ppe_object(ppe_LFQ, "LFQ", "imputed")
 
@@ -168,6 +181,10 @@ GCP_NAimputation <- function(GCPlist, quant_rate = 0.5, name_column_groups = NUL
                .before = 1)
 
   cat("\n______\n")
+
+  if (allwiththis_created) {
+    GCPoutput$sampleINFO <- GCPoutput$sampleINFO[, which(colnames(GCPoutput$sampleINFO) != "allwiththis")]
+  }
 
   return(GCPoutput)
 
