@@ -6,6 +6,8 @@
 #' @param raw_or_LFQ one of the following: "raw", "LFQ". The principal component analysis will be performed only in the specified data.
 #' @param scores_or_loadings one of the following: "scores", "loadings". Specify here if you want to plot the scores or the loadings.
 #' @param PC_to_plot character of length 2. Specify here the two principal components to plot.
+#' @param center logical. Whether the variables should be shifted to be zero centered (as in the prcomp function).
+#' @param scale. logical. whether the variables should be scaled to have unit variance before the analysis takes place (as in prcomp function).
 #' @param name_column_groups NULL or character of length 1. The name of the column of the sampleINFO table containing the sample groups. Specify it only if you want to color the points of the score plot.
 #' @param name_column_labels NULL or character of length 1. The name of the column of the sampleINFO table containing the sample names. Specify it only if you want to add a label to the points of the score plot.
 #' @param col_pal a character vector containing colors for groups for the score plot. If NULL, colors from the pals package will be used (see function GetFeatistics::build_long_vector_of_colors).
@@ -22,6 +24,7 @@
 #' @export
 GCP_plotPCA <- function(GCPlist, raw_or_LFQ = c("raw", "LFQ"),
                         scores_or_loadings = c("scores", "loadings"), PC_to_plot = c("PC1", "PC2"),
+                        center = TRUE, scale. = FALSE,
                         name_column_groups = NULL, name_column_labels = NULL, col_pal = NULL, ellipses_on_score = TRUE,
                         name_column_groups_loading = NULL, name_column_labels_loading = NULL, col_pal_loading = NULL, ellipses_on_loading = FALSE) {
 
@@ -204,6 +207,8 @@ GCP_plotPCA <- function(GCPlist, raw_or_LFQ = c("raw", "LFQ"),
                                                      sv = name_column_labels_loading,
                                                      fv = name_column_groups_loading,
                                                      labels_on_loading = FALSE,
+                                                     center = center,
+                                                     scale. = scale.,
                                                      col_pal = col_pal,
                                                      col_pal_fv = col_pal_loading,
                                                      PC_to_plot = PC_to_plot,

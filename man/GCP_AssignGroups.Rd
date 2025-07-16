@@ -12,8 +12,9 @@ GCP_AssignGroups(
   group_names = rep("not_assigned", length(sample_names)),
   sample_group_table = NULL,
   name_column_groups = "Condition",
+  name_column_replicates = "Replicates",
   factorlevels = NULL,
-  name_column_replicates = "Replicates"
+  controlgroup = NULL
 )
 }
 \arguments{
@@ -31,9 +32,11 @@ GCP_AssignGroups(
 
 \item{name_column_groups}{character of length 1. The name of the new column that will contain the groups.}
 
-\item{factorlevels}{NULL or character. You can specify here the levels of the groups (the reference group should be put as first element). If NULL, it will just apply the function as.factor (in which the order of levels is assigned in appearing order).}
-
 \item{name_column_replicates}{character of length 1. The name of the new column that will contain the replicates (it will be used if automatic_assignment is not "no").}
+
+\item{factorlevels}{NULL or character. You can specify here the levels of the groups (the reference group should be put as first element). If NULL, it will just apply the function as.factor.}
+
+\item{controlgroup}{NULL or character. You can specify here the name of the control group(s) which will be put as the first level(s).}
 }
 \value{
 the GCPlist with an additional column in the sampleINFO data frames containing the assigned groups.

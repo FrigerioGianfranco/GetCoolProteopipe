@@ -268,6 +268,34 @@ GCP_BarPlot <- function(GCPlist, name_column_groups = NULL, raw_or_LFQ_or_both =
       theme(axis.text.x = element_text(angle = 270, vjust = 0.5, hjust = 0))
   }
 
+
+  if (raw_or_LFQ_or_both == "raw") {
+
+    if (any(map_lgl(GCPlist$quant_raw[, which(colnames(GCPlist$quant_raw)!="protid")], ~ any(isTRUE(.x == 0))))) {
+      warning("There are some zeros in the raw table, are you sure you don't want to apply before the function GCP_ReplaceZerowithNA ?")
+    } else if (!any(map_lgl(GCPlist$quant_raw[, which(colnames(GCPlist$quant_raw)!="protid")], ~ any(is.na(.x))))) {
+      warning("There are literally no NAs in the entire raw table, that's why all the numbers are the same!")
+    }
+
+
+
+  } else if (raw_or_LFQ_or_both == "lfq") {
+    if (any(map_lgl(GCPlist$quant_LFQ[, which(colnames(GCPlist$quant_LFQ)!="protid")], ~ any(isTRUE(.x == 0))))) {
+      warning("There are some zeros in the LFQ table, are you sure you don't want to apply before the function GCP_ReplaceZerowithNA ?")
+    } else if (!any(map_lgl(GCPlist$quant_LFQ[, which(colnames(GCPlist$quant_LFQ)!="protid")], ~ any(is.na(.x))))) {
+      warning("There are literally no NAs in the entire LFQ table, that's why all the numbers are the same!")
+    }
+
+
+  } else if (raw_or_LFQ_or_both == "both") {
+    if (any(c(any(map_lgl(GCPlist$quant_raw[, which(colnames(GCPlist$quant_raw)!="protid")], ~ any(isTRUE(.x == 0)))), any(map_lgl(GCPlist$quant_LFQ[, which(colnames(GCPlist$quant_LFQ)!="protid")], ~ any(isTRUE(.x == 0))))))) {
+      warning("There are some zeros in the intensity tables, are you sure you don't want to apply before the function GCP_ReplaceZerowithNA ?")
+    } else if (!any(c(any(map_lgl(GCPlist$quant_raw[, which(colnames(GCPlist$quant_raw)!="protid")], ~ any(is.na(.x)))), any(map_lgl(GCPlist$quant_LFQ[, which(colnames(GCPlist$quant_LFQ)!="protid")], ~ any(is.na(.x))))))) {
+      warning("There are literally no NAs in the intensity tables, that's why all the numbers are the same!")
+    }
+  }
+
+
   return(the_barplot)
 }
 

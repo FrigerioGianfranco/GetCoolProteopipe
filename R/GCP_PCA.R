@@ -4,11 +4,13 @@
 #'
 #' @param GCPlist a list created with the ImportOutputMaxQuant function.
 #' @param raw_or_LFQ one of the following: "raw", "LFQ". The principal component analysis will be performed only in the specified data.
+#' @param center logical. Whether the variables should be shifted to be zero centered (as in the prcomp function).
+#' @param scale. logical. whether the variables should be scaled to have unit variance before the analysis takes place (as in prcomp function).
 #'
 #' @return The GCPlist will be returned with the scores in the sampleINFO and the loadings in the proteinINFO.
 #'
 #' @export
-GCP_PCA <- function(GCPlist, raw_or_LFQ = c("raw", "LFQ")) {
+GCP_PCA <- function(GCPlist, raw_or_LFQ = c("raw", "LFQ"), center = TRUE, scale. = FALSE) {
 
   checkGCPlist(GCPlist)
 
@@ -30,7 +32,9 @@ GCP_PCA <- function(GCPlist, raw_or_LFQ = c("raw", "LFQ")) {
 
 
   PCA_list <- GetFeatistics::getPCA(df = df_intensities,
-                                    v = colnames(df_intensities)[-1])
+                                    v = colnames(df_intensities)[-1],
+                                    center = center,
+                                    scale. = scale.)
 
   GCPoutput <- GCPlist
 

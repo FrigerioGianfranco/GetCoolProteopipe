@@ -9,6 +9,8 @@ GCP_plotPCA(
   raw_or_LFQ = c("raw", "LFQ"),
   scores_or_loadings = c("scores", "loadings"),
   PC_to_plot = c("PC1", "PC2"),
+  center = TRUE,
+  scale. = FALSE,
   name_column_groups = NULL,
   name_column_labels = NULL,
   col_pal = NULL,
@@ -27,6 +29,10 @@ GCP_plotPCA(
 \item{scores_or_loadings}{one of the following: "scores", "loadings". Specify here if you want to plot the scores or the loadings.}
 
 \item{PC_to_plot}{character of length 2. Specify here the two principal components to plot.}
+
+\item{center}{logical. Whether the variables should be shifted to be zero centered (as in the prcomp function).}
+
+\item{scale.}{logical. whether the variables should be scaled to have unit variance before the analysis takes place (as in prcomp function).}
 
 \item{name_column_groups}{NULL or character of length 1. The name of the column of the sampleINFO table containing the sample groups. Specify it only if you want to color the points of the score plot.}
 

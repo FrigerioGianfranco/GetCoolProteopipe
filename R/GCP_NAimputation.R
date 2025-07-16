@@ -23,26 +23,18 @@ GCP_NAimputation <- function(GCPlist, quant_rate = 0.5, name_column_groups = NUL
   if (is.na(quant_rate)) {stop("quant_rate must be a numeric of length 1, not a missing value")}
   if (quant_rate<0 | quant_rate>1) {stop("quant_rate must be between 0 and 1 (included)")}
 
-  allwiththis_created <- FALSE
 
   if (!is.null(name_column_groups)) {
     if (length(name_column_groups)!=1) {stop("name_column_groups must be NULL or a character of length 1")}
     if (!is.character(name_column_groups)) {stop("name_column_groups must be NULL or a character of length 1")}
     if (is.na(name_column_groups)) {stop("name_column_groups must be NULL or a character of length 1, not a NA")}
     if (length(which(colnames(GCPlist$sampleINFO) == name_column_groups)) != 1) {stop("The name passed in name_column_groups must be a name of a column of the sampleINFO dataframe")}
-    if (name_column_groups == "allwiththis") {stop("Please, just don't pass 'allwiththis' to name_column_groups, thanks!")}
+
 
     if (!is.factor(pull(GCPlist$sampleINFO, name_column_groups))) {
       GCPlist$sampleINFO[,name_column_groups] <- as.factor(pull(GCPlist$sampleINFO, name_column_groups))
     }
 
-  } else {
-    if ("allwiththis" %in% colnames(GCPlist$sampleINFO)) {stop("Please, don't call a column of the sampleINFO data frame 'allwiththis' as I need to create one with this name now")}
-    GCPlist$sampleINFO <- mutate(GCPlist$sampleINFO, allwiththis = as.factor("theOnlyGroup"))
-
-    name_column_groups <- "allwiththis"
-
-    allwiththis_created <- TRUE
   }
 
   if (length(seed)!=1) {stop("seed must be a numeric of length 1")}
@@ -57,11 +49,41 @@ GCP_NAimputation <- function(GCPlist, quant_rate = 0.5, name_column_groups = NUL
   method <- match.arg(method, c("both", "scimpute", "timpute"))
 
   if (method == "both") {
-    do_scimpute <- TRUE
-    do_timpute <- TRUE
+
+    if (is.null(name_column_groups)) {
+
+      cat("\nNote: name_column_groups was not specidied, so scimpute is not performed!\n")
+
+      do_scimpute <- FALSE
+      do_timpute <- TRUE
+
+    } else if (any(as_tibble(GCPlist$sampleINFO%>%group_by(!!sym(name_column_groups))%>%summarise(N = n()))$N == 1)) {
+      cat(paste0('\nNote: the following groups have only one sample, so scimpute is not performed!\n ',
+                     paste0(as.character(pull(as_tibble(GCPlist$sampleINFO%>%group_by(!!sym(name_column_groups))%>%summarise(N = n())), name_column_groups))[which(as_tibble(GCPlist$sampleINFO%>%group_by(!!sym(name_column_groups))%>%summarise(N = n()))$N == 1)], collapse = ", ")))
+      cat("\n")
+
+
+      do_scimpute <- FALSE
+      do_timpute <- TRUE
+
+    } else {
+      do_scimpute <- TRUE
+      do_timpute <- TRUE
+    }
+
+
   } else if (method == "scimpute") {
-    do_scimpute <- TRUE
-    do_timpute <- FALSE
+
+    if (is.null(name_column_groups)) {
+      stop("name_column_groups was not specidied, so scimpute is not performed")
+    } else if (any(as_tibble(GCPlist$sampleINFO%>%group_by(!!sym(name_column_groups))%>%summarise(N = n()))$N == 1)) {
+      stop(paste0('the following groups have only one sample, so scimpute cannot be done!\n ',
+                  paste0(as.character(pull(as_tibble(GCPlist$sampleINFO%>%group_by(!!sym(name_column_groups))%>%summarise(N = n())), name_column_groups))[which(as_tibble(GCPlist$sampleINFO%>%group_by(!!sym(name_column_groups))%>%summarise(N = n()))$N == 1)], collapse = ", ")))
+    } else {
+      do_scimpute <- TRUE
+      do_timpute <- FALSE
+    }
+
   } else if (method == "timpute") {
     do_scimpute <- FALSE
     do_timpute <- TRUE
@@ -102,7 +124,10 @@ GCP_NAimputation <- function(GCPlist, quant_rate = 0.5, name_column_groups = NUL
 
   check_ppe_object(ppe_raw, "raw", "Quantification")
 
-  ppe_raw@colData@listData[["condition"]] <- pull(GCPlist$sampleINFO, name_column_groups)
+  if (!is.null(name_column_groups)) {
+    ppe_raw@colData@listData[["condition"]] <- pull(GCPlist$sampleINFO, name_column_groups)
+  }
+
 
   cat("\n______\nIn the raw table, the number of NAs is:")
   print_missing_info(ppe_raw, "raw", "Quantification")
@@ -143,7 +168,10 @@ GCP_NAimputation <- function(GCPlist, quant_rate = 0.5, name_column_groups = NUL
 
   check_ppe_object(ppe_LFQ, "LFQ", "Quantification")
 
-  ppe_LFQ@colData@listData[["condition"]] <- pull(GCPlist$sampleINFO, name_column_groups)
+  if (!is.null(name_column_groups)) {
+    ppe_LFQ@colData@listData[["condition"]] <- pull(GCPlist$sampleINFO, name_column_groups)
+  }
+
 
   cat("\n\n____\nIn the LFQ table, the number of NAs is:")
   print_missing_info(ppe_LFQ, "LFQ", "Quantification")
@@ -181,10 +209,6 @@ GCP_NAimputation <- function(GCPlist, quant_rate = 0.5, name_column_groups = NUL
                .before = 1)
 
   cat("\n______\n")
-
-  if (allwiththis_created) {
-    GCPoutput$sampleINFO <- GCPoutput$sampleINFO[, which(colnames(GCPoutput$sampleINFO) != "allwiththis")]
-  }
 
   return(GCPoutput)
 

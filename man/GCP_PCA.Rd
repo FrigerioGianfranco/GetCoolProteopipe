@@ -4,12 +4,16 @@
 \alias{GCP_PCA}
 \title{Get Principal Component analysis.}
 \usage{
-GCP_PCA(GCPlist, raw_or_LFQ = c("raw", "LFQ"))
+GCP_PCA(GCPlist, raw_or_LFQ = c("raw", "LFQ"), center = TRUE, scale. = FALSE)
 }
 \arguments{
 \item{GCPlist}{a list created with the ImportOutputMaxQuant function.}
 
 \item{raw_or_LFQ}{one of the following: "raw", "LFQ". The principal component analysis will be performed only in the specified data.}
+
+\item{center}{logical. Whether the variables should be shifted to be zero centered (as in the prcomp function).}
+
+\item{scale.}{logical. whether the variables should be scaled to have unit variance before the analysis takes place (as in prcomp function).}
 }
 \value{
 The GCPlist will be returned with the scores in the sampleINFO and the loadings in the proteinINFO.

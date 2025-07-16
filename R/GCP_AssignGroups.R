@@ -9,13 +9,14 @@
 #' @param group_names character vector containing the groups corresponding to the samples passed to sample_names (Will be considered if automatic_assignment is "no").
 #' @param sample_group_table alternatively, you can pass here a table with the sample names in the first column and the relative group in the second column. If you pass an argument here (and if automatic_assignment is "no"), this will be considered instead of sample_names and group_names.
 #' @param name_column_groups character of length 1. The name of the new column that will contain the groups.
-#' @param factorlevels NULL or character. You can specify here the levels of the groups (the reference group should be put as first element). If NULL, it will just apply the function as.factor (in which the order of levels is assigned in appearing order).
 #' @param name_column_replicates character of length 1. The name of the new column that will contain the replicates (it will be used if automatic_assignment is not "no").
+#' @param factorlevels NULL or character. You can specify here the levels of the groups (the reference group should be put as first element). If NULL, it will just apply the function as.factor.
+#' @param controlgroup NULL or character. You can specify here the name of the control group(s) which will be put as the first level(s).
 #'
 #' @return the GCPlist with an additional column in the sampleINFO data frames containing the assigned groups.
 #'
 #' @export
-GCP_AssignGroups <- function(GCPlist, automatic_assignment = c("no", "groupfirst", "replicatefirst"), separator_automatic_assignment = "_", sample_names = pull(GCPlist$sampleINFO, 1), group_names = rep("not_assigned", length(sample_names)), sample_group_table = NULL, name_column_groups = "Condition", factorlevels = NULL, name_column_replicates = "Replicates") {
+GCP_AssignGroups <- function(GCPlist, automatic_assignment = c("no", "groupfirst", "replicatefirst"), separator_automatic_assignment = "_", sample_names = pull(GCPlist$sampleINFO, 1), group_names = rep("not_assigned", length(sample_names)), sample_group_table = NULL, name_column_groups = "Condition", name_column_replicates = "Replicates", factorlevels = NULL, controlgroup = NULL) {
 
   checkGCPlist(GCPlist)
 
@@ -31,8 +32,15 @@ GCP_AssignGroups <- function(GCPlist, automatic_assignment = c("no", "groupfirst
   if (is.na(name_column_groups)) {stop("name_column_groups must a character of length 1, not a missing value")}
 
   if (!is.null(factorlevels)) {
-    if (!is.character(factorlevels)) {stop("factorlevels must be a character")}
-    if (any(is.na(factorlevels))) {stop("factorlevels must a character with no missing values")}
+    if (!is.character(factorlevels)) {stop("if not NULL, factorlevels must be a character")}
+    if (length(factorlevels) < 1) {stop("if not NULL, factorlevels must not be empty!")}
+    if (any(is.na(factorlevels))) {stop("if not NULL, factorlevels must be a character with no missing values")}
+  }
+
+  if (!is.null(controlgroup)) {
+    if (!is.character(controlgroup)) {stop("if not NULL, controlgroup must be a character")}
+    if (length(controlgroup) < 1) {stop("if not NULL, controlgroup must not be empty!")}
+    if (any(is.na(controlgroup))) {stop("if not NULL, controlgroup must be a character with no missing values")}
   }
 
 
@@ -46,7 +54,7 @@ GCP_AssignGroups <- function(GCPlist, automatic_assignment = c("no", "groupfirst
     if (is.na(name_column_replicates)) {stop("name_column_replicates must a character of length 1, not a missing value")}
 
     names_first_parts <- str_remove(pull(GCPlist[["sampleINFO"]], 1), paste0(separator_automatic_assignment, ".*"))
-    names_second_parts <- str_remove(pull(GCPlist[["sampleINFO"]], 1), paste0(names_first_parts, "_"))
+    names_second_parts <- str_remove(pull(GCPlist[["sampleINFO"]], 1), paste0(names_first_parts, separator_automatic_assignment))
 
     GCPoutput <- GCPlist
 
@@ -157,6 +165,19 @@ GCP_AssignGroups <- function(GCPlist, automatic_assignment = c("no", "groupfirst
     }
   }
 
+  if (!is.null(controlgroup)) {
+
+    if (!all(controlgroup%in%levels(pull(GCPoutput$sampleINFO, name_column_groups)))) {warning(paste0('The following names you passed in controlgroup were not considered as they are not valid names of the groups:\n ', paste0(controlgroup[which(!controlgroup%in%levels(pull(GCPoutput$sampleINFO, name_column_groups)))], collapse = " ")))}
+
+    controlgroup <- controlgroup[which(controlgroup%in%levels(pull(GCPoutput$sampleINFO, name_column_groups)))]
+
+    if (length(controlgroup) > 0) {
+
+      GCPoutput$sampleINFO[, name_column_groups] <- factor(as.character(pull(GCPoutput$sampleINFO, name_column_groups)),
+                                                           levels = c(controlgroup, levels(pull(GCPoutput$sampleINFO, name_column_groups))[which(levels(pull(GCPoutput$sampleINFO, name_column_groups)) != controlgroup)]))
+    }
+  }
+
 
 
   cat("\n")
@@ -170,11 +191,11 @@ GCP_AssignGroups <- function(GCPlist, automatic_assignment = c("no", "groupfirst
   }
 
 
-  cat("______\n")
+  cat(paste0("\n\nThe order of the levels is the following: ", paste0(levels(pull(GCPoutput$sampleINFO, name_column_groups)), collapse = " ")))
+
+
+  cat("\n______\n")
 
   return(GCPoutput)
 
-
 }
-
-
