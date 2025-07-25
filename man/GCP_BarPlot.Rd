@@ -10,6 +10,7 @@ GCP_BarPlot(
   raw_or_LFQ_or_both = c("raw", "LFQ", "both"),
   col_pal = NULL,
   label_numbers = TRUE,
+  label_numbers_size = NULL,
   showCV = FALSE,
   rotate_sample_names = FALSE
 )
@@ -24,6 +25,8 @@ GCP_BarPlot(
 \item{col_pal}{NULL or a character vector containing colors. If NULL, colors from the pals package will be used (see function build_long_vector_of_colors).}
 
 \item{label_numbers}{logical. If TRUE, it adds the number of proteins on the top of each bar.}
+
+\item{label_numbers_size}{NULL or numeric of length 1. If specified and if label_numbers is TRUE, this is the size of the numbers of proteins of the top of each bar.}
 
 \item{showCV}{logical. If TRUE, it adds to the graphs the coefficient of variation (CV\%) of the number of proteins for each group.}
 

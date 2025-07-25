@@ -225,5 +225,13 @@ GCP_plotPCA <- function(GCPlist, raw_or_LFQ = c("raw", "LFQ"),
     stop('scores_or_loadings must be "scores" or "loadings"')
   }
 
+
+  for (nlay in 1:length(object_to_return$layers)) {
+    if (!inherits(object_to_return$layers[[nlay]]$geom, "GeomPoint")) {
+      object_to_return$layers[[nlay]]$show.legend <- FALSE
+    }
+  }
+
+
   return(object_to_return)
 }

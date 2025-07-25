@@ -7,13 +7,14 @@
 #' @param raw_or_LFQ_or_both one of the following: "raw", "LFQ", "both". The barplot will be performed only in the specified data, or a facet_wrap plot will be generated if "both" is specified.
 #' @param col_pal NULL or a character vector containing colors. If NULL, colors from the pals package will be used (see function build_long_vector_of_colors).
 #' @param label_numbers logical. If TRUE, it adds the number of proteins on the top of each bar.
+#' @param label_numbers_size NULL or numeric of length 1. If specified and if label_numbers is TRUE, this is the size of the numbers of proteins of the top of each bar.
 #' @param showCV logical. If TRUE, it adds to the graphs the coefficient of variation (CV%) of the number of proteins for each group.
 #' @param rotate_sample_names logical. If TRUE, it rotate sample name labels of x-axis in vertical position.
 #'
 #' @return A ggplot object.
 #'
 #' @export
-GCP_BarPlot <- function(GCPlist, name_column_groups = NULL, raw_or_LFQ_or_both = c("raw", "LFQ", "both"), col_pal = NULL, label_numbers = TRUE, showCV = FALSE, rotate_sample_names = FALSE) {
+GCP_BarPlot <- function(GCPlist, name_column_groups = NULL, raw_or_LFQ_or_both = c("raw", "LFQ", "both"), col_pal = NULL, label_numbers = TRUE, label_numbers_size = NULL, showCV = FALSE, rotate_sample_names = FALSE) {
 
   checkGCPlist(GCPlist)
 
@@ -76,6 +77,15 @@ GCP_BarPlot <- function(GCPlist, name_column_groups = NULL, raw_or_LFQ_or_both =
   if (length(label_numbers) != 1) {stop("label_numbers must be either TRUE or FALSE")}
   if (is.na(label_numbers)) {stop("label_numbers must be either TRUE or FALSE")}
 
+  if (label_numbers) {
+    if (!is.null(label_numbers_size)) {
+      if (length(label_numbers_size)!=1) {stop("label_numbers_size must be a numeric of length 1")}
+      if (!is.numeric(label_numbers_size)) {stop("label_numbers_size must be a numeric of length 1")}
+      if (is.na(label_numbers_size)) {stop("label_numbers_size must be a numeric of length 1, not a missing value")}
+    }
+  }
+
+
   if (!is.logical(showCV)) {stop("showCV must be either TRUE or FALSE")}
   if (length(showCV) != 1) {stop("showCV must be either TRUE or FALSE")}
   if (is.na(showCV)) {stop("showCV must be either TRUE or FALSE")}
@@ -89,32 +99,32 @@ GCP_BarPlot <- function(GCPlist, name_column_groups = NULL, raw_or_LFQ_or_both =
 
     prot_num_df_raw <- summarise_at(GCPlist$quant_raw, colnames(GCPlist$quant_raw)[which(colnames(GCPlist$quant_raw)!="protid")], ~ sum(!is.na(.x)))
 
-    prot_num_df_raw_t <- GetFeatistics::transpose_feat_table(bind_cols(tibble(colcont = "proteins"), prot_num_df_raw), name_first_column = colnames(GCPlist$sampleINFO)[1])
+    prot_num_df_raw_t <- GetFeatistics::transpose_feat_table(bind_cols(tibble(colcont = "Proteins"), prot_num_df_raw), name_first_column = colnames(GCPlist$sampleINFO)[1])
 
     df_barplot_raw <- left_join(x = GCPlist$sampleINFO, y = prot_num_df_raw_t, by = colnames(GCPlist$sampleINFO)[1], suffix = c("_INFO", "_prot_summ"))
 
     df_barplot_raw[,colnames(GCPlist$sampleINFO)[1]] <- factor(pull(df_barplot_raw, colnames(GCPlist$sampleINFO)[1]), levels = unique(pull(df_barplot_raw, colnames(GCPlist$sampleINFO)[1])))
 
-    the_barplot <- ggplot(data = df_barplot_raw, aes(x = .data[[colnames(GCPlist$sampleINFO)[1]]], y = .data[["proteins"]], fill = .data[[name_column_groups]])) +
+    the_barplot <- ggplot(data = df_barplot_raw, aes(x = .data[[colnames(GCPlist$sampleINFO)[1]]], y = .data[["Proteins"]], fill = .data[[name_column_groups]])) +
       geom_col() +
-      ggtitle("Protein numbers in quant_raw") +
+      ggtitle("Number of proteins per sample") +
       theme_bw() +
       theme(plot.title = element_text(hjust = 0.5))
 
     if (showCV) {
       summary_for_CV_raw <- df_barplot_raw %>%
         group_by(!!sym(name_column_groups)) %>%
-        summarise(Mean = mean(proteins), SD = sd(proteins)) %>%
+        summarise(Mean = mean(Proteins), SD = sd(Proteins)) %>%
         mutate(CV = round((SD/Mean)*100, digits = 1))
 
       CV_raw <- summary_for_CV_raw$CV
       names(CV_raw) <- pull(summary_for_CV_raw, name_column_groups)
 
-      CV_labels <- paste0(names(CV_raw), "\n CV: ",  CV_raw, "%")
+      CV_labels <- paste0(names(CV_raw), " (CV: ",  CV_raw, "%)")
       names(CV_labels) <- names(CV_raw)
 
       if (name_column_groups == "allwiththis") {
-        CV_labels <- paste0(" CV: ",  CV_raw, "%")
+        CV_labels <- paste0(" (CV: ",  CV_raw, "%)")
         names(CV_labels) <- names(CV_raw)
       }
 
@@ -128,8 +138,13 @@ GCP_BarPlot <- function(GCPlist, name_column_groups = NULL, raw_or_LFQ_or_both =
     }
 
     if (label_numbers) {
-      max_proteins <- max(df_barplot_raw$proteins)
-      the_barplot <- the_barplot + geom_text(aes(label = .data[["proteins"]], y = .data[["proteins"]]+max_proteins*0.022))
+      max_proteins <- max(df_barplot_raw$Proteins)
+
+      if (is.null(label_numbers_size)) {
+        the_barplot <- the_barplot + geom_text(aes(label = .data[["Proteins"]], y = .data[["Proteins"]]+max_proteins*0.022))
+      } else {
+        the_barplot <- the_barplot + geom_text(aes(label = .data[["Proteins"]], y = .data[["Proteins"]]+max_proteins*0.022), size = label_numbers_size)
+      }
     }
 
     if (name_column_groups == "allwiththis" & !showCV) {the_barplot <- the_barplot + theme(legend.position = "none")}
@@ -138,32 +153,32 @@ GCP_BarPlot <- function(GCPlist, name_column_groups = NULL, raw_or_LFQ_or_both =
 
     prot_num_df_LFQ <- summarise_at(GCPlist$quant_LFQ, colnames(GCPlist$quant_LFQ)[which(colnames(GCPlist$quant_LFQ)!="protid")], ~ sum(!is.na(.x)))
 
-    prot_num_df_LFQ_t <- GetFeatistics::transpose_feat_table(bind_cols(tibble(colcont = "proteins"), prot_num_df_LFQ), name_first_column = colnames(GCPlist$sampleINFO)[1])
+    prot_num_df_LFQ_t <- GetFeatistics::transpose_feat_table(bind_cols(tibble(colcont = "Proteins"), prot_num_df_LFQ), name_first_column = colnames(GCPlist$sampleINFO)[1])
 
     df_barplot_LFQ <- left_join(x = GCPlist$sampleINFO, y = prot_num_df_LFQ_t, by = colnames(GCPlist$sampleINFO)[1], suffix = c("_INFO", "_prot_summ"))
 
     df_barplot_LFQ[,colnames(GCPlist$sampleINFO)[1]] <- factor(pull(df_barplot_LFQ, colnames(GCPlist$sampleINFO)[1]), levels = unique(pull(df_barplot_LFQ, colnames(GCPlist$sampleINFO)[1])))
 
-    the_barplot <- ggplot(data = df_barplot_LFQ, aes(x = .data[[colnames(GCPlist$sampleINFO)[1]]], y = .data[["proteins"]], fill = .data[[name_column_groups]])) +
+    the_barplot <- ggplot(data = df_barplot_LFQ, aes(x = .data[[colnames(GCPlist$sampleINFO)[1]]], y = .data[["Proteins"]], fill = .data[[name_column_groups]])) +
       geom_col() +
-      ggtitle("Protein numbers in quant_LFQ") +
+      ggtitle("Number of proteins per sample") +
       theme_bw() +
       theme(plot.title = element_text(hjust = 0.5))
 
     if (showCV) {
       summary_for_CV_LFQ <- df_barplot_LFQ %>%
         group_by(!!sym(name_column_groups)) %>%
-        summarise(Mean = mean(proteins), SD = sd(proteins)) %>%
+        summarise(Mean = mean(Proteins), SD = sd(Proteins)) %>%
         mutate(CV = round((SD/Mean)*100, digits = 1))
 
       CV_LFQ <- summary_for_CV_LFQ$CV
       names(CV_LFQ) <- pull(summary_for_CV_LFQ, name_column_groups)
 
-      CV_labels <- paste0(names(CV_LFQ), "\n CV: ",  CV_LFQ, "%")
+      CV_labels <- paste0(names(CV_LFQ), " (CV: ",  CV_LFQ, "%)")
       names(CV_labels) <- names(CV_LFQ)
 
       if (name_column_groups == "allwiththis") {
-        CV_labels <- paste0(" CV: ",  CV_LFQ, "%")
+        CV_labels <- paste0(" (CV: ",  CV_LFQ, "%)")
         names(CV_labels) <- names(CV_LFQ)
       }
 
@@ -178,8 +193,13 @@ GCP_BarPlot <- function(GCPlist, name_column_groups = NULL, raw_or_LFQ_or_both =
 
 
     if (label_numbers) {
-      max_proteins <- max(df_barplot_LFQ$proteins)
-      the_barplot <- the_barplot + geom_text(aes(label = .data[["proteins"]], y = .data[["proteins"]]+max_proteins*0.022))
+      max_proteins <- max(df_barplot_LFQ$Proteins)
+
+      if (is.null(label_numbers_size)) {
+        the_barplot <- the_barplot + geom_text(aes(label = .data[["Proteins"]], y = .data[["Proteins"]]+max_proteins*0.022))
+      } else {
+        the_barplot <- the_barplot + geom_text(aes(label = .data[["Proteins"]], y = .data[["Proteins"]]+max_proteins*0.022), size = label_numbers_size)
+      }
     }
 
     if (name_column_groups == "allwiththis" & !showCV) {the_barplot <- the_barplot + theme(legend.position = "none")}
@@ -188,11 +208,11 @@ GCP_BarPlot <- function(GCPlist, name_column_groups = NULL, raw_or_LFQ_or_both =
 
     prot_num_df_raw <- summarise_at(GCPlist$quant_raw, colnames(GCPlist$quant_raw)[which(colnames(GCPlist$quant_raw)!="protid")], ~ sum(!is.na(.x)))
 
-    prot_num_df_raw_t <- GetFeatistics::transpose_feat_table(bind_cols(tibble(colcont = "proteins"), prot_num_df_raw), name_first_column = colnames(GCPlist$sampleINFO)[1])
+    prot_num_df_raw_t <- GetFeatistics::transpose_feat_table(bind_cols(tibble(colcont = "Proteins"), prot_num_df_raw), name_first_column = colnames(GCPlist$sampleINFO)[1])
 
     prot_num_df_LFQ <- summarise_at(GCPlist$quant_LFQ, colnames(GCPlist$quant_LFQ)[which(colnames(GCPlist$quant_LFQ)!="protid")], ~ sum(!is.na(.x)))
 
-    prot_num_df_LFQ_t <- GetFeatistics::transpose_feat_table(bind_cols(tibble(colcont = "proteins"), prot_num_df_LFQ), name_first_column = colnames(GCPlist$sampleINFO)[1])
+    prot_num_df_LFQ_t <- GetFeatistics::transpose_feat_table(bind_cols(tibble(colcont = "Proteins"), prot_num_df_LFQ), name_first_column = colnames(GCPlist$sampleINFO)[1])
 
     df_barplot_raw <- left_join(x = GCPlist$sampleINFO, y = prot_num_df_raw_t, by = colnames(GCPlist$sampleINFO)[1], suffix = c("_INFO", "_prot_summ"))
 
@@ -205,17 +225,17 @@ GCP_BarPlot <- function(GCPlist, name_column_groups = NULL, raw_or_LFQ_or_both =
 
     df_barplot_both[,colnames(GCPlist$sampleINFO)[1]] <- factor(pull(df_barplot_both, colnames(GCPlist$sampleINFO)[1]), levels = unique(pull(df_barplot_both, colnames(GCPlist$sampleINFO)[1])))
 
-    the_barplot <- ggplot(data = df_barplot_both, aes(x = .data[[colnames(GCPlist$sampleINFO)[1]]], y = .data[["proteins"]], fill = .data[[name_column_groups]])) +
+    the_barplot <- ggplot(data = df_barplot_both, aes(x = .data[[colnames(GCPlist$sampleINFO)[1]]], y = .data[["Proteins"]], fill = .data[[name_column_groups]])) +
       geom_col() +
       facet_wrap(~ intensity_table) +
-      ggtitle("Protein numbers") +
+      ggtitle("Number of proteins per sample") +
       theme_bw() +
       theme(plot.title = element_text(hjust = 0.5))
 
     if (showCV) {
       summary_for_CV_raw <- df_barplot_raw %>%
         group_by(!!sym(name_column_groups)) %>%
-        summarise(Mean = mean(proteins), SD = sd(proteins)) %>%
+        summarise(Mean = mean(Proteins), SD = sd(Proteins)) %>%
         mutate(CV = round((SD/Mean)*100, digits = 1))
 
       CV_raw <- summary_for_CV_raw$CV
@@ -223,18 +243,18 @@ GCP_BarPlot <- function(GCPlist, name_column_groups = NULL, raw_or_LFQ_or_both =
 
       summary_for_CV_LFQ <- df_barplot_LFQ %>%
         group_by(!!sym(name_column_groups)) %>%
-        summarise(Mean = mean(proteins), SD = sd(proteins)) %>%
+        summarise(Mean = mean(Proteins), SD = sd(Proteins)) %>%
         mutate(CV = round((SD/Mean)*100, digits = 1))
 
       CV_LFQ <- summary_for_CV_LFQ$CV
       names(CV_LFQ) <- pull(summary_for_CV_LFQ, name_column_groups)
 
 
-      CV_labels <- paste0(names(CV_raw), "\n CV raw: ",  CV_raw, "%\n CV LFQ: ", CV_LFQ, "%")
+      CV_labels <- paste0(names(CV_raw), " (CV raw: ",  CV_raw, "%) (CV LFQ: ", CV_LFQ, "%)")
       names(CV_labels) <- names(CV_raw)
 
       if (name_column_groups == "allwiththis") {
-        CV_labels <- paste0(" CV raw: ",  CV_raw, "%\n CV LFQ: ", CV_LFQ, "%")
+        CV_labels <- paste0(" (CV raw: ",  CV_raw, "%) (CV LFQ: ", CV_LFQ, "%)")
         names(CV_labels) <- names(CV_raw)
       }
 
@@ -250,8 +270,13 @@ GCP_BarPlot <- function(GCPlist, name_column_groups = NULL, raw_or_LFQ_or_both =
 
 
     if (label_numbers) {
-      max_proteins <- max(df_barplot_both$proteins)
-      the_barplot <- the_barplot + geom_text(aes(label = .data[["proteins"]], y = .data[["proteins"]]+max_proteins*0.022))
+      max_proteins <- max(df_barplot_both$Proteins)
+
+      if (is.null(label_numbers_size)) {
+        the_barplot <- the_barplot + geom_text(aes(label = .data[["Proteins"]], y = .data[["Proteins"]]+max_proteins*0.022))
+      } else {
+        the_barplot <- the_barplot + geom_text(aes(label = .data[["Proteins"]], y = .data[["Proteins"]]+max_proteins*0.022), size = label_numbers_size)
+      }
     }
 
     if (name_column_groups == "allwiththis" & !showCV) {the_barplot <- the_barplot + theme(legend.position = "none")}
