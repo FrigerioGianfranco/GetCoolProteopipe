@@ -76,7 +76,7 @@ GCP_Venn <- function(GCPlist, name_column_groups = NULL, raw_or_LFQ = c("raw", "
     stop('raw_or_LFQ must be one of "raw", "LFQ"')
   }
 
-  df_intensities_w_groups <- left_join(x = GCPlist$sampleINFO[,c(colnames(GCPlist$sampleINFO)[1], name_column_groups)], y = df_intensities, by = colnames(GCPlist$sampleINFO)[1], suffix = c("_INFO", "_intensities"))
+  df_intensities_w_groups <- left_join(x = GCPlist$sampleINFO[,unique(c(colnames(GCPlist$sampleINFO)[1], name_column_groups))], y = df_intensities, by = colnames(GCPlist$sampleINFO)[1], suffix = c("_INFO", "_intensities"))
 
   list_for_ggven <- vector(mode = "list", length = length(levels(pull(GCPlist$sampleINFO, name_column_groups))))
   names(list_for_ggven) <- levels(pull(GCPlist$sampleINFO, name_column_groups))
