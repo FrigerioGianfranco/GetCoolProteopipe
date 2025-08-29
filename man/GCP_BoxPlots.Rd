@@ -8,7 +8,7 @@ GCP_BoxPlots(
   GCPlist,
   by_samples = TRUE,
   name_column_groups = NULL,
-  raw_or_LFQ = c("raw", "LFQ"),
+  raw_or_LFQ = c("lfq", "raw"),
   col_pal = NULL,
   Title = "Distribution of intensities",
   only_these_protid = NULL,

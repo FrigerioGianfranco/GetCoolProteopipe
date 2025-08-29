@@ -6,7 +6,7 @@
 \usage{
 GCP_plotPCA(
   GCPlist,
-  raw_or_LFQ = c("raw", "LFQ"),
+  raw_or_LFQ = c("lfq", "raw"),
   scores_or_loadings = c("scores", "loadings"),
   PC_to_plot = c("PC1", "PC2"),
   center = TRUE,

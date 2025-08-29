@@ -22,7 +22,7 @@
 #' @import ggdendro
 #'
 #' @export
-GCP_plotPCA <- function(GCPlist, raw_or_LFQ = c("raw", "LFQ"),
+GCP_plotPCA <- function(GCPlist, raw_or_LFQ = c("lfq", "raw"),
                         scores_or_loadings = c("scores", "loadings"), PC_to_plot = c("PC1", "PC2"),
                         center = TRUE, scale. = FALSE,
                         name_column_groups = NULL, name_column_labels = NULL, col_pal = NULL, ellipses_on_score = TRUE,
@@ -30,12 +30,18 @@ GCP_plotPCA <- function(GCPlist, raw_or_LFQ = c("raw", "LFQ"),
 
   checkGCPlist(GCPlist)
 
-  if (!identical(tolower(raw_or_LFQ), c("raw", "lfq"))) {
+  if (!identical(tolower(raw_or_LFQ), c("lfq", "raw"))) {
     if (length(raw_or_LFQ) != 1) {stop('raw_or_LFQ must be one of "raw", "LFQ"')}
     if (is.na(raw_or_LFQ)) {stop('raw_or_LFQ must be one of "raw", "LFQ"')}
   }
   raw_or_LFQ <- tolower(raw_or_LFQ)
-  raw_or_LFQ <- match.arg(raw_or_LFQ, c("raw", "lfq"))
+  raw_or_LFQ <- match.arg(raw_or_LFQ, c("lfq", "raw"))
+
+  if (raw_or_LFQ == "lfq") {
+    cat("\n -- LFQ data are used --\n\n")
+  } else if (raw_or_LFQ == "raw") {
+    cat("\n -- raw data are used --\n\n")
+  }
 
   if (!identical(tolower(scores_or_loadings), c("scores", "loadings"))) {
     if (length(scores_or_loadings) != 1) {stop('scores_or_loadings must be one of "scores", "loadings"')}

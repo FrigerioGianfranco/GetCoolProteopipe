@@ -12,7 +12,7 @@
 #' @import ggdendro
 #'
 #' @export
-GCP_Dendogram <- function(GCPlist, name_column_groups = NULL, raw_or_LFQ = c("raw", "LFQ"), col_pal = NULL) {
+GCP_Dendogram <- function(GCPlist, name_column_groups = NULL, raw_or_LFQ = c("lfq", "raw"), col_pal = NULL) {
 
   checkGCPlist(GCPlist)
 
@@ -34,12 +34,18 @@ GCP_Dendogram <- function(GCPlist, name_column_groups = NULL, raw_or_LFQ = c("ra
     name_column_groups <- "allwiththis"
   }
 
-  if (!identical(tolower(raw_or_LFQ), c("raw", "lfq"))) {
+  if (!identical(tolower(raw_or_LFQ), c("lfq", "raw"))) {
     if (length(raw_or_LFQ) != 1) {stop('raw_or_LFQ must be one of "raw", "LFQ"')}
     if (is.na(raw_or_LFQ)) {stop('raw_or_LFQ must be one of "raw", "LFQ"')}
   }
   raw_or_LFQ <- tolower(raw_or_LFQ)
-  raw_or_LFQ <- match.arg(raw_or_LFQ, c("raw", "lfq"))
+  raw_or_LFQ <- match.arg(raw_or_LFQ, c("lfq", "raw"))
+
+  if (raw_or_LFQ == "lfq") {
+    cat("\n -- LFQ data are used --\n\n")
+  } else if (raw_or_LFQ == "raw") {
+    cat("\n -- raw data are used --\n\n")
+  }
 
   if (!is.null(col_pal)) {
     if (!is.character(col_pal)) stop("col_pal must be a character vector")

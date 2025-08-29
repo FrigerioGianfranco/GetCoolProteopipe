@@ -11,16 +11,22 @@
 #' @importFrom ggpubr ggqqplot
 #'
 #' @export
-GCP_QQplotIntensities <- function(GCPlist, raw_or_LFQ = c("raw", "LFQ"), Title = "QQ plot intensities") {
+GCP_QQplotIntensities <- function(GCPlist, raw_or_LFQ = c("lfq", "raw"), Title = "QQ plot intensities") {
 
   checkGCPlist(GCPlist)
 
-  if (!identical(tolower(raw_or_LFQ), c("raw", "lfq"))) {
+  if (!identical(tolower(raw_or_LFQ), c("lfq", "raw"))) {
     if (length(raw_or_LFQ) != 1) {stop('raw_or_LFQ must be one of "raw", "LFQ"')}
     if (is.na(raw_or_LFQ)) {stop('raw_or_LFQ must be one of "raw", "LFQ"')}
   }
   raw_or_LFQ <- tolower(raw_or_LFQ)
-  raw_or_LFQ <- match.arg(raw_or_LFQ, c("raw", "lfq"))
+  raw_or_LFQ <- match.arg(raw_or_LFQ, c("lfq", "raw"))
+
+  if (raw_or_LFQ == "lfq") {
+    cat("\n -- LFQ data are used --\n\n")
+  } else if (raw_or_LFQ == "raw") {
+    cat("\n -- raw data are used --\n\n")
+  }
 
   if (!is.null(Title)) {
     if (length(Title)!=1) {

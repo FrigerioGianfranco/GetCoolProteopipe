@@ -6,7 +6,7 @@
 \usage{
 GCP_FoldChange(
   GCPlist,
-  raw_or_LFQ = c("raw", "LFQ"),
+  raw_or_LFQ = c("lfq", "raw"),
   name_column_groups,
   control_group = NULL,
   paired = FALSE,

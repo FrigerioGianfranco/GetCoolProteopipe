@@ -6,7 +6,7 @@
 \usage{
 GCP_QQplotIntensities(
   GCPlist,
-  raw_or_LFQ = c("raw", "LFQ"),
+  raw_or_LFQ = c("lfq", "raw"),
   Title = "QQ plot intensities"
 )
 }

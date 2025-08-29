@@ -6,7 +6,7 @@
 \usage{
 GCP_HeatMap(
   GCPlist,
-  raw_or_LFQ = c("raw", "LFQ"),
+  raw_or_LFQ = c("lfq", "raw"),
   name_column_groups = NULL,
   name_column_labels = NULL,
   name_column_groups_protein = NULL,

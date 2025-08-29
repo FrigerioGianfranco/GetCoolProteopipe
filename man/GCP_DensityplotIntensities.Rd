@@ -6,7 +6,7 @@
 \usage{
 GCP_DensityplotIntensities(
   GCPlist,
-  raw_or_LFQ = c("raw", "LFQ"),
+  raw_or_LFQ = c("lfq", "raw"),
   Title = "Distribution of intensities"
 )
 }

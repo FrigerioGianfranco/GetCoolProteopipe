@@ -14,7 +14,7 @@
 #' @return A ggplot object, if by_samples is TRUE; or a list of ggplot objects, if by_samples is FALSE.
 #'
 #' @export
-GCP_BoxPlots <- function(GCPlist, by_samples = TRUE, name_column_groups = NULL, raw_or_LFQ = c("raw", "LFQ"), col_pal = NULL, Title = "Distribution of intensities", only_these_protid = NULL, only_the_first = NULL) {
+GCP_BoxPlots <- function(GCPlist, by_samples = TRUE, name_column_groups = NULL, raw_or_LFQ = c("lfq", "raw"), col_pal = NULL, Title = "Distribution of intensities", only_these_protid = NULL, only_the_first = NULL) {
 
   checkGCPlist(GCPlist)
 
@@ -40,12 +40,18 @@ GCP_BoxPlots <- function(GCPlist, by_samples = TRUE, name_column_groups = NULL, 
     name_column_groups <- "allwiththis"
   }
 
-  if (!identical(tolower(raw_or_LFQ), c("raw", "lfq"))) {
+  if (!identical(tolower(raw_or_LFQ), c("lfq", "raw"))) {
     if (length(raw_or_LFQ) != 1) {stop('raw_or_LFQ_or_both must be one of "raw", "LFQ"')}
     if (is.na(raw_or_LFQ)) {stop('raw_or_LFQ_or_both must be one of "raw", "LFQ"')}
   }
   raw_or_LFQ <- tolower(raw_or_LFQ)
-  raw_or_LFQ <- match.arg(raw_or_LFQ, c("raw", "lfq"))
+  raw_or_LFQ <- match.arg(raw_or_LFQ, c("lfq", "raw"))
+
+  if (raw_or_LFQ == "lfq") {
+    cat("\n -- LFQ data are used --\n\n")
+  } else if (raw_or_LFQ == "raw") {
+    cat("\n -- raw data are used --\n\n")
+  }
 
   if (!is.null(col_pal)) {
     if (!is.character(col_pal)) stop("col_pal must be a character vector")

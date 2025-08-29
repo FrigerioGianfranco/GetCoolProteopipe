@@ -7,7 +7,7 @@
 ImportOutputMaxQuant(
   MaxQuant_table_name,
   samples_info = NULL,
-  fasta_database = c(NA, "human", "mouse"),
+  fasta_database = NA,
   prioritize_MaxQuant_names = TRUE,
   remove_identified_by_site = TRUE,
   remove_reverse = TRUE,
@@ -19,7 +19,7 @@ ImportOutputMaxQuant(
 
 \item{samples_info}{NULL or NA or a character vector of length 1 with the name of the table in the current working directory, containing information for each sample. The table must be in txt, csv, or xslsx format. In particular, the first column of the table must contain the names of the samples exactly as they are in the MaxQuant table.}
 
-\item{fasta_database}{NULL or NA or either "human" or "mouse". You can specify the fasta database to use to fill the missing Protein names and Gene names from the MaxQuant table}
+\item{fasta_database}{NULL or NA or either "human" or "mouse", or a name of a table in the current working directory (in .txt or .csv format). You can specify the fasta database to use to fill the missing Protein names and Gene names from the MaxQuant table.}
 
 \item{prioritize_MaxQuant_names}{logical. If TRUE and if a fasta_database is provided, the final "Protein names" and "Gene names" will be primarily taken from the  MaxQuant table (they will be taken from the fasta database only if missing). If FALSE, the opposite will happen.}
 

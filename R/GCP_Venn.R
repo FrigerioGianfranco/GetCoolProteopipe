@@ -13,7 +13,7 @@
 #' @import ggvenn
 #'
 #' @export
-GCP_Venn <- function(GCPlist, name_column_groups = NULL, raw_or_LFQ = c("raw", "LFQ"), col_pal = NULL, auto_scale_circles = FALSE) {
+GCP_Venn <- function(GCPlist, name_column_groups = NULL, raw_or_LFQ = c("lfq", "raw"), col_pal = NULL, auto_scale_circles = FALSE) {
 
   checkGCPlist(GCPlist)
 
@@ -33,12 +33,18 @@ GCP_Venn <- function(GCPlist, name_column_groups = NULL, raw_or_LFQ = c("raw", "
     stop("please, specifiy the name of the sample group column in the name_column_groups argoument")
   }
 
-  if (!identical(tolower(raw_or_LFQ), c("raw", "lfq"))) {
+  if (!identical(tolower(raw_or_LFQ), c("lfq", "raw"))) {
     if (length(raw_or_LFQ) != 1) {stop('raw_or_LFQ must be one of "raw", "LFQ"')}
     if (is.na(raw_or_LFQ)) {stop('raw_or_LFQ must be one of "raw", "LFQ"')}
   }
   raw_or_LFQ <- tolower(raw_or_LFQ)
-  raw_or_LFQ <- match.arg(raw_or_LFQ, c("raw", "lfq"))
+  raw_or_LFQ <- match.arg(raw_or_LFQ, c("lfq", "raw"))
+
+  if (raw_or_LFQ == "lfq") {
+    cat("\n -- LFQ data are used --\n\n")
+  } else if (raw_or_LFQ == "raw") {
+    cat("\n -- raw data are used --\n\n")
+  }
 
   if (!is.null(col_pal)) {
     if (!is.character(col_pal)) stop("col_pal must be a character vector")

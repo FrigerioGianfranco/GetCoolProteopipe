@@ -14,7 +14,7 @@
 #' @return A ggplot object.
 #'
 #' @export
-GCP_BarPlot <- function(GCPlist, name_column_groups = NULL, raw_or_LFQ_or_both = c("raw", "LFQ", "both"), col_pal = NULL, label_numbers = TRUE, label_numbers_size = NULL, showCV = FALSE, rotate_sample_names = FALSE) {
+GCP_BarPlot <- function(GCPlist, name_column_groups = NULL, raw_or_LFQ_or_both = c("lfq", "raw", "both"), col_pal = NULL, label_numbers = TRUE, label_numbers_size = NULL, showCV = FALSE, rotate_sample_names = FALSE) {
 
   checkGCPlist(GCPlist)
 
@@ -36,12 +36,21 @@ GCP_BarPlot <- function(GCPlist, name_column_groups = NULL, raw_or_LFQ_or_both =
     name_column_groups <- "allwiththis"
   }
 
-  if (!identical(tolower(raw_or_LFQ_or_both), c("raw", "lfq", "both"))) {
+  if (!identical(tolower(raw_or_LFQ_or_both), c("lfq", "raw", "both"))) {
     if (length(raw_or_LFQ_or_both) != 1) {stop('raw_or_LFQ_or_both must be one of "raw", "LFQ", "both"')}
     if (is.na(raw_or_LFQ_or_both)) {stop('raw_or_LFQ_or_both must be one of "raw", "LFQ", "both"')}
   }
   raw_or_LFQ_or_both <- tolower(raw_or_LFQ_or_both)
-  raw_or_LFQ_or_both <- match.arg(raw_or_LFQ_or_both, c("raw", "lfq", "both"))
+  raw_or_LFQ_or_both <- match.arg(raw_or_LFQ_or_both, c("lfq", "raw", "both"))
+
+  if (raw_or_LFQ_or_both == "lfq") {
+    cat("\n -- LFQ data are used --\n\n")
+  } else if (raw_or_LFQ_or_both == "raw") {
+    cat("\n -- raw data are used --\n\n")
+  } else if (raw_or_LFQ_or_both == "both") {
+    cat("\n -- both raw and LFQ data are compared --\n\n")
+  }
+
 
   if (!is.null(col_pal)) {
     if (!is.character(col_pal)) stop("col_pal must be a character vector")

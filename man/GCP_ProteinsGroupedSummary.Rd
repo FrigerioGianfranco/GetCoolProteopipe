@@ -7,7 +7,7 @@
 GCP_ProteinsGroupedSummary(
   GCPlist,
   name_column_groups = NULL,
-  raw_or_LFQ = c("raw", "LFQ"),
+  raw_or_LFQ = c("lfq", "raw"),
   digits_perc = NULL,
   add_perc_symbol = FALSE
 )

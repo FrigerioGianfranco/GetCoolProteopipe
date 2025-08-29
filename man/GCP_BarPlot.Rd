@@ -7,7 +7,7 @@
 GCP_BarPlot(
   GCPlist,
   name_column_groups = NULL,
-  raw_or_LFQ_or_both = c("raw", "LFQ", "both"),
+  raw_or_LFQ_or_both = c("lfq", "raw", "both"),
   col_pal = NULL,
   label_numbers = TRUE,
   label_numbers_size = NULL,

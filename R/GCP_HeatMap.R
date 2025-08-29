@@ -24,7 +24,7 @@
 #' @return a ggplot object.
 #'
 #' @export
-GCP_HeatMap <- function(GCPlist, raw_or_LFQ = c("raw", "LFQ"),
+GCP_HeatMap <- function(GCPlist, raw_or_LFQ = c("lfq", "raw"),
                         name_column_groups = NULL, name_column_labels = NULL,
                         name_column_groups_protein = NULL, name_column_labels_protein = NULL,
                         order_samples_by = NULL, order_protein_by = NULL,
@@ -35,12 +35,18 @@ GCP_HeatMap <- function(GCPlist, raw_or_LFQ = c("raw", "LFQ"),
 
   checkGCPlist(GCPlist)
 
-  if (!identical(tolower(raw_or_LFQ), c("raw", "lfq"))) {
+  if (!identical(tolower(raw_or_LFQ), c("lfq", "raw"))) {
     if (length(raw_or_LFQ) != 1) {stop('raw_or_LFQ must be one of "raw", "LFQ"')}
     if (is.na(raw_or_LFQ)) {stop('raw_or_LFQ must be one of "raw", "LFQ"')}
   }
   raw_or_LFQ <- tolower(raw_or_LFQ)
-  raw_or_LFQ <- match.arg(raw_or_LFQ, c("raw", "lfq"))
+  raw_or_LFQ <- match.arg(raw_or_LFQ, c("lfq", "raw"))
+
+  if (raw_or_LFQ == "lfq") {
+    cat("\n -- LFQ data are used --\n\n")
+  } else if (raw_or_LFQ == "raw") {
+    cat("\n -- raw data are used --\n\n")
+  }
 
   if (!is.null(name_column_groups)) {
     if (!is.character(name_column_groups)) {stop("name_column_groups must be NULL or a character")}

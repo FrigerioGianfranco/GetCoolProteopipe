@@ -6,7 +6,7 @@
 \usage{
 GCP_TestNormality(
   GCPlist,
-  raw_or_LFQ = c("raw", "LFQ"),
+  raw_or_LFQ = c("lfq", "raw"),
   print_DensityPlot = FALSE,
   print_QQPlot = FALSE,
   print_only_these_protid = NULL,
