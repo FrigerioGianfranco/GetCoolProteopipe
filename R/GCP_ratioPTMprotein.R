@@ -4,12 +4,12 @@
 #'
 #' @param GCPlistPTM a list created with the ImportPTMs function.
 #' @param GCPlistProteins a list created with the ImportOutputMaxQuant function.
-#'
+#' @param raw_or_LFQ one of the following: "raw", "LFQ". If "raw", the denominator of the ratio will be the quant_raw table of GCPlistProteins; if "LFQ", it will be the quantLFQ table.
 #'
 #' @return a GCPlist list with the calculated ratios of intensities in the quant_raw table.
 #'
 #' @export
-GCP_ratioPTMprotein <- function(GCPlistPTM, GCPlistProteins) {
+GCP_ratioPTMprotein <- function(GCPlistPTM, GCPlistProteins, raw_or_LFQ = c("lfq", "raw")) {
 
   checkGCPlist(GCPlistPTM)
   checkGCPlist(GCPlistProteins)
@@ -22,6 +22,20 @@ GCP_ratioPTMprotein <- function(GCPlistPTM, GCPlistProteins) {
     stop(paste0("The coulumn Accession of the proteinINFO table of GCPlistProteins contains duplicates! In particular, the followings are duplicated:\n",
                 paste0(GCPlistProteins$proteinINFO$Accession[which(duplicated(GCPlistProteins$proteinINFO$Accession))], collapse = "\n")))
   }
+
+  if (!identical(tolower(raw_or_LFQ), c("lfq", "raw"))) {
+    if (length(raw_or_LFQ) != 1) {stop('raw_or_LFQ must be one of "raw", "LFQ"')}
+    if (is.na(raw_or_LFQ)) {stop('raw_or_LFQ must be one of "raw", "LFQ"')}
+  }
+  raw_or_LFQ <- tolower(raw_or_LFQ)
+  raw_or_LFQ <- match.arg(raw_or_LFQ, c("lfq", "raw"))
+
+  if (raw_or_LFQ == "lfq") {
+    cat("\n -- LFQ data are used for proteins as denominator --\n\n")
+  } else if (raw_or_LFQ == "raw") {
+    cat("\n -- raw data are used for proteins as denominator --\n\n")
+  }
+
 
   all_protidPTM <- GCPlistPTM$quant_raw$protid
   valid_protidPTM <- character()
@@ -84,8 +98,14 @@ GCP_ratioPTMprotein <- function(GCPlistPTM, GCPlistProteins) {
     tibble_validPTM_found_paired[i, "protidProteins"] <- GCPlistProteins$proteinINFO$protid[which(GCPlistProteins$proteinINFO$Accession == tibble_validPTM_found_paired$Accession[i])]
   }
 
+  if (raw_or_LFQ == "lfq") {
+    protein_table_to_use <- GCPlistProteins$quant_LFQ[which(GCPlistProteins$quant_LFQ$protid %in% tibble_validPTM_found_paired$protidProteins),]
+  } else if (raw_or_LFQ == "raw") {
+    protein_table_to_use <- GCPlistProteins$quant_raw[which(GCPlistProteins$quant_raw$protid %in% tibble_validPTM_found_paired$protidProteins),]
+  } else {
+    stop('raw_or_LFQ must be "raw" or "LFQ"')
+  }
 
-  protein_table_to_use <- GCPlistProteins$quant_raw[which(GCPlistProteins$quant_raw$protid %in% tibble_validPTM_found_paired$protidProteins),]
 
 
   if (any(map_lgl(protein_table_to_use[,which(colnames(protein_table_to_use)!="protid")], ~ any(is.na(.))))) {

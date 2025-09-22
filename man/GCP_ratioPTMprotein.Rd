@@ -4,12 +4,14 @@
 \alias{GCP_ratioPTMprotein}
 \title{ratio PTM on protein intensities}
 \usage{
-GCP_ratioPTMprotein(GCPlistPTM, GCPlistProteins)
+GCP_ratioPTMprotein(GCPlistPTM, GCPlistProteins, raw_or_LFQ = c("lfq", "raw"))
 }
 \arguments{
 \item{GCPlistPTM}{a list created with the ImportPTMs function.}
 
 \item{GCPlistProteins}{a list created with the ImportOutputMaxQuant function.}
+
+\item{raw_or_LFQ}{one of the following: "raw", "LFQ". If "raw", the denominator of the ratio will be the quant_raw table of GCPlistProteins; if "LFQ", it will be the quantLFQ table.}
 }
 \value{
 a GCPlist list with the calculated ratios of intensities in the quant_raw table.
