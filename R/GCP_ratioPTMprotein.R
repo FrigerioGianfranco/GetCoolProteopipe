@@ -65,6 +65,14 @@ GCP_ratioPTMprotein <- function(GCPlistPTM, GCPlistProteins, raw_or_LFQ = c("lfq
     stop("There are no valid intensities in the PTM to use!!")
   }
 
+
+  if (raw_or_LFQ == "lfq") {
+    Protein_proteinINFO_filtered <- GCPlistProteins$proteinINFO[which(GCPlistProteins$proteinINFO$protid%in%GCPlistProteins$quant_LFQ$protid),]
+  } else if (raw_or_LFQ == "raw") {
+    Protein_proteinINFO_filtered <- GCPlistProteins$proteinINFO[which(GCPlistProteins$proteinINFO$protid%in%GCPlistProteins$quant_raw$protid),]
+  }
+
+
   GCPoutput_nr <- GCPlistPTM
 
   tibble_validPTM <- tibble(protid = valid_protidPTM,
@@ -72,18 +80,18 @@ GCP_ratioPTMprotein <- function(GCPlistPTM, GCPlistProteins, raw_or_LFQ = c("lfq
 
 
 
-  if (!all(tibble_validPTM$Accession %in% GCPlistProteins$proteinINFO$Accession)) {
+  if (!all(tibble_validPTM$Accession %in% Protein_proteinINFO_filtered$Accession)) {
 
     tibble_validPTM_not_found <- filter(tibble_validPTM,
-                                        !Accession %in% GCPlistProteins$proteinINFO$Accession)
+                                        !Accession %in% Protein_proteinINFO_filtered$Accession)
 
     tibble_validPTM_found <- filter(tibble_validPTM,
-                                    Accession %in% GCPlistProteins$proteinINFO$Accession)
+                                    Accession %in% Protein_proteinINFO_filtered$Accession)
 
     GCPoutput_nr$quant_raw <- filter(GCPoutput_nr$quant_raw,
-                        protid %in% tibble_validPTM_found$protid)
+                                     protid %in% tibble_validPTM_found$protid)
     GCPoutput_nr$quant_LFQ <- filter(GCPoutput_nr$quant_LFQ,
-                                  protid %in% tibble_validPTM_found$protid)
+                                     protid %in% tibble_validPTM_found$protid)
 
   } else {
 
@@ -95,7 +103,7 @@ GCP_ratioPTMprotein <- function(GCPlistPTM, GCPlistProteins, raw_or_LFQ = c("lfq
   tibble_validPTM_found_paired <- add_column(tibble_validPTM_found, protidProteins = as.character(NA))
 
   for (i in 1:nrow(tibble_validPTM_found_paired)) {
-    tibble_validPTM_found_paired[i, "protidProteins"] <- GCPlistProteins$proteinINFO$protid[which(GCPlistProteins$proteinINFO$Accession == tibble_validPTM_found_paired$Accession[i])]
+    tibble_validPTM_found_paired[i, "protidProteins"] <- Protein_proteinINFO_filtered$protid[which(Protein_proteinINFO_filtered$Accession == tibble_validPTM_found_paired$Accession[i])]
   }
 
   if (raw_or_LFQ == "lfq") {
@@ -127,13 +135,15 @@ GCP_ratioPTMprotein <- function(GCPlistPTM, GCPlistProteins, raw_or_LFQ = c("lfq
                        collapse = "\n")))
   }
 
+  proteinINFO_prot_with_validID <-
 
-  if (!all(tibble_validPTM$Accession %in% GCPlistProteins$proteinINFO$Accession)) {
-    cat(paste0("\n\n  ", nrow(tibble_validPTM_not_found), " out of ", nrow(tibble_validPTM), " has been removed as there is no correspondence with any Accession in the protein table:\n"))
-    print(as.data.frame(tibble_validPTM_not_found))
-  } else {
-    cat("\n\n  Found a correspondence for all the Accension of the protein table!")
-  }
+
+    if (!all(tibble_validPTM$Accession %in% Protein_proteinINFO_filtered$Accession)) {
+      cat(paste0("\n\n  ", nrow(tibble_validPTM_not_found), " out of ", nrow(tibble_validPTM), " has been removed as there is no correspondence with any Accession in the protein table:\n"))
+      print(as.data.frame(tibble_validPTM_not_found))
+    } else {
+      cat("\n\n  Found a correspondence for all the Accension of the protein table!")
+    }
   cat("\n")
 
 
@@ -156,4 +166,3 @@ GCP_ratioPTMprotein <- function(GCPlistPTM, GCPlistProteins, raw_or_LFQ = c("lfq
 
   return(GCPoutput)
 }
-
