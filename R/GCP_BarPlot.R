@@ -14,7 +14,7 @@
 #' @return A ggplot object.
 #'
 #' @export
-GCP_BarPlot <- function(GCPlist, name_column_groups = NULL, raw_or_LFQ_or_both = c("lfq", "raw", "both"), col_pal = NULL, label_numbers = TRUE, label_numbers_size = NULL, showCV = FALSE, rotate_sample_names = FALSE) {
+GCP_BarPlot <- function(GCPlist, name_column_groups = NULL, raw_or_LFQ_or_both = getOption("GetCoolProteopipe.raw_or_LFQ"), col_pal = NULL, label_numbers = TRUE, label_numbers_size = NULL, showCV = FALSE, rotate_sample_names = FALSE) {
 
   checkGCPlist(GCPlist)
 

@@ -11,7 +11,7 @@
 #' @importFrom ggpubr ggqqplot
 #'
 #' @export
-GCP_QQplotIntensities <- function(GCPlist, raw_or_LFQ = c("lfq", "raw"), Title = "QQ plot intensities") {
+GCP_QQplotIntensities <- function(GCPlist, raw_or_LFQ = getOption("GetCoolProteopipe.raw_or_LFQ"), Title = "QQ plot intensities") {
 
   checkGCPlist(GCPlist)
 

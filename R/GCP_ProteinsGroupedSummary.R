@@ -11,7 +11,7 @@
 #' @return A tibble with summary of the presence of proteins in indicated groups.
 #'
 #' @export
-GCP_ProteinsGroupedSummary <- function(GCPlist, name_column_groups = NULL, raw_or_LFQ = c("lfq", "raw"), digits_perc = NULL, add_perc_symbol = FALSE) {
+GCP_ProteinsGroupedSummary <- function(GCPlist, name_column_groups = NULL, raw_or_LFQ = getOption("GetCoolProteopipe.raw_or_LFQ"), digits_perc = NULL, add_perc_symbol = FALSE) {
 
   checkGCPlist(GCPlist)
 

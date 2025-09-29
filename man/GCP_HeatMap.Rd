@@ -6,7 +6,7 @@
 \usage{
 GCP_HeatMap(
   GCPlist,
-  raw_or_LFQ = c("lfq", "raw"),
+  raw_or_LFQ = getOption("GetCoolProteopipe.raw_or_LFQ"),
   name_column_groups = NULL,
   name_column_labels = NULL,
   name_column_groups_protein = NULL,

@@ -73,9 +73,9 @@ ImportPTMs <- function(MaxQuant_table_name, samples_info = NULL, fasta_database 
   proteinGroup_Raw <- read_tsv(MaxQuant_table_name, guess_max = Inf)
 
 
-  if(!(all(c("Proteins", "Protein names", "Gene names", "id") %in% colnames(proteinGroup_Raw)))) {stop('MaxQuant_table must have at least the columns named: "Proteins", "Protein names", "Gene names", "id"')}
+  if(!(all(c("Protein", "Protein names", "Gene names", "id") %in% colnames(proteinGroup_Raw)))) {stop('MaxQuant_table must have at least the columns named: "Protein", "Protein names", "Gene names", "id"')}
 
-  if (!is.character(proteinGroup_Raw$`Proteins`)) stop('The column "Proteins" must contain character')
+  if (!is.character(proteinGroup_Raw$`Protein`)) stop('The column "Protein" must contain character')
 
   if (!is.character(proteinGroup_Raw$`Protein names`)) stop('The column "Protein names" must contain character')
 
@@ -191,12 +191,9 @@ ImportPTMs <- function(MaxQuant_table_name, samples_info = NULL, fasta_database 
 
 
 
+  if ("Accession" %in% colnames(proteinGroup_Raw)) {warning('A column named "Accession" was already present in the imported table. Please not that now it has been completely replaced with each first code (before the ";") of "Protein"')}
 
-  #Add protein and gene names when missing if possible
-
-  if ("Accession" %in% colnames(proteinGroup_Raw)) {warning('A column named "Accession" was already present in the imported table. Please not that now it has been completely replaced with each first code (before the ";") of "Proteins"')}
-
-  proteinGroup_Raw_acc <-  mutate(proteinGroup_Raw, Accession = gsub(";.*", "", `Proteins`))
+  proteinGroup_Raw_acc <-  mutate(proteinGroup_Raw, Accession = gsub(";.*", "", `Protein`))
 
   if (!is.null(fasta_database)) {
     if (!is.na(fasta_database)) {
@@ -236,12 +233,9 @@ ImportPTMs <- function(MaxQuant_table_name, samples_info = NULL, fasta_database 
   }
 
 
-  #Keep only first name in protein names and gene names
-
   proteinGroup_Raw_added_cut <- mutate(proteinGroup_Raw_added,
                                        `Protein names` = gsub(";.*", "", `Protein names`),
                                        `Gene names` = gsub(";.*", "", `Gene names`))
-
 
 
   colnames_raw_intensities <- c("protid", samplenames_raw_intensities)

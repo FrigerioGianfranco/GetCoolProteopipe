@@ -7,7 +7,7 @@
 GCP_BarPlot(
   GCPlist,
   name_column_groups = NULL,
-  raw_or_LFQ_or_both = c("lfq", "raw", "both"),
+  raw_or_LFQ_or_both = getOption("GetCoolProteopipe.raw_or_LFQ"),
   col_pal = NULL,
   label_numbers = TRUE,
   label_numbers_size = NULL,

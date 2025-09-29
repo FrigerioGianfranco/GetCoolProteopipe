@@ -6,7 +6,7 @@
 \usage{
 GCP_TestNormality(
   GCPlist,
-  raw_or_LFQ = c("lfq", "raw"),
+  raw_or_LFQ = getOption("GetCoolProteopipe.raw_or_LFQ"),
   print_DensityPlot = FALSE,
   print_QQPlot = FALSE,
   print_only_these_protid = NULL,

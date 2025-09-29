@@ -9,7 +9,7 @@
 #' @return a GCPlist list with the calculated ratios of intensities in the quant_raw table.
 #'
 #' @export
-GCP_ratioPTMprotein <- function(GCPlistPTM, GCPlistProteins, raw_or_LFQ = c("lfq", "raw")) {
+GCP_ratioPTMprotein <- function(GCPlistPTM, GCPlistProteins, raw_or_LFQ = getOption("GetCoolProteopipe.raw_or_LFQ")) {
 
   checkGCPlist(GCPlistPTM)
   checkGCPlist(GCPlistProteins)

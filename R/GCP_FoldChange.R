@@ -13,7 +13,7 @@
 #' @return The GCPlist with the results of the Fold Change analysis added to the proteinINFO data frame.
 #'
 #' @export
-GCP_FoldChange <- function(GCPlist, raw_or_LFQ = c("lfq", "raw"), name_column_groups, control_group = NULL,
+GCP_FoldChange <- function(GCPlist, raw_or_LFQ = getOption("GetCoolProteopipe.raw_or_LFQ"), name_column_groups, control_group = NULL,
                            paired = FALSE, are_log_transf = TRUE, log_base = 2) {
 
   checkGCPlist(GCPlist)

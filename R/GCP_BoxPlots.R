@@ -14,7 +14,7 @@
 #' @return A ggplot object, if by_samples is TRUE; or a list of ggplot objects, if by_samples is FALSE.
 #'
 #' @export
-GCP_BoxPlots <- function(GCPlist, by_samples = TRUE, name_column_groups = NULL, raw_or_LFQ = c("lfq", "raw"), col_pal = NULL, Title = "Distribution of intensities", only_these_protid = NULL, only_the_first = NULL) {
+GCP_BoxPlots <- function(GCPlist, by_samples = TRUE, name_column_groups = NULL, raw_or_LFQ = getOption("GetCoolProteopipe.raw_or_LFQ"), col_pal = NULL, Title = "Distribution of intensities", only_these_protid = NULL, only_the_first = NULL) {
 
   checkGCPlist(GCPlist)
 

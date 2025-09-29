@@ -4,7 +4,11 @@
 \alias{GCP_ratioPTMprotein}
 \title{ratio PTM on protein intensities}
 \usage{
-GCP_ratioPTMprotein(GCPlistPTM, GCPlistProteins, raw_or_LFQ = c("lfq", "raw"))
+GCP_ratioPTMprotein(
+  GCPlistPTM,
+  GCPlistProteins,
+  raw_or_LFQ = getOption("GetCoolProteopipe.raw_or_LFQ")
+)
 }
 \arguments{
 \item{GCPlistPTM}{a list created with the ImportPTMs function.}

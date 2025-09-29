@@ -7,7 +7,7 @@
 GCP_Venn(
   GCPlist,
   name_column_groups = NULL,
-  raw_or_LFQ = c("lfq", "raw"),
+  raw_or_LFQ = getOption("GetCoolProteopipe.raw_or_LFQ"),
   col_pal = NULL,
   auto_scale_circles = FALSE
 )

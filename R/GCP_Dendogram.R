@@ -12,7 +12,7 @@
 #' @import ggdendro
 #'
 #' @export
-GCP_Dendogram <- function(GCPlist, name_column_groups = NULL, raw_or_LFQ = c("lfq", "raw"), col_pal = NULL) {
+GCP_Dendogram <- function(GCPlist, name_column_groups = NULL, raw_or_LFQ = getOption("GetCoolProteopipe.raw_or_LFQ"), col_pal = NULL) {
 
   checkGCPlist(GCPlist)
 

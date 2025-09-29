@@ -4,7 +4,12 @@
 \alias{GCP_PCA}
 \title{Get Principal Component analysis.}
 \usage{
-GCP_PCA(GCPlist, raw_or_LFQ = c("lfq", "raw"), center = TRUE, scale. = FALSE)
+GCP_PCA(
+  GCPlist,
+  raw_or_LFQ = getOption("GetCoolProteopipe.raw_or_LFQ"),
+  center = TRUE,
+  scale. = FALSE
+)
 }
 \arguments{
 \item{GCPlist}{a list created with the ImportOutputMaxQuant function.}

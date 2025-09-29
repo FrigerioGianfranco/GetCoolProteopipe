@@ -6,7 +6,7 @@
 \usage{
 GCP_DensityplotIntensities(
   GCPlist,
-  raw_or_LFQ = c("lfq", "raw"),
+  raw_or_LFQ = getOption("GetCoolProteopipe.raw_or_LFQ"),
   Title = "Distribution of intensities"
 )
 }

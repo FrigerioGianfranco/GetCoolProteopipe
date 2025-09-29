@@ -9,7 +9,7 @@
 #' @return The GCPlist with an additional column in the proteinINFO data frame.
 #'
 #' @export
-GCP_ProteinsGrouped <- function(GCPlist, name_column_groups = NULL, raw_or_LFQ = c("lfq", "raw")) {
+GCP_ProteinsGrouped <- function(GCPlist, name_column_groups = NULL, raw_or_LFQ = getOption("GetCoolProteopipe.raw_or_LFQ")) {
 
   checkGCPlist(GCPlist)
 

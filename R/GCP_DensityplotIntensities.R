@@ -9,7 +9,7 @@
 #' @return a ggplot object.
 #'
 #' @export
-GCP_DensityplotIntensities <- function(GCPlist, raw_or_LFQ = c("lfq", "raw"), Title = "Distribution of intensities") {
+GCP_DensityplotIntensities <- function(GCPlist, raw_or_LFQ = getOption("GetCoolProteopipe.raw_or_LFQ"), Title = "Distribution of intensities") {
 
   checkGCPlist(GCPlist)
 

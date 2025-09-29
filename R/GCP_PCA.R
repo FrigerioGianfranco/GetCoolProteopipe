@@ -10,7 +10,7 @@
 #' @return The GCPlist will be returned with the scores in the sampleINFO and the loadings in the proteinINFO.
 #'
 #' @export
-GCP_PCA <- function(GCPlist, raw_or_LFQ = c("lfq", "raw"), center = TRUE, scale. = FALSE) {
+GCP_PCA <- function(GCPlist, raw_or_LFQ = getOption("GetCoolProteopipe.raw_or_LFQ"), center = TRUE, scale. = FALSE) {
 
   checkGCPlist(GCPlist)
 

@@ -12,7 +12,7 @@
 #' @return The GCPlist with the results of the t-test added to the proteinINFO data frame.
 #'
 #' @export
-GCP_ttest <- function(GCPlist, raw_or_LFQ = c("lfq", "raw"), name_column_groups,
+GCP_ttest <- function(GCPlist, raw_or_LFQ = getOption("GetCoolProteopipe.raw_or_LFQ"), name_column_groups,
                       paired = FALSE, FDR = TRUE, pcutoff = 0.05) {
 
   checkGCPlist(GCPlist)

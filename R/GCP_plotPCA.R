@@ -22,7 +22,7 @@
 #' @import ggdendro
 #'
 #' @export
-GCP_plotPCA <- function(GCPlist, raw_or_LFQ = c("lfq", "raw"),
+GCP_plotPCA <- function(GCPlist, raw_or_LFQ = getOption("GetCoolProteopipe.raw_or_LFQ"),
                         scores_or_loadings = c("scores", "loadings"), PC_to_plot = c("PC1", "PC2"),
                         center = TRUE, scale. = FALSE,
                         name_column_groups = NULL, name_column_labels = NULL, col_pal = NULL, ellipses_on_score = TRUE,

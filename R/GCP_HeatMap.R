@@ -24,7 +24,7 @@
 #' @return a ggplot object.
 #'
 #' @export
-GCP_HeatMap <- function(GCPlist, raw_or_LFQ = c("lfq", "raw"),
+GCP_HeatMap <- function(GCPlist, raw_or_LFQ = getOption("GetCoolProteopipe.raw_or_LFQ"),
                         name_column_groups = NULL, name_column_labels = NULL,
                         name_column_groups_protein = NULL, name_column_labels_protein = NULL,
                         order_samples_by = NULL, order_protein_by = NULL,
