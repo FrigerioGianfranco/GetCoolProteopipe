@@ -16,7 +16,7 @@
 #' @return the GCPlist with an additional column in the sampleINFO data frames containing the assigned groups.
 #'
 #' @export
-GCP_AssignGroups <- function(GCPlist, automatic_assignment = c("no", "groupfirst", "replicatefirst"), separator_automatic_assignment = "_", sample_names = pull(GCPlist$sampleINFO, 1), group_names = rep("not_assigned", length(sample_names)), sample_group_table = NULL, name_column_groups = "Condition", name_column_replicates = "Replicates", factorlevels = NULL, controlgroup = NULL) {
+GCP_AssignGroups <- function(GCPlist, automatic_assignment = c("no", "groupfirst", "replicatefirst"), separator_automatic_assignment = "_", sample_names = pull(GCPlist$sampleINFO, 1), group_names = rep("not_assigned", length(sample_names)), sample_group_table = NULL, name_column_groups = "Condition", name_column_replicates = "Replicate", factorlevels = NULL, controlgroup = NULL) {
 
   checkGCPlist(GCPlist)
 

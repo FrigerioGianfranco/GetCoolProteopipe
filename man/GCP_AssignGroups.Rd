@@ -12,7 +12,7 @@ GCP_AssignGroups(
   group_names = rep("not_assigned", length(sample_names)),
   sample_group_table = NULL,
   name_column_groups = "Condition",
-  name_column_replicates = "Replicates",
+  name_column_replicates = "Replicate",
   factorlevels = NULL,
   controlgroup = NULL
 )

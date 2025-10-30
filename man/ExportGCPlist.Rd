@@ -7,11 +7,11 @@
 ExportGCPlist(
   GCPlist,
   filename = "GCP.xlsx",
-  exportype = c("raw", "LFQ", "proteinINFO", "sampleINFO", "all"),
+  exportype = c("sheets", "raw", "LFQ", "proteinINFO", "sampleINFO", "all"),
   intensity_indication = TRUE,
   protgenenames = TRUE,
   protIDclean = TRUE,
-  specific_columns = NULL
+  specific_columns = "all_stat"
 )
 }
 \arguments{
@@ -19,7 +19,7 @@ ExportGCPlist(
 
 \item{filename}{character. The name of the file to create. It must end with ".txt", ".csv", or ".xlsx"; and the file will be accordingly created of that format.}
 
-\item{exportype}{exportype one of the following: "raw", "LFQ", "proteinINFO", "sampleINFO", "all". If "raw", a table with the raw intensities will be exported; if "LFQ", a table with the LFQ intensities will be exported; if "proteinINFO", a table with all the proteinINFO; if "sampleINFO", a table with all the sampleINFO; if "all", a table with combined quant_raw, quant_LFQ, and proteinINFO will be exported. Please note that the latter might be too big to be suitably exported as a '.xlsx' file: if so, export it as '.txt' or '.csv'.}
+\item{exportype}{exportype one of the following: "raw", "LFQ", "proteinINFO", "sampleINFO", "all", "sheets". If "raw", a table with the raw intensities will be exported; if "LFQ", a table with the LFQ intensities will be exported; if "proteinINFO", a table with all the proteinINFO; if "sampleINFO", a table with all the sampleINFO; if "all", a table with combined quant_raw, quant_LFQ, and proteinINFO will be exported; if "sheets", an Excel table with 4 sheets will be exported. Please note that "all" might be too big to be suitably exported as a '.xlsx' file: if so, export it as '.txt' or '.csv'.}
 
 \item{intensity_indication}{logical. if TRUE and if exportype is either "raw" or "LFQ" the column names of samples will start with "Intensity " for raw intensities or with "LFQ Intensity " for LFQ intensities. Please note that this will happen anyway if exportype is "all".}
 

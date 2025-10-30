@@ -6,6 +6,7 @@
 \usage{
 GCP_ScaleIntensities(
   GCPlist,
+  raw_or_LFQ = getOption("GetCoolProteopipe.raw_or_LFQ"),
   subtract = c("shift_median", "mean", "median"),
   divide = c("sqrt_sd", "sd", "maxmin"),
   by_sample = TRUE,
@@ -14,6 +15,8 @@ GCP_ScaleIntensities(
 }
 \arguments{
 \item{GCPlist}{a list created with the ImportOutputMaxQuant function.}
+
+\item{raw_or_LFQ}{one of the following: "raw", "LFQ". The scale will be performed only in the specified data intensities. Please note that it might not be a good idea to do so on LFQ data, so a warning is generated if LFQ is chosen.}
 
 \item{subtract}{NULL, or "shift_median", or "mean", or "median". Specify it to subtract the mean or median value to all values. If "shift_median", an offset will be subtracted in order to center the medians to the global median.}
 

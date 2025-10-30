@@ -184,6 +184,12 @@ GCP_plotPCA <- function(GCPlist, raw_or_LFQ = getOption("GetCoolProteopipe.raw_o
                                     .after = 1)
     colnames(df_intensities_wg)[2] <- name_column_groups
 
+    if (colnames(df_intensities_wg)[1] == colnames(df_intensities_wg)[2]) {
+      the_new_name <- paste0(colnames(df_intensities_wg)[2], "_bis")
+      colnames(df_intensities_wg)[2] <- the_new_name
+      name_column_groups <- the_new_name
+    }
+
     for (i in 1:length(pull(df_intensities_wg, 1))) {
       df_intensities_wg[i, name_column_groups] <- pull(GCPlist$sampleINFO, name_column_groups)[which(pull(GCPlist$sampleINFO, 1) == pull(df_intensities_wg, 1)[i])]
     }
@@ -192,11 +198,24 @@ GCP_plotPCA <- function(GCPlist, raw_or_LFQ = getOption("GetCoolProteopipe.raw_o
   if (!is.null(name_column_labels)) {
     if (all(pull(df_intensities_wg, 1) == pull(GCPlist$sampleINFO, name_column_labels))) {
       colnames(df_intensities_wg)[1] <- name_column_labels
+
+      if (colnames(df_intensities_wg)[1] == colnames(df_intensities_wg)[2]) {
+        thiis_new_name <- paste0(colnames(df_intensities_wg)[1], "_bis")
+        colnames(df_intensities_wg)[1] <- thiis_new_name
+        name_column_labels <- thiis_new_name
+      }
+
     } else {
       df_intensities_wg <- add_column(df_intensities_wg,
                                       allwiththis_label = NA,
                                       .after = 1)
       colnames(df_intensities_wg)[2] <- name_column_labels
+
+      if (colnames(df_intensities_wg)[1] == colnames(df_intensities_wg)[2]) {
+        this_new_name <- paste0(colnames(df_intensities_wg)[2], "_bis")
+        colnames(df_intensities_wg)[2] <- this_new_name
+        name_column_labels <- this_new_name
+      }
 
       for (i in 1:length(pull(df_intensities_wg, 1))) {
         df_intensities_wg[i, name_column_labels] <- pull(GCPlist$sampleINFO, name_column_labels)[which(pull(GCPlist$sampleINFO, 1) == pull(df_intensities_wg, 1)[i])]
@@ -236,6 +255,11 @@ GCP_plotPCA <- function(GCPlist, raw_or_LFQ = getOption("GetCoolProteopipe.raw_o
     if (!inherits(object_to_return$layers[[nlay]]$geom, "GeomPoint")) {
       object_to_return$layers[[nlay]]$show.legend <- FALSE
     }
+  }
+
+  if (scores_or_loadings == "scores") {
+    is_point <- vapply(object_to_return$layers, function(l) inherits(l$geom, "GeomPoint"), logical(1))
+    object_to_return$layers[[which(is_point)[1]]]$aes_params$size <- 4
   }
 
 

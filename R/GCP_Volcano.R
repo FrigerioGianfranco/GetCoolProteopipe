@@ -16,7 +16,7 @@
 #' @return A ggplot object.
 #'
 #' @export
-GCP_Volcano <- function(GCPlist, FDR = TRUE, log_base = 2, pcutoff_colored = 0.05, pcutoff_line = 0.05, pcutoff_prot_label = NULL, name_column_proteinlabels = NULL, name_column_proteingroups = NULL, col_pal_difference = c("grey", "blue", "red"), col_pal_groups = NULL) {
+GCP_Volcano <- function(GCPlist, FDR = TRUE, log_base = exp(1), pcutoff_colored = 0.05, pcutoff_line = 0.05, pcutoff_prot_label = NULL, name_column_proteinlabels = NULL, name_column_proteingroups = NULL, col_pal_difference = c("grey", "blue", "red"), col_pal_groups = NULL) {
 
   checkGCPlist(GCPlist)
 
@@ -149,9 +149,9 @@ GCP_Volcano <- function(GCPlist, FDR = TRUE, log_base = 2, pcutoff_colored = 0.0
                                                                                ifelse(logFC>0, "increased", NA))),
                                                                  levels = c("not significant", "decreased", "increased")))
 
-    DifferenceLabels <- c(paste0("not significant:\n ", sum(Volcano_tibble$Difference=="not significant")),
-                          paste0("decreased:\n ", sum(Volcano_tibble$Difference=="decreased")),
-                          paste0("increased:\n ", sum(Volcano_tibble$Difference=="increased")))
+    DifferenceLabels <- c(paste0("not significant: ", sum(Volcano_tibble$Difference=="not significant")),
+                          paste0("decreased: ", sum(Volcano_tibble$Difference=="decreased")),
+                          paste0("increased: ", sum(Volcano_tibble$Difference=="increased")))
     names(DifferenceLabels) <- c("not significant", "decreased", "increased")
 
 
@@ -186,24 +186,24 @@ GCP_Volcano <- function(GCPlist, FDR = TRUE, log_base = 2, pcutoff_colored = 0.0
 
   Volcano_plot <- Volcano_plot +
     theme_bw() +
-    ggtitle(paste0("Changes in ", GCPlist$proteinINFO$FCcomparison[which(!is.na(GCPlist$proteinINFO$FCcomparison))][1])) +
+    ggtitle(paste0("Volcano plot of significantly-altered proteins (", GCPlist$proteinINFO$FCcomparison[which(!is.na(GCPlist$proteinINFO$FCcomparison))][1], ")")) +
     theme(panel.grid.minor = element_blank(),
           plot.title = element_text(hjust = 0.5))
 
   if (FDR) {
     Volcano_plot <- Volcano_plot +
-      ylab("-log10(t-test FDR p-values)")
+      ylab(paste0("-log10 FDR p-value (", GCPlist$proteinINFO$FCcomparison[which(!is.na(GCPlist$proteinINFO$FCcomparison))][1], ")"))
   } else {
     Volcano_plot <- Volcano_plot +
-      ylab("-log10(t-test p-values)")
+      ylab(paste0("-log10 p-value (", GCPlist$proteinINFO$FCcomparison[which(!is.na(GCPlist$proteinINFO$FCcomparison))][1], ")"))
   }
 
   if (log_base == exp(1)) {
     Volcano_plot <- Volcano_plot +
-      xlab("ln(Fold Change)")
+      xlab(paste0("ln FC (", GCPlist$proteinINFO$FCcomparison[which(!is.na(GCPlist$proteinINFO$FCcomparison))][1], ")"))
   } else {
     Volcano_plot <- Volcano_plot +
-      xlab(paste0("log", log_base, "(Fold Change)"))
+      xlab(paste0("log", log_base, " FC (", GCPlist$proteinINFO$FCcomparison[which(!is.na(GCPlist$proteinINFO$FCcomparison))][1], ")"))
   }
 
 

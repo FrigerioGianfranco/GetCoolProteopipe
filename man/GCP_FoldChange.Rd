@@ -11,7 +11,7 @@ GCP_FoldChange(
   control_group = NULL,
   paired = FALSE,
   are_log_transf = TRUE,
-  log_base = 2
+  log_base = exp(1)
 )
 }
 \arguments{

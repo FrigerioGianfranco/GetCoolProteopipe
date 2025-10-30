@@ -1,20 +1,20 @@
-#' Performing a Fold Change analysis on data
+#' Performing a Fold Change analysis on data, for more than 2 groups
 #'
-#' It performs a Fold Change analyses on the proteins intensities. Please, be aware that the Fold Change analysis should be performed only on positive data! Indeed, all protein intensities should be positive, or unreliable results will be generated!
+#' It performs a Fold Change analyses on the proteins intensities, performing multiple pair comparisons. Please, be aware that the Fold Change analysis should be performed only on positive data! Indeed, all protein intensities should be positive, or unreliable results will be generated!
 #'
 #' @param GCPlist a list created with the ImportOutputMaxQuant function. IMPORTANT: All protein intensities should be positive, or unreliable results will be generated!
 #' @param raw_or_LFQ one of the following: "raw", "LFQ". The Fold Change analysis will be performed only in the specified data intensities.
-#' @param name_column_groups character of length 1. The name of the column of the sampleINFO table containing the sample groups. Since this is a Fold Change analysis, there must be exactly two groups.
-#' @param control_group NULL or a character of length 1. The name of the group to be considered as control group, which will be considered as denominator in the ratio of the Fold Change analysis. If NULL, the first level of the factor will be considered as the control group.
-#' @param paired logical. If FALSE it performs FC on mean of the two groups. If TRUE it performs FC for each pair and then compute the mean.
+#' @param name_column_groups character of length 1. The name of the column of the sampleINFO table containing the sample groups. 3 or more groups should be indicated here.
+#' @param group_order NULL or a character. The ordered names of the groups, the first ones in order will be considered as denominator in the ratio of the Fold Change analyses. If NULL, the order of the levels of the factor will be considered.
+#' @param paired logical. If FALSE it performs FC on mean of the two groups, for each pair. If TRUE it performs FC for each pair and then compute the mean.
 #' @param are_log_transf logical. If the protein intensities are already log-transformed, specify here as TRUE, so the subtraction will be performed instead of the ratio.
 #' @param log_base numeric of length 1. Specify here the base of the logarithm to calculate the logFC or, if are_log_transf is TRUE; the base of the logarithm that were used to transform the data.
 #'
-#' @return The GCPlist with the results of the Fold Change analysis added to the proteinINFO data frame.
+#' @return The GCPlist with the results of the Fold Change analyses added to the proteinINFO data frame.
 #'
 #' @export
-GCP_FoldChange <- function(GCPlist, raw_or_LFQ = getOption("GetCoolProteopipe.raw_or_LFQ"), name_column_groups, control_group = NULL,
-                           paired = FALSE, are_log_transf = TRUE, log_base = exp(1)) {
+GCP_FoldChange_Multi <- function(GCPlist, raw_or_LFQ = getOption("GetCoolProteopipe.raw_or_LFQ"), name_column_groups, group_order = NULL,
+                                 paired = FALSE, are_log_transf = TRUE, log_base = exp(1)) {
 
   checkGCPlist(GCPlist)
 
@@ -41,33 +41,21 @@ GCP_FoldChange <- function(GCPlist, raw_or_LFQ = getOption("GetCoolProteopipe.ra
   if (!is.factor(pull(GCPlist$sampleINFO, name_column_groups))) {
     GCPlist$sampleINFO[,name_column_groups] <- as.factor(pull(GCPlist$sampleINFO, name_column_groups))
   }
-  if (length(levels(pull(GCPlist$sampleINFO, name_column_groups))) != 2) {stop("To perform a Fold Change analyses, you must have exactly 2 groups!")}
+  if (length(levels(pull(GCPlist$sampleINFO, name_column_groups))) <= 2) {stop("To perform these multiple Fold Change analyses, you should have more than 2 groups!")}
 
-  if (is.null(control_group)) {
-    cat(paste0('\n"', levels(pull(GCPlist$sampleINFO, name_column_groups))[1], '" has been used as control group. If that is not fine for you, specify which group you want in the argument control_group\n\n'))
-    second_to_first_ratio <- TRUE
-  } else {
-    if (length(control_group)!=1) {stop("control_group must be a character of length 1")}
-    if (!is.character(control_group)) {stop("control_group must be a character of length 1")}
-    if (is.na(control_group)) {stop("control_group must be a character of length 1, not a NA")}
-    if (!control_group%in%levels(pull(GCPlist$sampleINFO, name_column_groups))) {stop("control_group must be a group contained in the column indicated by name_column_groups of the sampleINFO table")}
-    if (control_group==levels(pull(GCPlist$sampleINFO, name_column_groups))[1]) {
-      second_to_first_ratio <- TRUE
-    } else {
-      second_to_first_ratio <- FALSE
-    }
+  if (!is.null(group_order)) {
+    if (length(group_order)!=length(levels(pull(GCPlist$sampleINFO, name_column_groups)))) {stop("the length of group_order must be the same of the groups")}
+    if (any(is.na(group_order))) {stop("group_order must not contain NAs")}
+    if (!is.character(group_order)) {stop("group_order must be a character")}
+    if (any(duplicated(group_order))) {stop("group_order must not contain duplicated")}
+    if (!all(group_order %in% levels(pull(GCPlist$sampleINFO, name_column_groups)))) {stop("group_order must contain the levels of the factor!")}
+
+    GCPlist$sampleINFO[,name_column_groups] <- factor(as.character(pull(GCPlist$sampleINFO, name_column_groups)), levels = group_order)
   }
 
   if (length(paired)!=1) {stop("paired must be exclusively TRUE or FALSE")}
   if (!is.logical(paired)) {stop("paired must be exclusively TRUE or FALSE")}
   if (is.na(paired)) {stop("paired must be exclusively TRUE or FALSE")}
-
-  if (paired) {
-    length_vect_fact1 <- length(which(pull(GCPlist$sampleINFO, name_column_groups) == levels(pull(GCPlist$sampleINFO, name_column_groups))[1]))
-    length_vect_fact2 <- length(which(pull(GCPlist$sampleINFO, name_column_groups) == levels(pull(GCPlist$sampleINFO, name_column_groups))[2]))
-
-    if (length_vect_fact1 != length_vect_fact2) {stop("You cannot perform a paired Fold Change on groups that don't have the same number of observations")}
-  }
 
   if (length(are_log_transf)!=1) {stop("are_log_transf must be exclusively TRUE or FALSE")}
   if (!is.logical(are_log_transf)) {stop("are_log_transf must be exclusively TRUE or FALSE")}
@@ -99,22 +87,21 @@ GCP_FoldChange <- function(GCPlist, raw_or_LFQ = getOption("GetCoolProteopipe.ra
   }
 
 
-  the_FC_table <- gentab_FC(df = df_intensities_wg,
-                            v = colnames(df_intensities)[-1],
-                            f = name_column_groups,
-                            second_to_first_ratio = second_to_first_ratio,
-                            paired = paired,
-                            are_log_transf = are_log_transf,
-                            log_base = log_base,
-                            filter_sign = FALSE)
-  colnames(the_FC_table)[1] <- "protid"
+  the_FC_table_Multi <- gentab_FC_more_than2levels(df = df_intensities_wg,
+                                                   v = colnames(df_intensities)[-1],
+                                                   f = name_column_groups,
+                                                   second_to_first_ratio = TRUE,
+                                                   paired = paired,
+                                                   are_log_transf = are_log_transf,
+                                                   log_base = log_base,
+                                                   only_on_positive = FALSE)
 
-  the_FC_table <- mutate(the_FC_table, FCcomparison = rep(ifelse(second_to_first_ratio,
-                                                                 paste0(levels(pull(df_intensities_wg, name_column_groups))[2], " vs ", levels(pull(df_intensities_wg, name_column_groups))[1]),
-                                                                 paste0(levels(pull(df_intensities_wg, name_column_groups))[1], " vs ", levels(pull(df_intensities_wg, name_column_groups))[2])),
-                                                          nrow(the_FC_table)))
+  colnames(the_FC_table_Multi)[1] <- "protid"
 
-  colnames_noprotid <- colnames(the_FC_table)[which(colnames(the_FC_table)!="protid")]
+
+
+
+  colnames_noprotid <- colnames(the_FC_table_Multi)[which(colnames(the_FC_table_Multi)!="protid")]
   colnames_noprotid_present <- colnames_noprotid[which(colnames_noprotid %in% colnames(GCPlist$proteinINFO))]
   colnames_noprotid_notpresent <- colnames_noprotid[which(!colnames_noprotid %in% colnames(GCPlist$proteinINFO))]
 
@@ -137,7 +124,7 @@ GCP_FoldChange <- function(GCPlist, raw_or_LFQ = getOption("GetCoolProteopipe.ra
 
   GCPoutput <- GCPlist
 
-  GCPoutput$proteinINFO <- left_join(x = GCPlist$proteinINFO, y = the_FC_table, by = "protid")
+  GCPoutput$proteinINFO <- left_join(x = GCPlist$proteinINFO, y = the_FC_table_Multi, by = "protid")
 
 
   return(GCPoutput)

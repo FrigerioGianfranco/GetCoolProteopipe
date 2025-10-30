@@ -53,8 +53,8 @@ GCP_HeatMap <- function(GCPlist, raw_or_LFQ = getOption("GetCoolProteopipe.raw_o
     if (any(is.na(name_column_groups))) {stop("name_column_groups must not contain NAs")}
     if (!all(name_column_groups %in% colnames(GCPlist$sampleINFO))) {stop("The names passed in name_column_groups must names of columns of the sampleINFO dataframe")}
     if (any(duplicated(colnames(GCPlist$sampleINFO)[which(colnames(GCPlist$sampleINFO)%in%name_column_groups)]))) {stop("there are duplicates in the name of sampleINFO considering the name_column_groups")}
-    if (name_column_groups == "allwiththis") {stop("Please, just don't pass 'allwiththis' to name_column_groups, thanks!")}
-    if (name_column_groups == "thesearethesamplenamesused") {stop("Please, just don't pass 'thesearethesamplenamesused' to name_column_groups, thanks!")}
+    if (any(name_column_groups == "allwiththis")) {stop("Please, just don't pass 'allwiththis' to name_column_groups, thanks!")}
+    if (any(name_column_groups == "thesearethesamplenamesused")) {stop("Please, just don't pass 'thesearethesamplenamesused' to name_column_groups, thanks!")}
   }
 
   if (!is.null(name_column_labels)) {
@@ -177,13 +177,21 @@ GCP_HeatMap <- function(GCPlist, raw_or_LFQ = getOption("GetCoolProteopipe.raw_o
   df_intensities_wg <- df_intensities
 
   if (!is.null(name_column_groups)) {
-    df_intensities_wg <- add_column(df_intensities_wg,
-                                    allwiththis = factor(NA, levels = levels(pull(GCPlist$sampleINFO, name_column_groups))),
-                                    .after = 1)
-    colnames(df_intensities_wg)[2] <- name_column_groups
+    for (ncg in rev(name_column_groups)) {
 
-    for (i in 1:length(pull(df_intensities_wg, 1))) {
-      df_intensities_wg[i, name_column_groups] <- pull(GCPlist$sampleINFO, name_column_groups)[which(pull(GCPlist$sampleINFO, 1) == pull(df_intensities_wg, 1)[i])]
+      if (!is.factor(pull(GCPlist$sampleINFO, ncg))) {
+
+        GCPlist$sampleINFO <- mutate_at(GCPlist$sampleINFO, ncg, as.factor)
+      }
+
+      df_intensities_wg <- add_column(df_intensities_wg,
+                                      allwiththis = factor(NA_character_, levels = levels(pull(GCPlist$sampleINFO, ncg))),
+                                      .after = 1)
+      colnames(df_intensities_wg)[2] <- ncg
+
+      for (i in 1:length(pull(df_intensities_wg, 1))) {
+        df_intensities_wg[i, ncg] <- pull(GCPlist$sampleINFO, ncg)[which(pull(GCPlist$sampleINFO, 1) == pull(df_intensities_wg, 1)[i])]
+      }
     }
   }
 

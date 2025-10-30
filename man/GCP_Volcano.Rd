@@ -7,7 +7,7 @@
 GCP_Volcano(
   GCPlist,
   FDR = TRUE,
-  log_base = 2,
+  log_base = exp(1),
   pcutoff_colored = 0.05,
   pcutoff_line = 0.05,
   pcutoff_prot_label = NULL,

@@ -9,6 +9,7 @@ GCP_BarPlot(
   name_column_groups = NULL,
   raw_or_LFQ_or_both = getOption("GetCoolProteopipe.raw_or_LFQ"),
   col_pal = NULL,
+  bar_width = NULL,
   label_numbers = TRUE,
   label_numbers_size = NULL,
   showCV = FALSE,
@@ -23,6 +24,8 @@ GCP_BarPlot(
 \item{raw_or_LFQ_or_both}{one of the following: "raw", "LFQ", "both". The barplot will be performed only in the specified data, or a facet_wrap plot will be generated if "both" is specified.}
 
 \item{col_pal}{NULL or a character vector containing colors. If NULL, colors from the pals package will be used (see function build_long_vector_of_colors).}
+
+\item{bar_width}{NULL or a number. You can pass here the width of the bars.}
 
 \item{label_numbers}{logical. If TRUE, it adds the number of proteins on the top of each bar.}
 

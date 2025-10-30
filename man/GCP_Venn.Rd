@@ -8,8 +8,10 @@ GCP_Venn(
   GCPlist,
   name_column_groups = NULL,
   raw_or_LFQ = getOption("GetCoolProteopipe.raw_or_LFQ"),
+  consider_genenames = FALSE,
   col_pal = NULL,
-  auto_scale_circles = FALSE
+  auto_scale_circles = FALSE,
+  add_title = FALSE
 )
 }
 \arguments{
@@ -19,9 +21,13 @@ GCP_Venn(
 
 \item{raw_or_LFQ}{one of the following: "raw", "LFQ". The venn diagram will be performed only in the specified data.}
 
+\item{consider_genenames}{logical. If TRUE, the gene names will be considered to perform the grouping, instead of the protid.}
+
 \item{col_pal}{NULL or a character vector containing colors. If NULL, colors from the pals package will be used (see function build_long_vector_of_colors).}
 
 \item{auto_scale_circles}{logical. If TRUE and if there are only 2 groups, the dimensions of circles will be scaled to the number of intersections.}
+
+\item{add_title}{logical. If TRUE, a short default title is added at the top of the graph.}
 }
 \value{
 A ggplot object.

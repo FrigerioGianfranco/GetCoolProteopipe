@@ -117,7 +117,13 @@ GCP_ProteinsGrouped <- function(GCPlist, name_column_groups = NULL, raw_or_LFQ =
                                                                                                   levels = all_combinations(levels(pull(GCPlist$sampleINFO, name_column_groups))))
 
 
+  the_new_col_added <- colnames(GCPoutout$proteinINFO)[which(!colnames(GCPoutout$proteinINFO)%in%colnames(GCPlist$proteinINFO))]
 
+  if (length(the_new_col_added)>0) {
+    cat("\nThe following columns have been added to the proteinINFO table:\n ")
+    cat(paste0(the_new_col_added, collapse = "\n "))
+    cat("\n")
+  }
 
   return(GCPoutout)
 }

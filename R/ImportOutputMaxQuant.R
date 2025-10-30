@@ -164,10 +164,10 @@ ImportOutputMaxQuant <- function(MaxQuant_table_name, samples_info = NULL, fasta
 
 
     } else {
-      samples_info_loaded <- tibble(Samples = samplenames_raw_clean)
+      samples_info_loaded <- tibble(Sample = samplenames_raw_clean)
     }
   } else {
-    samples_info_loaded <- tibble(Samples = samplenames_raw_clean)
+    samples_info_loaded <- tibble(Sample = samplenames_raw_clean)
   }
 
 

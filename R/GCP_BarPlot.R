@@ -6,6 +6,7 @@
 #' @param name_column_groups NULL or character of length 1. The name of the column of the sampleINFO table containing the sample groups.
 #' @param raw_or_LFQ_or_both one of the following: "raw", "LFQ", "both". The barplot will be performed only in the specified data, or a facet_wrap plot will be generated if "both" is specified.
 #' @param col_pal NULL or a character vector containing colors. If NULL, colors from the pals package will be used (see function build_long_vector_of_colors).
+#' @param bar_width NULL or a number. You can pass here the width of the bars.
 #' @param label_numbers logical. If TRUE, it adds the number of proteins on the top of each bar.
 #' @param label_numbers_size NULL or numeric of length 1. If specified and if label_numbers is TRUE, this is the size of the numbers of proteins of the top of each bar.
 #' @param showCV logical. If TRUE, it adds to the graphs the coefficient of variation (CV%) of the number of proteins for each group.
@@ -14,7 +15,7 @@
 #' @return A ggplot object.
 #'
 #' @export
-GCP_BarPlot <- function(GCPlist, name_column_groups = NULL, raw_or_LFQ_or_both = getOption("GetCoolProteopipe.raw_or_LFQ"), col_pal = NULL, label_numbers = TRUE, label_numbers_size = NULL, showCV = FALSE, rotate_sample_names = FALSE) {
+GCP_BarPlot <- function(GCPlist, name_column_groups = NULL, raw_or_LFQ_or_both = getOption("GetCoolProteopipe.raw_or_LFQ"), col_pal = NULL, bar_width = NULL, label_numbers = TRUE, label_numbers_size = NULL, showCV = FALSE, rotate_sample_names = FALSE) {
 
   checkGCPlist(GCPlist)
 
@@ -82,6 +83,12 @@ GCP_BarPlot <- function(GCPlist, name_column_groups = NULL, raw_or_LFQ_or_both =
     if (!all(names(colors_of_groups) %in% levels(pull(GCPlist$sampleINFO, name_column_groups)) & levels(pull(GCPlist$sampleINFO, name_column_groups)) %in% names(colors_of_groups))) {stop("the names of col_pal don't correspond to the levels of name_column_groups")}
   }
 
+  if (!is.null(bar_width)) {
+    if (length(bar_width)!=1) {stop("bar_width must be a numeric of length 1 (or NULL)")}
+    if (!is.numeric(bar_width)) {stop("bar_width must be a numeric of length 1 (or NULL)")}
+    if (is.na(bar_width)) {stop("bar_width must be a numeric of length 1 (or NULL), not a missing value")}
+  }
+
   if (!is.logical(label_numbers)) {stop("label_numbers must be either TRUE or FALSE")}
   if (length(label_numbers) != 1) {stop("label_numbers must be either TRUE or FALSE")}
   if (is.na(label_numbers)) {stop("label_numbers must be either TRUE or FALSE")}
@@ -114,11 +121,22 @@ GCP_BarPlot <- function(GCPlist, name_column_groups = NULL, raw_or_LFQ_or_both =
 
     df_barplot_raw[,colnames(GCPlist$sampleINFO)[1]] <- factor(pull(df_barplot_raw, colnames(GCPlist$sampleINFO)[1]), levels = unique(pull(df_barplot_raw, colnames(GCPlist$sampleINFO)[1])))
 
-    the_barplot <- ggplot(data = df_barplot_raw, aes(x = .data[[colnames(GCPlist$sampleINFO)[1]]], y = .data[["Proteins"]], fill = .data[[name_column_groups]])) +
-      geom_col() +
-      ggtitle("Number of proteins per sample") +
-      theme_bw() +
-      theme(plot.title = element_text(hjust = 0.5))
+
+    if (is.null(bar_width)) {
+      the_barplot <- ggplot(data = df_barplot_raw, aes(x = .data[[colnames(GCPlist$sampleINFO)[1]]], y = .data[["Proteins"]], fill = .data[[name_column_groups]])) +
+        geom_col() +
+        ggtitle("Number of proteins per sample") +
+        theme_bw() +
+        theme(plot.title = element_text(hjust = 0.5))
+    } else {
+      the_barplot <- ggplot(data = df_barplot_raw, aes(x = .data[[colnames(GCPlist$sampleINFO)[1]]], y = .data[["Proteins"]], fill = .data[[name_column_groups]])) +
+        geom_col(width = bar_width) +
+        ggtitle("Number of proteins per sample") +
+        theme_bw() +
+        theme(plot.title = element_text(hjust = 0.5))
+    }
+
+
 
     if (showCV) {
       summary_for_CV_raw <- df_barplot_raw %>%
@@ -168,11 +186,20 @@ GCP_BarPlot <- function(GCPlist, name_column_groups = NULL, raw_or_LFQ_or_both =
 
     df_barplot_LFQ[,colnames(GCPlist$sampleINFO)[1]] <- factor(pull(df_barplot_LFQ, colnames(GCPlist$sampleINFO)[1]), levels = unique(pull(df_barplot_LFQ, colnames(GCPlist$sampleINFO)[1])))
 
-    the_barplot <- ggplot(data = df_barplot_LFQ, aes(x = .data[[colnames(GCPlist$sampleINFO)[1]]], y = .data[["Proteins"]], fill = .data[[name_column_groups]])) +
-      geom_col() +
-      ggtitle("Number of proteins per sample") +
-      theme_bw() +
-      theme(plot.title = element_text(hjust = 0.5))
+    if (is.null(bar_width)) {
+      the_barplot <- ggplot(data = df_barplot_LFQ, aes(x = .data[[colnames(GCPlist$sampleINFO)[1]]], y = .data[["Proteins"]], fill = .data[[name_column_groups]])) +
+        geom_col() +
+        ggtitle("Number of proteins per sample") +
+        theme_bw() +
+        theme(plot.title = element_text(hjust = 0.5))
+    } else {
+      the_barplot <- ggplot(data = df_barplot_LFQ, aes(x = .data[[colnames(GCPlist$sampleINFO)[1]]], y = .data[["Proteins"]], fill = .data[[name_column_groups]])) +
+        geom_col(width = bar_width) +
+        ggtitle("Number of proteins per sample") +
+        theme_bw() +
+        theme(plot.title = element_text(hjust = 0.5))
+    }
+
 
     if (showCV) {
       summary_for_CV_LFQ <- df_barplot_LFQ %>%
@@ -234,12 +261,21 @@ GCP_BarPlot <- function(GCPlist, name_column_groups = NULL, raw_or_LFQ_or_both =
 
     df_barplot_both[,colnames(GCPlist$sampleINFO)[1]] <- factor(pull(df_barplot_both, colnames(GCPlist$sampleINFO)[1]), levels = unique(pull(df_barplot_both, colnames(GCPlist$sampleINFO)[1])))
 
-    the_barplot <- ggplot(data = df_barplot_both, aes(x = .data[[colnames(GCPlist$sampleINFO)[1]]], y = .data[["Proteins"]], fill = .data[[name_column_groups]])) +
-      geom_col() +
-      facet_wrap(~ intensity_table) +
-      ggtitle("Number of proteins per sample") +
-      theme_bw() +
-      theme(plot.title = element_text(hjust = 0.5))
+    if (is.null(bar_width)) {
+      the_barplot <- ggplot(data = df_barplot_both, aes(x = .data[[colnames(GCPlist$sampleINFO)[1]]], y = .data[["Proteins"]], fill = .data[[name_column_groups]])) +
+        geom_col() +
+        facet_wrap(~ intensity_table) +
+        ggtitle("Number of proteins per sample") +
+        theme_bw() +
+        theme(plot.title = element_text(hjust = 0.5))
+    } else {
+      the_barplot <- ggplot(data = df_barplot_both, aes(x = .data[[colnames(GCPlist$sampleINFO)[1]]], y = .data[["Proteins"]], fill = .data[[name_column_groups]])) +
+        geom_col(width = bar_width) +
+        facet_wrap(~ intensity_table) +
+        ggtitle("Number of proteins per sample") +
+        theme_bw() +
+        theme(plot.title = element_text(hjust = 0.5))
+    }
 
     if (showCV) {
       summary_for_CV_raw <- df_barplot_raw %>%
