@@ -7,7 +7,7 @@
 ExportGCPlist(
   GCPlist,
   filename = "GCP.xlsx",
-  exportype = c("sheets", "raw", "LFQ", "proteinINFO", "sampleINFO", "all"),
+  exportype = getOption("GetCoolProteopipe.raw_or_LFQ"),
   intensity_indication = TRUE,
   protgenenames = TRUE,
   protIDclean = TRUE,
@@ -15,7 +15,7 @@ ExportGCPlist(
 )
 }
 \arguments{
-\item{GCPlist}{a list created with the ImportOutputMaxQuant function.}
+\item{GCPlist}{a list created with the ImportOutputMaxQuant function or a list of such lists. If the second is passed, the following filename argument must end with ".xlsx" as a sheet for each of those list will be created.}
 
 \item{filename}{character. The name of the file to create. It must end with ".txt", ".csv", or ".xlsx"; and the file will be accordingly created of that format.}
 
@@ -34,4 +34,28 @@ Export the file in the current working directory.
 }
 \description{
 It exports a GPClist in a single table file in the current working directory.
+}
+\examples{
+\dontrun{
+
+# Exporting a single GCPlist
+
+ExportGCPlist(GCPlist = GCPlist14,
+              filename = "example_single_export.txt")
+
+
+# Exporting a list of GCPlists
+
+list_of_GCPlists <- list(initial = GCPlist00,
+                         after_NAimputation = GCPlist10,
+                         `after scaling` = GCPlist11,
+                         `after statistics` = GCPlist14)
+
+ExportGCPlist(GCPlist = list_of_GCPlists,
+              filename = "example_list_of_lists.xslx")
+
+
+}
+
+
 }

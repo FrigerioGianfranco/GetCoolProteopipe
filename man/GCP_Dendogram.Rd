@@ -8,7 +8,8 @@ GCP_Dendogram(
   GCPlist,
   name_column_groups = NULL,
   raw_or_LFQ = getOption("GetCoolProteopipe.raw_or_LFQ"),
-  col_pal = NULL
+  col_pal = NULL,
+  rotate_names = TRUE
 )
 }
 \arguments{
@@ -19,6 +20,8 @@ GCP_Dendogram(
 \item{raw_or_LFQ}{one of the following: "raw", "LFQ". The dendogram will be performed only in the specified data.}
 
 \item{col_pal}{NULL or a character vector containing colors. If NULL, colors from the pals package will be used (see function build_long_vector_of_colors).}
+
+\item{rotate_names}{logical. If  TRUE, the names will be rotated vertically.}
 }
 \value{
 A ggplot object.

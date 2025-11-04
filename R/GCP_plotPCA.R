@@ -262,6 +262,31 @@ GCP_plotPCA <- function(GCPlist, raw_or_LFQ = getOption("GetCoolProteopipe.raw_o
     object_to_return$layers[[which(is_point)[1]]]$aes_params$size <- 4
   }
 
+  is_repel <- rep(FALSE, length(object_to_return$layers))
+  for (i in seq_along(object_to_return$layers)) {
+    is_repel[i] <- inherits(object_to_return$layers[[i]]$geom, "GeomTextRepel")
+  }
+  idx_repel <- which(is_repel)
+
+  if (length(idx_repel)>0) {
+    for (idx in idx_repel) {
+      ly <- object_to_return$layers[[idx]]
+
+      if (!is.null(ly$mapping) && "colour" %in% names(ly$mapping)) ly$mapping$colour <- NULL
+      if (!is.null(ly$mapping) && "color"  %in% names(ly$mapping)) ly$mapping$color  <- NULL
+
+      if (is.null(ly$mapping)) {ly$mapping <- ggplot2::aes()}
+      ly$mapping$colour <- I("black")
+
+      ly$aes_params$colour <- "black"
+
+      object_to_return$layers[[idx]] <- ly
+    }
+  }
+
+  object_to_return <- object_to_return +
+    theme(panel.border = element_rect(linewidth = 1.2))
+
 
   return(object_to_return)
 }

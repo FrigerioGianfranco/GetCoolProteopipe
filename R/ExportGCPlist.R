@@ -2,7 +2,7 @@
 #'
 #' It exports a GPClist in a single table file in the current working directory.
 #'
-#' @param GCPlist a list created with the ImportOutputMaxQuant function.
+#' @param GCPlist a list created with the ImportOutputMaxQuant function or a list of such lists. If the second is passed, the following filename argument must end with ".xlsx" as a sheet for each of those list will be created.
 #' @param filename character. The name of the file to create. It must end with ".txt", ".csv", or ".xlsx"; and the file will be accordingly created of that format.
 #' @param exportype exportype one of the following: "raw", "LFQ", "proteinINFO", "sampleINFO", "all", "sheets". If "raw", a table with the raw intensities will be exported; if "LFQ", a table with the LFQ intensities will be exported; if "proteinINFO", a table with all the proteinINFO; if "sampleINFO", a table with all the sampleINFO; if "all", a table with combined quant_raw, quant_LFQ, and proteinINFO will be exported; if "sheets", an Excel table with 4 sheets will be exported. Please note that "all" might be too big to be suitably exported as a '.xlsx' file: if so, export it as '.txt' or '.csv'.
 #' @param intensity_indication logical. if TRUE and if exportype is either "raw" or "LFQ" the column names of samples will start with "Intensity " for raw intensities or with "LFQ Intensity " for LFQ intensities. Please note that this will happen anyway if exportype is "all".
@@ -12,26 +12,92 @@
 #'
 #' @return Export the file in the current working directory.
 #'
+#' @examples
+#' \dontrun{
+#'
+#' # Exporting a single GCPlist
+#'
+#' ExportGCPlist(GCPlist = GCPlist14,
+#'               filename = "example_single_export.txt")
+#'
+#'
+#' # Exporting a list of GCPlists
+#'
+#' list_of_GCPlists <- list(initial = GCPlist00,
+#'                          after_NAimputation = GCPlist10,
+#'                          `after scaling` = GCPlist11,
+#'                          `after statistics` = GCPlist14)
+#'
+#' ExportGCPlist(GCPlist = list_of_GCPlists,
+#'               filename = "example_list_of_lists.xslx")
+#'
+#'
+#' }
+#'
+#'
 #' @importFrom writexl write_xlsx
 #'
 #' @export
-ExportGCPlist <- function(GCPlist, filename = "GCP.xlsx", exportype = c("sheets", "raw", "LFQ", "proteinINFO", "sampleINFO", "all"), intensity_indication = TRUE, protgenenames = TRUE, protIDclean = TRUE, specific_columns = "all_stat") {
+ExportGCPlist <- function(GCPlist, filename = "GCP.xlsx", exportype = getOption("GetCoolProteopipe.raw_or_LFQ"), intensity_indication = TRUE, protgenenames = TRUE, protIDclean = TRUE, specific_columns = "all_stat") {
 
-  checkGCPlist(GCPlist)
+  if (!is.list(GCPlist)) {stop("GCPlist must be a list")}
+  if (length(GCPlist)<1) {stop("GCPlist is empty!")}
+  if (is.data.frame(GCPlist[[1]])) {
+    checkGCPlist(GCPlist)
+
+    list_of_lists <- FALSE
+  } else {
+
+    if (!all(map_lgl(GCPlist, is.list))) {stop("GCPlist must be either a single GCPlist, or a list of such GCPlists")}
+
+    for (ii in 1:length(GCPlist)) {
+      checkGCPlist(GCPlist[[ii]])
+      if (is.null(names(GCPlist)[ii])) {
+        names(GCPlist)[ii] <- paste0("sheet", ifelse(ii<10, paste0("0", as.character(ii)), as.character(ii)))
+      } else if (is.na(names(GCPlist)[ii])) {
+        names(GCPlist)[ii] <- paste0("sheet", ifelse(ii<10, paste0("0", as.character(ii)), as.character(ii)))
+      } else if (names(GCPlist)[ii] == "") {
+        names(GCPlist)[ii] <- paste0("sheet", ifelse(ii<10, paste0("0", as.character(ii)), as.character(ii)))
+      }
+    }
+
+    list_of_lists <- TRUE
+  }
 
   if (length(filename) != 1) {stop('filename must be a character of length 1')}
   if (is.na(filename)) {stop('filename must be a character of length 1, not a missing value!')}
   if (!is.character(filename)) {stop('filename must be a character')}
   if (!(endsWith(toupper(filename), ".TXT") | endsWith(toupper(filename), ".CSV") | endsWith(toupper(filename), ".XLSX"))) {stop('filename must end with ".txt", ".csv", or ".xlsx"')}
 
-  if (!identical(toupper(exportype), c("SHEETS", "RAW", "LFQ", "PROTEININFO", "SAMPLEINFO", "ALL"))) {
-    if (length(exportype) != 1) {stop('exportype must be one of "sheets", "raw", "LFQ", "proteinINFO", "sampleINFO", "all"')}
-    if (is.na(exportype)) {stop('exportype must be one of "raw", "sheets", "raw", "LFQ", "proteinINFO", "sampleINFO", "all"')}
+  if (list_of_lists) {
+    if (!endsWith(toupper(filename), ".XLSX")) {stop('Since you have a list of lists, filename must end with ".xlsx"')}
+  }
+
+  if (!identical(toupper(exportype), c("RAW", "LFQ", "PROTEININFO", "SAMPLEINFO", "ALL", "SHEETS"))) {
+    if (length(exportype) != 1) {stop('exportype must be one of "raw", "LFQ", "proteinINFO", "sampleINFO", "all", "sheets"')}
+    if (is.na(exportype)) {stop('exportype must be one of "raw", "LFQ", "proteinINFO", "sampleINFO", "all", "sheets"')}
   }
   exportype <- toupper(exportype)
-  exportype <- match.arg(exportype, c("SHEETS", "RAW", "LFQ", "PROTEININFO", "SAMPLEINFO", "ALL"))
+  exportype <- match.arg(exportype, c("RAW", "LFQ", "PROTEININFO", "SAMPLEINFO", "ALL", "SHEETS"))
 
   if (toupper(exportype) == "SHEETS" & !endsWith(toupper(filename), ".XLSX")) {stop('If you select exportype as "sheets", the filename must end in ".xlsx"')}
+  if (list_of_lists) {
+    if (toupper(exportype) == "SHEETS") {stop('Since you have a list of lists, exportype cannot be "sheets"')}
+  }
+
+  if (toupper(exportype) == "LFQ") {
+    cat("\n -- LFQ data are being exported --\n\n")
+  } else if (toupper(exportype) == "RAW") {
+    cat("\n -- raw data are being exported --\n\n")
+  } else if (toupper(exportype) == "PROTEININFO") {
+    cat("\n -- proteinINFO are being exported --\n\n")
+  } else if (toupper(exportype) == "SAMPLEINFO") {
+    cat("\n -- sampleINFO are being exported --\n\n")
+  } else if (toupper(exportype) == "ALL") {
+    cat("\n -- all of raw data, LFQ data, and proteinINFO are being exported --\n\n")
+  } else if (toupper(exportype) == "SHEETS") {
+    cat("\n -- The tables quant_raw, quant_LFQ, proteinINFO, and sampleINFO of this list are being exported --\n\n")
+  }
 
   if (length(intensity_indication) != 1) {stop("intensity_indication must be either TRUE or FALSE")}
   if (!is.logical(intensity_indication)) {stop("intensity_indication must be either TRUE or FALSE")}
@@ -45,154 +111,171 @@ ExportGCPlist <- function(GCPlist, filename = "GCP.xlsx", exportype = c("sheets"
   if (!is.logical(protIDclean)) {stop("protIDclean must be either TRUE or FALSE")}
   if (is.na(protIDclean)) {stop("protIDclean must be either TRUE or FALSE")}
 
-  if (exportype %in% c(c("RAW", "LFQ", "PROTEININFO", "SHEETS"))) {
-    if (!is.null(specific_columns)) {
-      if (!is.character(specific_columns)) {stop("specific_columns must be a character vector")}
-      if (length(specific_columns) < 1) {
-        specific_columns <- NULL
+
+  things_to_do_to_each_GCPlist <- function(GCPlist, exportype, intensity_indication, protgenenames, protIDclean, specific_columns) {
+    if (exportype %in% c("RAW", "LFQ", "PROTEININFO", "SHEETS")) {
+      if (!is.null(specific_columns)) {
+        if (!is.character(specific_columns)) {stop("specific_columns must be a character vector")}
+        if (length(specific_columns) < 1) {
+          specific_columns <- NULL
+        } else {
+
+          specific_columns_verified <- character()
+
+          for (sc in specific_columns) {
+            if (is.na(sc)) {
+              stop("specific_columns must not contain NA")
+            } else if (tolower(sc) == "all_stat") {
+              specific_columns_verified <- c(specific_columns_verified,
+                                             colnames(GCPlist$proteinINFO)[which(grepl("^shap_test_", colnames(GCPlist$proteinINFO)) |
+                                                                                   grepl("^PC", colnames(GCPlist$proteinINFO)) |
+                                                                                   grepl("^ttest_", colnames(GCPlist$proteinINFO)) |
+                                                                                   colnames(GCPlist$proteinINFO)=="FC" | colnames(GCPlist$proteinINFO)=="logFC" | colnames(GCPlist$proteinINFO)=="FCcomparison" |
+                                                                                   endsWith(colnames(GCPlist$proteinINFO), "_FC") | endsWith(colnames(GCPlist$proteinINFO), "_logFC") |
+                                                                                   grepl("^ANOVA_", colnames(GCPlist$proteinINFO)))])
+            } else if (tolower(sc) == "shap_test") {
+              specific_columns_verified <- c(specific_columns_verified,
+                                             colnames(GCPlist$proteinINFO)[which(grepl("^shap_test_", colnames(GCPlist$proteinINFO)))])
+            } else if (tolower(sc) == "pc") {
+              specific_columns_verified <- c(specific_columns_verified,
+                                             colnames(GCPlist$proteinINFO)[which(grepl("^PC", colnames(GCPlist$proteinINFO)))])
+            } else if (tolower(sc) == "ttest") {
+              specific_columns_verified <- c(specific_columns_verified,
+                                             colnames(GCPlist$proteinINFO)[which(grepl("^ttest_", colnames(GCPlist$proteinINFO)))])
+            } else if (tolower(sc) == "fc") {
+              specific_columns_verified <- c(specific_columns_verified,
+                                             colnames(GCPlist$proteinINFO)[which(colnames(GCPlist$proteinINFO)=="FC" | colnames(GCPlist$proteinINFO)=="logFC" | colnames(GCPlist$proteinINFO)=="FCcomparison" |
+                                                                                   endsWith(colnames(GCPlist$proteinINFO), "_FC") | endsWith(colnames(GCPlist$proteinINFO), "_logFC"))])
+            } else if (tolower(sc) == "anova") {
+              specific_columns_verified <- c(specific_columns_verified,
+                                             colnames(GCPlist$proteinINFO)[which(grepl("^ANOVA_", colnames(GCPlist$proteinINFO)))])
+            } else if (!sc %in% colnames(GCPlist$proteinINFO)) {
+              stop(paste0('the specific_column "', sc, '" does not exist among the columns of proteinINFO'))
+            } else {
+              specific_columns_verified <- c(specific_columns_verified, sc)
+            }
+          }
+
+          specific_columns_verified <- unique(specific_columns_verified)
+        }
+      }
+    }
+
+
+    if (((toupper(exportype) == "RAW" | toupper(exportype) == "LFQ") & intensity_indication) | toupper(exportype) == "ALL"| toupper(exportype) == "SHEETS") {
+      colnames(GCPlist$quant_raw)[-which(colnames(GCPlist$quant_raw) == "protid")] <- paste0("Intensity ", colnames(GCPlist$quant_raw)[-which(colnames(GCPlist$quant_raw) == "protid")])
+      colnames(GCPlist$quant_LFQ)[-which(colnames(GCPlist$quant_LFQ) == "protid")] <- paste0("LFQ Intensity ", colnames(GCPlist$quant_LFQ)[-which(colnames(GCPlist$quant_LFQ) == "protid")])
+    }
+
+
+    if (toupper(exportype) == "SAMPLEINFO") {
+      table_to_export <- GCPlist$sampleINFO
+
+    } else if (toupper(exportype) == "ALL") {
+
+      table_to_export_1 <- left_join(x = GCPlist$proteinINFO, y = GCPlist$quant_raw, by = "protid", suffix = c("_INFO", "_raw"))
+      table_to_export <- left_join(x = table_to_export_1, y = GCPlist$quant_LFQ, by = "protid", suffix = c("_INFO", "_LFQ"))
+
+
+    } else {
+
+      if (protgenenames == FALSE & is.null(specific_columns) & toupper(exportype) == "RAW") {
+        table_to_export <- GCPlist$quant_raw
+      } else if (protgenenames == FALSE & is.null(specific_columns) & toupper(exportype) == "LFQ") {
+        table_to_export <- GCPlist$quant_LFQ
+      } else if (protgenenames == FALSE & is.null(specific_columns) & toupper(exportype) == "PROTEININFO") {
+        table_to_export <- GCPlist$proteinINFO
       } else {
 
-        specific_columns_verified <- character()
+        colproteinINFO_to_export <- c("protid")
 
-        for (sc in specific_columns) {
-          if (is.na(sc)) {
-            stop("specific_columns must not contain NA")
-          } else if (tolower(sc) == "all_stat") {
-            specific_columns_verified <- c(specific_columns_verified,
-                                           colnames(GCPlist$proteinINFO)[which(grepl("^shap_test_", colnames(GCPlist$proteinINFO)) |
-                                                                                 grepl("^PC", colnames(GCPlist$proteinINFO)) |
-                                                                                 grepl("^ttest_", colnames(GCPlist$proteinINFO)) |
-                                                                                 colnames(GCPlist$proteinINFO)=="FC" | colnames(GCPlist$proteinINFO)=="logFC" | colnames(GCPlist$proteinINFO)=="FCcomparison" |
-                                                                                 endsWith(colnames(GCPlist$proteinINFO), "_FC") | endsWith(colnames(GCPlist$proteinINFO), "_logFC") |
-                                                                                 grepl("^ANOVA_", colnames(GCPlist$proteinINFO)))])
-          } else if (tolower(sc) == "shap_test") {
-            specific_columns_verified <- c(specific_columns_verified,
-                                           colnames(GCPlist$proteinINFO)[which(grepl("^shap_test_", colnames(GCPlist$proteinINFO)))])
-          } else if (tolower(sc) == "pc") {
-            specific_columns_verified <- c(specific_columns_verified,
-                                           colnames(GCPlist$proteinINFO)[which(grepl("^PC", colnames(GCPlist$proteinINFO)))])
-          } else if (tolower(sc) == "ttest") {
-            specific_columns_verified <- c(specific_columns_verified,
-                                           colnames(GCPlist$proteinINFO)[which(grepl("^ttest_", colnames(GCPlist$proteinINFO)))])
-          } else if (tolower(sc) == "fc") {
-            specific_columns_verified <- c(specific_columns_verified,
-                                           colnames(GCPlist$proteinINFO)[which(colnames(GCPlist$proteinINFO)=="FC" | colnames(GCPlist$proteinINFO)=="logFC" | colnames(GCPlist$proteinINFO)=="FCcomparison" |
-                                                                                 endsWith(colnames(GCPlist$proteinINFO), "_FC") | endsWith(colnames(GCPlist$proteinINFO), "_logFC"))])
-          } else if (tolower(sc) == "anova") {
-            specific_columns_verified <- c(specific_columns_verified,
-                                           colnames(GCPlist$proteinINFO)[which(grepl("^ANOVA_", colnames(GCPlist$proteinINFO)))])
-          } else if (!sc %in% colnames(GCPlist$proteinINFO)) {
-            stop(paste0('the specific_column "', sc, '" does not exist among the columns of proteinINFO'))
+        if (protgenenames) {
+
+          if (protIDclean) {
+            if (length(which(colnames(GCPlist[["proteinINFO"]]) == "Accession")) != 1) {stop("The proteinINFO dataframe of the GCPlist must have exactly one 'Accession' column")}
+            if (length(which(colnames(GCPlist[["proteinINFO"]]) == "Protein names")) != 1) {stop("The proteinINFO dataframe of the GCPlist must have exactly one 'Protein names' column")}
+            if (length(which(colnames(GCPlist[["proteinINFO"]]) == "Gene names")) != 1) {stop("The proteinINFO dataframe of the GCPlist must have exactly one 'Gene names' column")}
+
+            colproteinINFO_to_export <- c(colproteinINFO_to_export, "Accession", "Protein names", "Gene names")
           } else {
-            specific_columns_verified <- c(specific_columns_verified, sc)
+            if (length(which(colnames(GCPlist[["proteinINFO"]]) == "Protein IDs")) != 1) {stop("The proteinINFO dataframe of the GCPlist must have exactly one 'Protein IDs' column")}
+            if (length(which(colnames(GCPlist[["proteinINFO"]]) == "Protein names")) != 1) {stop("The proteinINFO dataframe of the GCPlist must have exactly one 'Protein names' column")}
+            if (length(which(colnames(GCPlist[["proteinINFO"]]) == "Gene names")) != 1) {stop("The proteinINFO dataframe of the GCPlist must have exactly one 'Gene names' column")}
+
+            colproteinINFO_to_export <- c(colproteinINFO_to_export, "Protein IDs", "Protein names", "Gene names")
           }
         }
 
-        specific_columns_verified <- unique(specific_columns_verified)
+
+        if (!is.null(specific_columns)) {
+          colproteinINFO_to_export <- c(colproteinINFO_to_export, specific_columns_verified)
+        }
+
+        colproteinINFO_to_export <- unique(colproteinINFO_to_export)
+
+
+        if (toupper(exportype) == "RAW") {
+
+          proteinINFO_fil <- GCPlist$proteinINFO[which(GCPlist$proteinINFO$protid%in%GCPlist$quant_raw$protid),]
+
+          table_to_export <- left_join(x = select(proteinINFO_fil, all_of(colproteinINFO_to_export)), y = GCPlist$quant_raw, by = "protid", suffix = c("_INFO", "_raw"))
+
+          if (!is.null(specific_columns)) {
+            table_to_export <- relocate(table_to_export, all_of(specific_columns_verified), .after = last_col())
+          }
+
+        } else if (toupper(exportype) == "LFQ") {
+
+          proteinINFO_fil <- GCPlist$proteinINFO[which(GCPlist$proteinINFO$protid%in%GCPlist$quant_LFQ$protid),]
+
+          table_to_export <- left_join(x = select(proteinINFO_fil, all_of(colproteinINFO_to_export)), y = GCPlist$quant_LFQ, by = "protid", suffix = c("_INFO", "_LFQ"))
+
+          if (!is.null(specific_columns)) {
+            table_to_export <- relocate(table_to_export, all_of(specific_columns_verified), .after = last_col())
+          }
+
+        } else if (toupper(exportype) == "PROTEININFO") {
+
+          table_to_export <- select(GCPlist$proteinINFO, all_of(colproteinINFO_to_export))
+
+        }
       }
     }
-  }
 
-
-  if (((toupper(exportype) == "RAW" | toupper(exportype) == "LFQ") & intensity_indication) | toupper(exportype) == "ALL"| toupper(exportype) == "SHEETS") {
-    colnames(GCPlist$quant_raw)[-which(colnames(GCPlist$quant_raw) == "protid")] <- paste0("Intensity ", colnames(GCPlist$quant_raw)[-which(colnames(GCPlist$quant_raw) == "protid")])
-    colnames(GCPlist$quant_LFQ)[-which(colnames(GCPlist$quant_LFQ) == "protid")] <- paste0("LFQ Intensity ", colnames(GCPlist$quant_LFQ)[-which(colnames(GCPlist$quant_LFQ) == "protid")])
-  }
-
-
-  if (toupper(exportype) == "SAMPLEINFO") {
-    table_to_export <- GCPlist$sampleINFO
-
-  } else if (toupper(exportype) == "ALL") {
-
-    table_to_export_1 <- left_join(x = GCPlist$proteinINFO, y = GCPlist$quant_raw, by = "protid", suffix = c("_INFO", "_raw"))
-    table_to_export <- left_join(x = table_to_export_1, y = GCPlist$quant_LFQ, by = "protid", suffix = c("_INFO", "_LFQ"))
-
-
-  } else {
-
-    if (protgenenames == FALSE & is.null(specific_columns) & toupper(exportype) == "RAW") {
-      table_to_export <- GCPlist$quant_raw
-    } else if (protgenenames == FALSE & is.null(specific_columns) & toupper(exportype) == "LFQ") {
-      table_to_export <- GCPlist$quant_LFQ
-    } else if (protgenenames == FALSE & is.null(specific_columns) & toupper(exportype) == "PROTEININFO") {
-      table_to_export <- GCPlist$proteinINFO
+    if (toupper(exportype) != "SHEETS") {
+      return(table_to_export)
     } else {
+      GCPout <- GCPlist
 
-      colproteinINFO_to_export <- c("protid")
+      GCPout$proteinINFO <- select(GCPout$proteinINFO, all_of(colproteinINFO_to_export))
 
-      if (protgenenames) {
-
-        if (protIDclean) {
-          if (length(which(colnames(GCPlist[["proteinINFO"]]) == "Accession")) != 1) {stop("The proteinINFO dataframe of the GCPlist must have exactly one 'Accession' column")}
-          if (length(which(colnames(GCPlist[["proteinINFO"]]) == "Protein names")) != 1) {stop("The proteinINFO dataframe of the GCPlist must have exactly one 'Protein names' column")}
-          if (length(which(colnames(GCPlist[["proteinINFO"]]) == "Gene names")) != 1) {stop("The proteinINFO dataframe of the GCPlist must have exactly one 'Gene names' column")}
-
-          colproteinINFO_to_export <- c(colproteinINFO_to_export, "Accession", "Protein names", "Gene names")
-        } else {
-          if (length(which(colnames(GCPlist[["proteinINFO"]]) == "Protein IDs")) != 1) {stop("The proteinINFO dataframe of the GCPlist must have exactly one 'Protein IDs' column")}
-          if (length(which(colnames(GCPlist[["proteinINFO"]]) == "Protein names")) != 1) {stop("The proteinINFO dataframe of the GCPlist must have exactly one 'Protein names' column")}
-          if (length(which(colnames(GCPlist[["proteinINFO"]]) == "Gene names")) != 1) {stop("The proteinINFO dataframe of the GCPlist must have exactly one 'Gene names' column")}
-
-          colproteinINFO_to_export <- c(colproteinINFO_to_export, "Protein IDs", "Protein names", "Gene names")
-        }
-      }
-
-
-      if (!is.null(specific_columns)) {
-        colproteinINFO_to_export <- c(colproteinINFO_to_export, specific_columns_verified)
-      }
-
-      colproteinINFO_to_export <- unique(colproteinINFO_to_export)
-
-
-      if (toupper(exportype) == "RAW") {
-
-        proteinINFO_fil <- GCPlist$proteinINFO[which(GCPlist$proteinINFO$protid%in%GCPlist$quant_raw$protid),]
-
-        table_to_export <- left_join(x = select(proteinINFO_fil, all_of(colproteinINFO_to_export)), y = GCPlist$quant_raw, by = "protid", suffix = c("_INFO", "_raw"))
-
-        if (!is.null(specific_columns)) {
-          table_to_export <- relocate(table_to_export, all_of(specific_columns_verified), .after = last_col())
-        }
-
-      } else if (toupper(exportype) == "LFQ") {
-
-        proteinINFO_fil <- GCPlist$proteinINFO[which(GCPlist$proteinINFO$protid%in%GCPlist$quant_LFQ$protid),]
-
-        table_to_export <- left_join(x = select(proteinINFO_fil, all_of(colproteinINFO_to_export)), y = GCPlist$quant_LFQ, by = "protid", suffix = c("_INFO", "_LFQ"))
-
-        if (!is.null(specific_columns)) {
-          table_to_export <- relocate(table_to_export, all_of(specific_columns_verified), .after = last_col())
-        }
-
-      } else if (toupper(exportype) == "PROTEININFO") {
-
-        table_to_export <- select(GCPlist$proteinINFO, all_of(colproteinINFO_to_export))
-
-      }
+      return(GCPout)
     }
   }
 
 
+  if (!list_of_lists) {
 
-  if (toupper(exportype) != "SHEETS") {
-
-    if (endsWith(toupper(filename), ".TXT")) {
-      write_tsv(table_to_export, filename)
-    } else if (endsWith(toupper(filename), ".CSV")) {
-      write_csv(table_to_export, filename)
-    } else if (endsWith(toupper(filename), ".XLSX")) {
-      write_xlsx(table_to_export, filename)
-    }
+    what_to_export <- things_to_do_to_each_GCPlist(GCPlist = GCPlist, exportype = exportype, intensity_indication = intensity_indication, protgenenames = protgenenames, protIDclean = protIDclean, specific_columns = specific_columns)
 
   } else {
 
-    GCPout <- GCPlist
+    what_to_export <- vector(mode = "list", length = length(GCPlist))
+    names(what_to_export) <- names(GCPlist)
 
-    GCPout$proteinINFO <- select(GCPout$proteinINFO, all_of(colproteinINFO_to_export))
+    for (ll in 1:length(GCPlist)) {
+      what_to_export[[ll]] <- things_to_do_to_each_GCPlist(GCPlist = GCPlist[[ll]], exportype = exportype, intensity_indication = intensity_indication, protgenenames = protgenenames, protIDclean = protIDclean, specific_columns = specific_columns)
+    }
 
-    write_xlsx(GCPout, filename)
+  }
 
+
+
+  if (endsWith(toupper(filename), ".TXT")) {
+    write_tsv(what_to_export, filename)
+  } else if (endsWith(toupper(filename), ".CSV")) {
+    write_csv(what_to_export, filename)
+  } else if (endsWith(toupper(filename), ".XLSX")) {
+    write_xlsx(what_to_export, filename)
   }
 }

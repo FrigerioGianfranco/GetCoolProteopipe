@@ -6,13 +6,14 @@
 #' @param name_column_groups NULL or character of length 1. The name of the column of the sampleINFO table containing the sample groups.
 #' @param raw_or_LFQ one of the following: "raw", "LFQ". The dendogram will be performed only in the specified data.
 #' @param col_pal NULL or a character vector containing colors. If NULL, colors from the pals package will be used (see function build_long_vector_of_colors).
+#' @param rotate_names logical. If  TRUE, the names will be rotated vertically.
 #'
 #' @return A ggplot object.
 #'
 #' @import ggdendro
 #'
 #' @export
-GCP_Dendogram <- function(GCPlist, name_column_groups = NULL, raw_or_LFQ = getOption("GetCoolProteopipe.raw_or_LFQ"), col_pal = NULL) {
+GCP_Dendogram <- function(GCPlist, name_column_groups = NULL, raw_or_LFQ = getOption("GetCoolProteopipe.raw_or_LFQ"), col_pal = NULL, rotate_names = TRUE) {
 
   checkGCPlist(GCPlist)
 
@@ -52,7 +53,11 @@ GCP_Dendogram <- function(GCPlist, name_column_groups = NULL, raw_or_LFQ = getOp
     if (any(is.na(col_pal))) stop("col_pal must not contain NAs")
 
   } else {
-    col_pal <- build_long_vector_of_colors()
+    if (name_column_groups == "allwiththis") {
+      col_pal <- "black"
+    } else {
+      col_pal <- build_long_vector_of_colors()
+    }
   }
 
   if (length(col_pal)<length(levels(pull(GCPlist$sampleINFO, name_column_groups)))) {
@@ -80,6 +85,11 @@ GCP_Dendogram <- function(GCPlist, name_column_groups = NULL, raw_or_LFQ = getOp
   }
 
 
+  if (length(rotate_names)!=1) {stop("rotate_names must be exclusively TRUE or FALSE")}
+  if (!is.logical(rotate_names)) {stop("rotate_names must be exclusively TRUE or FALSE")}
+  if (is.na(rotate_names)) {stop("rotate_names must be exclusively TRUE or FALSE")}
+
+
   if (raw_or_LFQ == "raw") {
     df_intensities <- GetFeatistics::transpose_feat_table(GCPlist$quant_raw, name_first_column = colnames(GCPlist$sampleINFO)[1])
   } else if (raw_or_LFQ == "lfq") {
@@ -104,16 +114,34 @@ GCP_Dendogram <- function(GCPlist, name_column_groups = NULL, raw_or_LFQ = getOp
   }
 
 
-
   the_plot <- ggplot(segment(the_dendro_data)) +
     geom_segment(aes(x = x, y = y, xend = xend, yend = yend)) +
-    coord_flip() +
-    scale_y_reverse(expand = c(0.2, 0)) +
-    geom_text(data = the_dendro_data$labels,
-              aes(x = x, y = y, label = label, color = !!sym(name_column_groups)),
-              hjust = -0.5, vjust = 0.5) +
-    scale_color_manual(values = named_colors_bygroup) +
     theme_dendro()
+
+
+  if (rotate_names) {
+    the_plot <- the_plot +
+      geom_text(data = the_dendro_data$labels,
+                aes(x = x, y = y, label = label, color = !!sym(name_column_groups)),
+                hjust = 0, vjust = 0, angle = 270, show.legend = FALSE) +
+      scale_color_manual(values = named_colors_bygroup) +
+      scale_y_continuous(expand = expansion(mult = c(0.014*max(nchar(the_dendro_data$labels$label)), 0)))
+
+  } else {
+    the_plot <- the_plot +
+      geom_text(data = the_dendro_data$labels,
+                aes(x = x, y = y, label = label, colour = !!sym(name_column_groups)),
+                hjust = 0.5, vjust = 1, angle = 0, show.legend = FALSE) +
+      scale_color_manual(values = named_colors_bygroup)
+  }
+
+
+  if (name_column_groups != "allwiththis") {
+
+    the_plot <- the_plot +
+      geom_point(data = the_dendro_data$labels, aes(x = x, y = y, color = !!sym(name_column_groups)), alpha = 0, show.legend = TRUE) +
+      guides(colour = guide_legend(override.aes = list(alpha = 1, size = 3)))
+  }
 
 
   return(the_plot)

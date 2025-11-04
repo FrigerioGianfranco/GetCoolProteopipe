@@ -14,7 +14,9 @@
   invisible()
 
   library(tidyverse)
-  library(GetFeatistics)
+  suppressPackageStartupMessages(
+    library(GetFeatistics, quietly = TRUE, warn.conflicts = FALSE)
+  )
 }
 
 
