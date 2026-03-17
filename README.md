@@ -54,7 +54,7 @@ If you use the package, please cite it as follows:
 
 The idea that led to this work came from Clarissa Braccia's mind. She conceived the proteomics workflow and wrote initial R scripts; tested the functions and suggested many improvements to them, revised all the documentations and contributed to some examples, and supervised the whole work.
 
-The cheminformatics skills that allowed this package to exist belong to Gianfranco Frigerio. He wrote all the codes of all the functions, as well as the documentation and examples; implemented his ideas on the development of the algorithms and the building of the R-objects, and he is committed to maintain this package.
+The cheminformatics skills that allowed this package to exist belong to Gianfranco Frigerio. He wrote all the codes of all the functions, as well as the vignettes, documentation, and examples; implemented his ideas on the development of the algorithms and the building of the R-objects, and he is committed to maintain this package.
 
 A fundamental contribution was made by Chiara Ansermino, who gave her inputs and ideas for the development of functions, contributed to their testing, and designed the logo of the package.
 
