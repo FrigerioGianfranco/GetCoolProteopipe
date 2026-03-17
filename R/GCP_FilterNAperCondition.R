@@ -1,6 +1,6 @@
 #' Filter proteins based on missing values per condition
 #'
-#' In the quant_raw and the quantLFQ data intensity, it keeps only proteins that are not missing values for a defined ratio in at least one of the specified conditions (sample groups).
+#' In the intensities table, it keeps only proteins that are not missing values for a defined ratio in at least one of the specified sample groups.
 #'
 #' @param GCPlist a list created with the ImportOutputMaxQuant function.
 #' @param ratio numeric, between 0 an 1 (included). Ratio of non-missing values, per sample group, wanted to pass this filtration step (the higher this ratio, the less proteins will be kept).
@@ -8,8 +8,19 @@
 #'
 #' @return a GCPlist list with filtered tables.
 #'
+#'
+#' @examples
+#' \dontrun{
+#'
+#' GCPlist07 <- GCP_FilterNAperCondition(GCPlist = GCPlist06,
+#'                                       ratio = 0.5)
+#'
+#' }
+#'
+#'
+#'
 #' @export
-GCP_FilterNAperCondition <- function(GCPlist, ratio = 0.5, name_column_groups = NULL) {
+GCP_FilterNAperCondition <- function(GCPlist, ratio = 0.5, name_column_groups = getOption("GetCoolProteopipe.name_column_groups")) {
 
   checkGCPlist(GCPlist)
 
@@ -22,14 +33,14 @@ GCP_FilterNAperCondition <- function(GCPlist, ratio = 0.5, name_column_groups = 
     if (length(name_column_groups)!=1) {stop("name_column_groups must be NULL or a character of length 1")}
     if (!is.character(name_column_groups)) {stop("name_column_groups must be NULL or a character of length 1")}
     if (is.na(name_column_groups)) {stop("name_column_groups must be NULL or a character of length 1, not a NA")}
+    cat(paste0("\n -- The name_column_groups considered is '", name_column_groups, "' --\n\n"))
     if (length(which(colnames(GCPlist$sampleINFO) == name_column_groups)) != 1) {stop("The name passed in name_column_groups must be a name of a column of the sampleINFO dataframe")}
     if (any(pull(GCPlist$sampleINFO, name_column_groups)%in%c("prot", "so_to_keep"))) {stop("Please, don't call any group 'prot' or 'so_to_keep'")}
     if (name_column_groups == "allwiththis") {stop("Please, just don't pass 'allwiththis' to name_column_groups, thanks!")}
   }
 
-
-
   if (is.null(name_column_groups)) {
+    cat("\n -- The name_column_groups considered is NULL --\n\n")
 
     if ("allwiththis" %in% colnames(GCPlist$sampleINFO)) {stop("Please, don't call a column of the sampleINFO data frame 'allwiththis' as I need to create one with this name now")}
 
@@ -41,86 +52,49 @@ GCP_FilterNAperCondition <- function(GCPlist, ratio = 0.5, name_column_groups = 
     name_column_groups <- "allwiththis"
   }
 
-
-  table_info_to_keep_raw <- tibble(prot = pull(GCPlist$quant_raw, "protid"))
-  table_info_to_keep_raw[,unique(as.character(pull(GCPlist$sampleINFO, name_column_groups)))] <- NA
-  table_info_to_keep_raw[,"so_to_keep"] <- NA
-
-  table_info_to_keep_LFQ <- tibble(prot = pull(GCPlist$quant_LFQ, "protid"))
-  table_info_to_keep_LFQ[,unique(as.character(pull(GCPlist$sampleINFO, name_column_groups)))] <- NA
-  table_info_to_keep_LFQ[,"so_to_keep"] <- NA
+  table_info_to_keep <- tibble(prot = pull(GCPlist$intensities, "protid"))
+  table_info_to_keep[,unique(as.character(pull(GCPlist$sampleINFO, name_column_groups)))] <- NA
+  table_info_to_keep[,"so_to_keep"] <- NA
 
   for (g in unique(as.character(pull(GCPlist$sampleINFO, name_column_groups)))) {
 
     name_samples <- pull(GCPlist$sampleINFO, 1)[which(pull(GCPlist$sampleINFO, name_column_groups) == g)]
 
-    for (ir in 1:length(pull(GCPlist$quant_raw, 1))) {
+    for (ir in 1:length(pull(GCPlist$intensities, 1))) {
 
-      this_vector_raw <- as.vector(GCPlist$quant_raw[ir, name_samples], mode = "numeric")
+      this_vector <- as.vector(GCPlist$intensities[ir, name_samples], mode = "numeric")
 
-      if (length(which(!is.na(this_vector_raw)))/length(this_vector_raw) >= ratio) {
-        table_info_to_keep_raw[ir,g] <- TRUE
+      if (length(which(!is.na(this_vector)))/length(this_vector) >= ratio) {
+        table_info_to_keep[ir,g] <- TRUE
       } else {
-        table_info_to_keep_raw[ir,g] <- FALSE
+        table_info_to_keep[ir,g] <- FALSE
       }
 
       if (g == unique(as.character(pull(GCPlist$sampleINFO, name_column_groups)))[length(unique(as.character(pull(GCPlist$sampleINFO, name_column_groups))))]) {
-        table_info_to_keep_raw[ir, "so_to_keep"] <- any(as.vector(table_info_to_keep_raw[ir, colnames(table_info_to_keep_raw)[which(!colnames(table_info_to_keep_raw)%in%c("prot", "so_to_keep"))]], mode = "logical"))
+        table_info_to_keep[ir, "so_to_keep"] <- any(as.vector(table_info_to_keep[ir, colnames(table_info_to_keep)[which(!colnames(table_info_to_keep)%in%c("prot", "so_to_keep"))]], mode = "logical"))
       }
-
-    }
-
-    for (il in 1:length(pull(GCPlist$quant_LFQ, 1))) {
-
-      this_vector_LFQ <- as.vector(GCPlist$quant_LFQ[il, name_samples], mode = "numeric")
-
-      if (length(which(!is.na(this_vector_LFQ)))/length(this_vector_LFQ) >= ratio) {
-        table_info_to_keep_LFQ[il,g] <- TRUE
-      } else {
-        table_info_to_keep_LFQ[il,g] <- FALSE
-      }
-
-      if (g == unique(as.character(pull(GCPlist$sampleINFO, name_column_groups)))[length(unique(as.character(pull(GCPlist$sampleINFO, name_column_groups))))]) {
-        table_info_to_keep_LFQ[il, "so_to_keep"] <- any(as.vector(table_info_to_keep_LFQ[il, colnames(table_info_to_keep_LFQ)[which(!colnames(table_info_to_keep_LFQ)%in%c("prot", "so_to_keep"))]], mode = "logical"))
-      }
-
     }
   }
 
 
   GCPoutput <- GCPlist
 
-  GCPoutput$quant_raw <- GCPoutput$quant_raw[which(pull(table_info_to_keep_raw, "so_to_keep")),]
-  GCPoutput$quant_LFQ <- GCPoutput$quant_LFQ[which(pull(table_info_to_keep_LFQ, "so_to_keep")),]
+  GCPoutput$intensities <- GCPoutput$intensities[which(pull(table_info_to_keep, "so_to_keep")),]
 
   cat("\n")
   cat("_____________________\n")
-  cat("For the quant_raw table:")
+  cat("For the intensities table:")
 
   if (name_column_groups != "allwiththis") {
-    for (gr in colnames(table_info_to_keep_raw)[which(!colnames(table_info_to_keep_raw) %in% c("prot", "so_to_keep"))]) {
+    for (gr in colnames(table_info_to_keep)[which(!colnames(table_info_to_keep) %in% c("prot", "so_to_keep"))]) {
       cat("\n")
-      cat(paste0("- ", length(which(pull(table_info_to_keep_raw, gr))), " out of ", length(pull(table_info_to_keep_raw)), " where suitable for ", gr, "."))
+      cat(paste0("- ", length(which(pull(table_info_to_keep, gr))), " out of ", length(pull(table_info_to_keep)), " where suitable for ", gr, "."))
     }
   }
   cat("\n")
-  cat(paste0("--> Overall, ", length(which(pull(table_info_to_keep_raw, "so_to_keep"))), " out of ", length(pull(table_info_to_keep_raw, "so_to_keep")), " have been kept in the quant_raw table."))
+  cat(paste0("--> Overall, ", length(which(pull(table_info_to_keep, "so_to_keep"))), " out of ", length(pull(table_info_to_keep, "so_to_keep")), " have been kept in the intensities table."))
   cat("\n")
   cat("___________________\n")
-  cat("\n")
-  cat("For the quant_LFQ table:")
-  if (name_column_groups != "allwiththis") {
-    for (gl in colnames(table_info_to_keep_LFQ)[which(!colnames(table_info_to_keep_LFQ) %in% c("prot", "so_to_keep"))]) {
-      cat("\n")
-      cat(paste0("- ", length(which(pull(table_info_to_keep_LFQ, gl))), " out of ", length(pull(table_info_to_keep_LFQ)), " where suitable for ", gl, "."))
-    }
-  }
-  cat("\n")
-  cat(paste0("--> Overall, ", length(which(pull(table_info_to_keep_LFQ, "so_to_keep"))), " out of ", length(pull(table_info_to_keep_LFQ, "so_to_keep")), " have been kept in the quant_LFQ table."))
-  cat("\n")
-  cat("_____________________\n")
-
 
   return(GCPoutput)
-
 }

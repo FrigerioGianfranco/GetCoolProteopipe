@@ -3,7 +3,6 @@
 #' It performs a Fold Change analyses on the proteins intensities. Please, be aware that the Fold Change analysis should be performed only on positive data! Indeed, all protein intensities should be positive, or unreliable results will be generated!
 #'
 #' @param GCPlist a list created with the ImportOutputMaxQuant function. IMPORTANT: All protein intensities should be positive, or unreliable results will be generated!
-#' @param raw_or_LFQ one of the following: "raw", "LFQ". The Fold Change analysis will be performed only in the specified data intensities.
 #' @param name_column_groups character of length 1. The name of the column of the sampleINFO table containing the sample groups. Since this is a Fold Change analysis, there must be exactly two groups.
 #' @param control_group NULL or a character of length 1. The name of the group to be considered as control group, which will be considered as denominator in the ratio of the Fold Change analysis. If NULL, the first level of the factor will be considered as the control group.
 #' @param paired logical. If FALSE it performs FC on mean of the two groups. If TRUE it performs FC for each pair and then compute the mean.
@@ -12,28 +11,30 @@
 #'
 #' @return The GCPlist with the results of the Fold Change analysis added to the proteinINFO data frame.
 #'
+#'
+#'
+#' @examples
+#' \dontrun{
+#'
+#' GCPlist14 <- GCP_FoldChange(GCPlist = GCPlist13,
+#'                             paired = TRUE,
+#'                             are_log_transf = TRUE,
+#'                             log_base = 2)
+#'
+#' }
+#'
+#'
+#'
 #' @export
-GCP_FoldChange <- function(GCPlist, raw_or_LFQ = getOption("GetCoolProteopipe.raw_or_LFQ"), name_column_groups, control_group = NULL,
+GCP_FoldChange <- function(GCPlist, name_column_groups = getOption("GetCoolProteopipe.name_column_groups"), control_group = NULL,
                            paired = FALSE, are_log_transf = TRUE, log_base = exp(1)) {
 
   checkGCPlist(GCPlist)
 
-  if (!identical(tolower(raw_or_LFQ), c("lfq", "raw"))) {
-    if (length(raw_or_LFQ) != 1) {stop('raw_or_LFQ must be one of "raw", "LFQ"')}
-    if (is.na(raw_or_LFQ)) {stop('raw_or_LFQ must be one of "raw", "LFQ"')}
-  }
-  raw_or_LFQ <- tolower(raw_or_LFQ)
-  raw_or_LFQ <- match.arg(raw_or_LFQ, c("lfq", "raw"))
-
-  if (raw_or_LFQ == "lfq") {
-    cat("\n -- LFQ data are used --\n\n")
-  } else if (raw_or_LFQ == "raw") {
-    cat("\n -- raw data are used --\n\n")
-  }
-
   if (length(name_column_groups)!=1) {stop("name_column_groups must be a character of length 1")}
   if (!is.character(name_column_groups)) {stop("name_column_groups must be a character of length 1")}
   if (is.na(name_column_groups)) {stop("name_column_groups must be a character of length 1, not a NA")}
+  cat(paste0("\n -- The name_column_groups considered is '", name_column_groups, "' --\n\n"))
   if (length(which(colnames(GCPlist$sampleINFO) == name_column_groups)) != 1) {stop("The name passed in name_column_groups must be a name of a column of the sampleINFO dataframe")}
   if (name_column_groups == "allwiththis") {stop("Please, just don't pass 'allwiththis' to name_column_groups, thanks!")}
   if (name_column_groups == "thesearethesamplenamesused") {stop("Please, just don't pass 'thesearethesamplenamesused' to name_column_groups, thanks!")}
@@ -78,13 +79,9 @@ GCP_FoldChange <- function(GCPlist, raw_or_LFQ = getOption("GetCoolProteopipe.ra
   if (!is.numeric(log_base)) {stop("log_base must be a number")}
 
 
-  if (raw_or_LFQ == "raw") {
-    df_intensities <- GetFeatistics::transpose_feat_table(GCPlist$quant_raw, name_first_column = "thesearethesamplenamesused")
-  } else if (raw_or_LFQ == "lfq") {
-    df_intensities <- GetFeatistics::transpose_feat_table(GCPlist$quant_LFQ, name_first_column = "thesearethesamplenamesused")
-  } else {
-    stop('raw_or_LFQ must be one of "raw", "LFQ"')
-  }
+
+  df_intensities <- GetFeatistics::transpose_feat_table(GCPlist$intensities, name_first_column = "thesearethesamplenamesused")
+
 
   if (any(map_lgl(df_intensities, ~ any(is.na(.))))) {stop("there are some missing values in the data")}
 

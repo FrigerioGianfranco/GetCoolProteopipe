@@ -5,38 +5,51 @@
 #' @param MaxQuant_table_name a character vector of length 1 with the name of the MaxQuant table file in the current working directory, which must be in the .txt format.
 #' @param samples_info NULL or NA or a character vector of length 1 with the name of the table in the current working directory, containing information for each sample. The table must be in txt, csv, or xslsx format. In particular, the first column of the table must contain the names of the samples exactly as they are in the MaxQuant table.
 #' @param fasta_database NULL or NA or either "human" or "mouse", or a name of a table in the current working directory (in .txt or .csv format). You can specify the fasta database to use to fill the missing Protein names and Gene names from the MaxQuant table.
+#' @param raw_or_LFQ one of the following: "raw", "LFQ". Only such data intensities will be imported.
 #' @param prioritize_MaxQuant_names logical. If TRUE and if a fasta_database is provided, the final "Protein names" and "Gene names" will be primarily taken from the  MaxQuant table (they will be taken from the fasta database only if missing). If FALSE, the opposite will happen.
 #' @param remove_identified_by_site logical. Do you want to remove rows that contains "+" in the column "Only identified by site"?
 #' @param remove_reverse logical. Do you want to remove rows that contains "+" in the column "Reverse"?
 #' @param remove_potential_contaminant logical. Do you want to remove rows that contains "+" in the column "Potential contaminant"?
 #'
-#' @return a GCPlist, i.e.: a list with 4 dataframes (tibbles):#'
+#' @return a GCPlist, i.e.: a list with 3 dataframes (tibbles):
 #'
-#' - `quant_raw`: the raw intensities.
-#'
-#' - `quant_LFQ`: the LFQ intensities.
+#' - `intensities`: the protein intensities.
 #'
 #' - `proteinINFO`: all the information for each rows.
 #'
 #' - `sampleINFO`: the information about the samples.
 #'
 #'
+#' @examples
+#' \dontrun{
+#'
+#' GCPlist00 <- ImportOutputMaxQuant(MaxQuant_table_name = "MaxQuant OUTPUT FILE NAME.txt",     ## you can just put the name of your file in your current working directory
+#'                                   samples_info = NULL,                                       ## also here potentially
+#'                                   fasta_database = "mouse",
+#'                                   raw_or_LFQ = "raw",
+#'                                   prioritize_MaxQuant_names = TRUE,
+#'                                   remove_identified_by_site = TRUE,
+#'                                   remove_reverse = TRUE,
+#'                                   remove_potential_contaminant = TRUE)
+#'
+#'
+#' }
+#'
+#'
 #' @importFrom readxl read_excel
 #'
 #' @export
-ImportOutputMaxQuant <- function(MaxQuant_table_name, samples_info = NULL, fasta_database = NA, prioritize_MaxQuant_names = TRUE, remove_identified_by_site = TRUE, remove_reverse = TRUE, remove_potential_contaminant = TRUE) {
+ImportOutputMaxQuant <- function(MaxQuant_table_name, samples_info = NULL, fasta_database = NA, raw_or_LFQ = c("LFQ", "raw"), prioritize_MaxQuant_names = TRUE, remove_identified_by_site = TRUE, remove_reverse = TRUE, remove_potential_contaminant = TRUE) {
 
   if (length(MaxQuant_table_name) != 1) {stop("MaxQuant_table_name must be a character vector of length 1, indicating the name of the MaxQuant table files, in txt format")}
   if (is.na(MaxQuant_table_name)) {stop("MaxQuant_table_name must be a character vector of length 1, indicating the name of the MaxQuant table files, in txt format")}
   if (!is.character(MaxQuant_table_name)) {stop("MaxQuant_table_name must be a character vector of length 1, indicating the name of the MaxQuant table files, in txt format")}
-  if (!(endsWith(toupper(MaxQuant_table_name), ".TXT"))) {stop('MaxQuant_table_name must end with ".txt", and the file must be in the .txt format')}
 
   if (!is.null(samples_info)) {
     if (length(samples_info) != 1) {stop("samples_info must be a character vector of length 1, indicating the name of the table in the current working directory containing information for each sample files")}
 
     if (!is.na(samples_info)) {
       if (!is.character(samples_info)) {stop("samples_info must be a character vector of length 1, indicating the name of the table in the current working directory containing information for each sample files")}
-      if (!(endsWith(toupper(samples_info), ".TXT") | endsWith(toupper(samples_info), ".CSV") | endsWith(toupper(samples_info), ".XLSX"))) {stop('samples_info must end with ".txt", ".csv", or ".xlsx", and the file must be in that format')}
     }
   }
 
@@ -60,6 +73,13 @@ ImportOutputMaxQuant <- function(MaxQuant_table_name, samples_info = NULL, fasta
     }
   }
 
+  if (!identical(tolower(raw_or_LFQ), c("lfq", "raw"))) {
+    if (length(raw_or_LFQ) != 1) {stop('raw_or_LFQ must be one of "raw", "LFQ"')}
+    if (is.na(raw_or_LFQ)) {stop('raw_or_LFQ must be one of "raw", "LFQ"')}
+  }
+  raw_or_LFQ <- tolower(raw_or_LFQ)
+  raw_or_LFQ <- match.arg(raw_or_LFQ, c("lfq", "raw"))
+
 
   if (!is.logical(prioritize_MaxQuant_names)) {stop("prioritize_MaxQuant_names must be either TRUE or FALSE")}
   if (length(prioritize_MaxQuant_names) != 1) {stop("prioritize_MaxQuant_names must be either TRUE or FALSE")}
@@ -79,11 +99,7 @@ ImportOutputMaxQuant <- function(MaxQuant_table_name, samples_info = NULL, fasta
 
 
 
-
-  ###1st object: proteinGroup_Raw
-  #Load txt
   proteinGroup_Raw <- read_tsv(MaxQuant_table_name, guess_max = Inf)
-
 
 
   if(!(all(c("Protein IDs", "Protein names", "Gene names", "id") %in% colnames(proteinGroup_Raw)))) {stop('MaxQuant_table must have at least the columns named: "Protein IDs", "Protein names", "Gene names", "id"')}
@@ -130,17 +146,17 @@ ImportOutputMaxQuant <- function(MaxQuant_table_name, samples_info = NULL, fasta
     stop('There are some differences among raw samples names and LFQ samples names...! \n Please, you might also also want to check if in the MaxQuant table the columns with raw intensities start with "Intensity ", and the columns with LFQ intensities start with "LFQ Intensity "')
   }
 
-  if (any(duplicated(samplenames_raw_clean))) {stop("The names of samples must not be duplicated. Each of them must be unique!")}
+  if (any(duplicated(samplenames_raw_clean))) {stop("The names of samples must not be duplicated!")}
 
 
   if (!is.null(samples_info)) {
     if (!is.na(samples_info)) {
-      if (endsWith(toupper(samples_info), ".TXT")) {
-        samples_info_loaded <- read_tsv(samples_info)
-      } else if (endsWith(toupper(samples_info), ".CSV")) {
+      if (endsWith(toupper(samples_info), ".CSV")) {
         samples_info_loaded <- read_csv(samples_info)
       } else if (endsWith(toupper(samples_info), ".XLSX")) {
         samples_info_loaded <- read_excel(samples_info, sheet = 1)
+      } else {
+        samples_info_loaded <- read_tsv(samples_info)
       }
 
 
@@ -176,9 +192,9 @@ ImportOutputMaxQuant <- function(MaxQuant_table_name, samples_info = NULL, fasta
   if (!is.null(fasta_database)) {
     if (!is.na(fasta_database)) {
       if (fasta_database == "human") {
-        fasta_database_loaded <- read_tsv(system.file("extdata", "Database_Human_ref.txt", package = "GetCoolProteopipe"))
+        fasta_database_loaded <- read_tsv(system.file("extdata", "Database_Human_ref.txt.gz", package = "GetCoolProteopipe"))
       } else if (fasta_database == "mouse") {
-        fasta_database_loaded <- read_tsv(system.file("extdata", "Database_Mouse_ref.txt", package = "GetCoolProteopipe"))
+        fasta_database_loaded <- read_tsv(system.file("extdata", "Database_Mouse_ref.txt.gz", package = "GetCoolProteopipe"))
       } else if (endsWith(fasta_database, ".txt")) {
         fasta_database_loaded <- read_tsv(fasta_database)
       } else if (endsWith(fasta_database, ".csv")) {
@@ -242,7 +258,7 @@ ImportOutputMaxQuant <- function(MaxQuant_table_name, samples_info = NULL, fasta
 
   cat("___\n")
 
-  #Add protein and gene names when missing if possible
+
 
   if ("Accession" %in% colnames(proteinGroup_Raw)) {warning('A column named "Accession" was already present in the imported table. Please not that now it has been completely replaced with each first code (before the ";") of "Protein IDs"')}
 
@@ -286,8 +302,6 @@ ImportOutputMaxQuant <- function(MaxQuant_table_name, samples_info = NULL, fasta
   }
 
 
-  #Keep only first name in protein names and gene names
-
   proteinGroup_Raw_added_cut <- mutate(proteinGroup_Raw_added,
                                        `Protein names` = gsub(";.*", "", `Protein names`),
                                        `Gene names` = gsub(";.*", "", `Gene names`))
@@ -302,15 +316,26 @@ ImportOutputMaxQuant <- function(MaxQuant_table_name, samples_info = NULL, fasta
 
   colnames_others <- c("protid", colnames(proteinGroup_Raw_added_cut)[which(!(colnames(proteinGroup_Raw_added_cut)%in%colnames_raw_intensities[-1]) & !(colnames(proteinGroup_Raw_added_cut)%in%colnames_LFQ_intensities[-1])  & !(colnames(proteinGroup_Raw_added_cut)=="protid"))])
 
+  if (raw_or_LFQ == "raw") {
 
-  final_list <- list(quant_raw = select(proteinGroup_Raw_added_cut, all_of(colnames_raw_intensities)),
-                     quant_LFQ = select(proteinGroup_Raw_added_cut, all_of(colnames_LFQ_intensities)),
-                     proteinINFO = select(proteinGroup_Raw_added_cut, all_of(colnames_others)),
-                     sampleINFO = samples_info_loaded)
+    final_list <- list(intensities = select(proteinGroup_Raw_added_cut, all_of(colnames_raw_intensities)),
+                       proteinINFO = select(proteinGroup_Raw_added_cut, all_of(colnames_others)),
+                       sampleINFO = samples_info_loaded)
 
+    colnames(final_list$intensities)[-1] <- samplenames_raw_clean
 
-  colnames(final_list$quant_raw)[-1] <- samplenames_raw_clean
-  colnames(final_list$quant_LFQ)[-1] <- samplenames_LFQ_clean
+    cat("\n -- raw intensities are being imported --\n\n")
+
+  } else if (raw_or_LFQ == "lfq") {
+
+    final_list <- list(intensities = select(proteinGroup_Raw_added_cut, all_of(colnames_LFQ_intensities)),
+                       proteinINFO = select(proteinGroup_Raw_added_cut, all_of(colnames_others)),
+                       sampleINFO = samples_info_loaded)
+
+    colnames(final_list$intensities)[-1] <- samplenames_LFQ_clean
+
+    cat("\n -- LFQ intensities are being imported --\n\n")
+  }
 
 
   return(final_list)

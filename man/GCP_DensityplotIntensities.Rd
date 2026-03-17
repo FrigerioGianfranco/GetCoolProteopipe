@@ -4,16 +4,10 @@
 \alias{GCP_DensityplotIntensities}
 \title{Plotting an overall density plot}
 \usage{
-GCP_DensityplotIntensities(
-  GCPlist,
-  raw_or_LFQ = getOption("GetCoolProteopipe.raw_or_LFQ"),
-  Title = "Distribution of intensities"
-)
+GCP_DensityplotIntensities(GCPlist, Title = "Distribution of intensities")
 }
 \arguments{
 \item{GCPlist}{a list created with the ImportOutputMaxQuant function.}
-
-\item{raw_or_LFQ}{one of the following: "raw", "LFQ". The plot will be created only with the specified data intensities.}
 
 \item{Title}{NULL or character of length 1. The title you want to ad on the top of the plot.}
 }
@@ -22,4 +16,16 @@ a ggplot object.
 }
 \description{
 It crates an histogram and density curve considering all the intensities of protein from all samples.
+}
+\examples{
+\dontrun{
+
+Fig01_IntensityDistribution_before_processing <- GCP_DensityplotIntensities(GCPlist = GCPlist05,
+                                                                            Title = "Distribution of intensities, before processing")
+export_figures(Fig01_IntensityDistribution_before_processing)
+
+}
+
+
+
 }

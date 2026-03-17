@@ -3,28 +3,26 @@
 #' It crates an histogram and density curve considering all the intensities of protein from all samples.
 #'
 #' @param GCPlist a list created with the ImportOutputMaxQuant function.
-#' @param raw_or_LFQ one of the following: "raw", "LFQ". The plot will be created only with the specified data intensities.
 #' @param Title NULL or character of length 1. The title you want to ad on the top of the plot.
 #'
 #' @return a ggplot object.
 #'
+#'
+#' @examples
+#' \dontrun{
+#'
+#' Fig01_IntensityDistribution_before_processing <- GCP_DensityplotIntensities(GCPlist = GCPlist05,
+#'                                                                             Title = "Distribution of intensities, before processing")
+#' export_figures(Fig01_IntensityDistribution_before_processing)
+#'
+#' }
+#'
+#'
+#'
 #' @export
-GCP_DensityplotIntensities <- function(GCPlist, raw_or_LFQ = getOption("GetCoolProteopipe.raw_or_LFQ"), Title = "Distribution of intensities") {
+GCP_DensityplotIntensities <- function(GCPlist, Title = "Distribution of intensities") {
 
   checkGCPlist(GCPlist)
-
-  if (!identical(tolower(raw_or_LFQ), c("lfq", "raw"))) {
-    if (length(raw_or_LFQ) != 1) {stop('raw_or_LFQ must be one of "raw", "LFQ"')}
-    if (is.na(raw_or_LFQ)) {stop('raw_or_LFQ must be one of "raw", "LFQ"')}
-  }
-  raw_or_LFQ <- tolower(raw_or_LFQ)
-  raw_or_LFQ <- match.arg(raw_or_LFQ, c("lfq", "raw"))
-
-  if (raw_or_LFQ == "lfq") {
-    cat("\n -- LFQ data are used --\n\n")
-  } else if (raw_or_LFQ == "raw") {
-    cat("\n -- raw data are used --\n\n")
-  }
 
   if (!is.null(Title)) {
     if (length(Title)!=1) {
@@ -36,16 +34,8 @@ GCP_DensityplotIntensities <- function(GCPlist, raw_or_LFQ = getOption("GetCoolP
     }
   }
 
-
-  if (raw_or_LFQ == "raw") {
-    all_intensities <- GCPlist$quant_raw[, colnames(GCPlist$quant_raw)[which(colnames(GCPlist$quant_raw) != "protid")]]  %>%
-      gather(key="sample", value="value")
-  } else if (raw_or_LFQ == "lfq") {
-    all_intensities <- GCPlist$quant_LFQ[, colnames(GCPlist$quant_LFQ)[which(colnames(GCPlist$quant_LFQ) != "protid")]]  %>%
-      gather(key="sample", value="value")
-  } else {
-    stop('raw_or_LFQ must be one of "raw", "LFQ"')
-  }
+  all_intensities <- GCPlist$intensities[, colnames(GCPlist$intensities)[which(colnames(GCPlist$intensities) != "protid")]]  %>%
+    gather(key="sample", value="value")
 
   binwidth_calculated <- 2 * IQR(all_intensities$value, na.rm = TRUE) / length(all_intensities$value)^(1/3)
 

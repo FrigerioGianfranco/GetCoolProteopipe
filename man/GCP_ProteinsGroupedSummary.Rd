@@ -6,8 +6,7 @@
 \usage{
 GCP_ProteinsGroupedSummary(
   GCPlist,
-  name_column_groups = NULL,
-  raw_or_LFQ = getOption("GetCoolProteopipe.raw_or_LFQ"),
+  name_column_groups = getOption("GetCoolProteopipe.name_column_groups"),
   digits_perc = NULL,
   add_perc_symbol = FALSE
 )
@@ -16,8 +15,6 @@ GCP_ProteinsGroupedSummary(
 \item{GCPlist}{a list created with the ImportOutputMaxQuant function.}
 
 \item{name_column_groups}{character of length 1. The name of the column of the sampleINFO table containing the sample groups.}
-
-\item{raw_or_LFQ}{one of the following: "raw", "LFQ".}
 
 \item{digits_perc}{NULL or numeric integer of length 1. The number of digits to round the percentages.}
 
@@ -28,4 +25,15 @@ A tibble with summary of the presence of proteins in indicated groups.
 }
 \description{
 It creates a small table with the summary of the results of the GCP_ProteinsGrouped function. PLEASE NOTE that you must run the function GCP_ProteinsGrouped before!
+}
+\examples{
+\dontrun{
+
+SummaryTable_ProteinsGrouped_filteringNA <- GCP_ProteinsGroupedSummary(GCPlist08)
+export_the_table(SummaryTable_ProteinsGrouped_filteringNA)
+
+}
+
+
+
 }

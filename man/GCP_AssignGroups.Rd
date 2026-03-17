@@ -44,3 +44,16 @@ the GCPlist with an additional column in the sampleINFO data frames containing t
 \description{
 It assigns each samples to a desired groups.
 }
+\examples{
+\dontrun{
+
+GCPlist02 <- GCP_AssignGroups(GCPlist = GCPlist01,
+                              automatic_assignment = "groupfirst",
+                              separator_automatic_assignment = "_",
+                              name_column_groups = "Condition",
+                              controlgroup = "S")
+
+}
+
+
+}

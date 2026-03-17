@@ -6,10 +6,9 @@
 \usage{
 GCP_Venn(
   GCPlist,
-  name_column_groups = NULL,
-  raw_or_LFQ = getOption("GetCoolProteopipe.raw_or_LFQ"),
+  name_column_groups = getOption("GetCoolProteopipe.name_column_groups"),
+  col_pal = getOption("GetCoolProteopipe.col_pal"),
   consider_genenames = FALSE,
-  col_pal = NULL,
   auto_scale_circles = FALSE,
   add_title = FALSE
 )
@@ -19,11 +18,9 @@ GCP_Venn(
 
 \item{name_column_groups}{character of length 1. The name of the column of the sampleINFO table containing the sample groups. The sample groups must be between 2 and 4.}
 
-\item{raw_or_LFQ}{one of the following: "raw", "LFQ". The venn diagram will be performed only in the specified data.}
+\item{col_pal}{NULL or a character vector containing colors. If NULL, colors from the pals package will be used (see function build_long_vector_of_colors).}
 
 \item{consider_genenames}{logical. If TRUE, the gene names will be considered to perform the grouping, instead of the protid.}
-
-\item{col_pal}{NULL or a character vector containing colors. If NULL, colors from the pals package will be used (see function build_long_vector_of_colors).}
 
 \item{auto_scale_circles}{logical. If TRUE and if there are only 2 groups, the dimensions of circles will be scaled to the number of intersections.}
 
@@ -34,4 +31,15 @@ A ggplot object.
 }
 \description{
 It creates venn diagrams to show the overlapping proteins per sample group.
+}
+\examples{
+\dontrun{
+
+Fig08_Venn_post_filteringNA <- GCP_Venn(GCPlist07)
+export_figures(Fig08_Venn_post_filteringNA)
+
+}
+
+
+
 }

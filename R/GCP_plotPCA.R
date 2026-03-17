@@ -3,7 +3,6 @@
 #' It plots a principal component analysis.
 #'
 #' @param GCPlist a list created with the ImportOutputMaxQuant function.
-#' @param raw_or_LFQ one of the following: "raw", "LFQ". The principal component analysis will be performed only in the specified data.
 #' @param scores_or_loadings one of the following: "scores", "loadings". Specify here if you want to plot the scores or the loadings.
 #' @param PC_to_plot character of length 2. Specify here the two principal components to plot.
 #' @param center logical. Whether the variables should be shifted to be zero centered (as in the prcomp function).
@@ -19,29 +18,46 @@
 #'
 #' @return A ggplot object.
 #'
+#'
+#'
+#' @examples
+#' \dontrun{
+#'
+#' # to get a score plot:
+#'
+#' Fig13_PCA_score_plot <- GCP_plotPCA(GCPlist = GCPlist11,
+#'                                     scores_or_loadings = "scores",
+#'                                     PC_to_plot = c("PC1", "PC2"),
+#'                                     name_column_labels = "Sample",
+#'                                     ellipses_on_score = TRUE)
+#' export_figures(Fig13_PCA_score_plot)
+#'
+#'
+#' # to get a loading plot:
+#'
+#' Fig14_PCA_loading_plot <- GCP_plotPCA(GCPlist = GCPlist11,
+#'                                       scores_or_loadings = "loadings",
+#'                                       PC_to_plot = c("PC1", "PC2"),
+#'                                       name_column_groups_loading = NULL,
+#'                                       name_column_labels_loading = "Protein names",
+#'                                       col_pal_loading = NULL,
+#'                                       ellipses_on_loading = FALSE)
+#' export_figures(Fig14_PCA_loading_plot)
+#'
+#' }
+#'
+#'
+#'
 #' @import ggdendro
 #'
 #' @export
-GCP_plotPCA <- function(GCPlist, raw_or_LFQ = getOption("GetCoolProteopipe.raw_or_LFQ"),
+GCP_plotPCA <- function(GCPlist,
                         scores_or_loadings = c("scores", "loadings"), PC_to_plot = c("PC1", "PC2"),
                         center = TRUE, scale. = FALSE,
-                        name_column_groups = NULL, name_column_labels = NULL, col_pal = NULL, ellipses_on_score = TRUE,
+                        name_column_groups = getOption("GetCoolProteopipe.name_column_groups"), name_column_labels = NULL, col_pal = getOption("GetCoolProteopipe.col_pal"), ellipses_on_score = TRUE,
                         name_column_groups_loading = NULL, name_column_labels_loading = NULL, col_pal_loading = NULL, ellipses_on_loading = FALSE) {
 
   checkGCPlist(GCPlist)
-
-  if (!identical(tolower(raw_or_LFQ), c("lfq", "raw"))) {
-    if (length(raw_or_LFQ) != 1) {stop('raw_or_LFQ must be one of "raw", "LFQ"')}
-    if (is.na(raw_or_LFQ)) {stop('raw_or_LFQ must be one of "raw", "LFQ"')}
-  }
-  raw_or_LFQ <- tolower(raw_or_LFQ)
-  raw_or_LFQ <- match.arg(raw_or_LFQ, c("lfq", "raw"))
-
-  if (raw_or_LFQ == "lfq") {
-    cat("\n -- LFQ data are used --\n\n")
-  } else if (raw_or_LFQ == "raw") {
-    cat("\n -- raw data are used --\n\n")
-  }
 
   if (!identical(tolower(scores_or_loadings), c("scores", "loadings"))) {
     if (length(scores_or_loadings) != 1) {stop('scores_or_loadings must be one of "scores", "loadings"')}
@@ -53,13 +69,16 @@ GCP_plotPCA <- function(GCPlist, raw_or_LFQ = getOption("GetCoolProteopipe.raw_o
   if (length(PC_to_plot) != 2) {stop("PC_to_plot must contain exactly 2 elements")}
   if (!is.character(PC_to_plot)) {stop("PC_to_plot must be a character vector")}
   if (any(is.na(PC_to_plot))) {stop("PC_to_plot must not contain NAs")}
-  if (raw_or_LFQ == "raw") {
-    if (PC_to_plot[1] %in% pull(GCPlist$quant_raw, 1)) {stop(paste0('This is a problem..: quant_raw already contains a protein named "', PC_to_plot[1], '"'))}
-    if (PC_to_plot[2] %in% pull(GCPlist$quant_raw, 1)) {stop(paste0('This is a problem..: quant_raw already contains a protein named "', PC_to_plot[2], '"'))}
-  } else if (raw_or_LFQ == "lfq") {
-    if (PC_to_plot[1] %in% pull(GCPlist$quant_LFQ, 1)) {stop(paste0('This is a problem..: quant_LFQ already contains a protein named "', PC_to_plot[1], '"'))}
-    if (PC_to_plot[2] %in% pull(GCPlist$quant_LFQ, 1)) {stop(paste0('This is a problem..: quant_LFQ already contains a protein named "', PC_to_plot[2], '"'))}
-  }
+  if (PC_to_plot[1] %in% pull(GCPlist$intensities, 1)) {stop(paste0('This is a problem..: intensities already contains a protein named "', PC_to_plot[1], '"'))}
+  if (PC_to_plot[2] %in% pull(GCPlist$intensities, 1)) {stop(paste0('This is a problem..: intensities already contains a protein named "', PC_to_plot[2], '"'))}
+
+  if (length(center)!=1) {stop("center must be exclusively TRUE or FALSE")}
+  if (!is.logical(center)) {stop("center must be exclusively TRUE or FALSE")}
+  if (is.na(center)) {stop("center must be exclusively TRUE or FALSE")}
+
+  if (length(scale.)!=1) {stop("scale. must be exclusively TRUE or FALSE")}
+  if (!is.logical(scale.)) {stop("scale. must be exclusively TRUE or FALSE")}
+  if (is.na(scale.)) {stop("scale. must be exclusively TRUE or FALSE")}
 
   are.colors <- function (vect) {
     map_lgl(vect, ~tryCatch({
@@ -70,11 +89,11 @@ GCP_plotPCA <- function(GCPlist, raw_or_LFQ = getOption("GetCoolProteopipe.raw_o
   }
   used_the_long_vector_of_colors <- FALSE
 
-
   if (!is.null(name_column_groups)) {
     if (length(name_column_groups)!=1) {stop("name_column_groups must be NULL or a character of length 1")}
     if (!is.character(name_column_groups)) {stop("name_column_groups must be NULL or a character of length 1")}
     if (is.na(name_column_groups)) {stop("name_column_groups must be NULL or a character of length 1, not a NA")}
+    cat(paste0("\n -- The name_column_groups considered is '", name_column_groups, "' --\n\n"))
     if (length(which(colnames(GCPlist$sampleINFO) == name_column_groups)) != 1) {stop("The name passed in name_column_groups must be a name of a column of the sampleINFO dataframe")}
     if (name_column_groups == PC_to_plot[1]) {stop(paste0('This is a problem..: name_column_groups should not be named as "', PC_to_plot[1], '"'))}
     if (name_column_groups == PC_to_plot[2]) {stop(paste0('This is a problem..: name_column_groups should not be named as "', PC_to_plot[2], '"'))}
@@ -88,8 +107,25 @@ GCP_plotPCA <- function(GCPlist, raw_or_LFQ = getOption("GetCoolProteopipe.raw_o
     if (!is.null(col_pal)) {
       if (!is.character(col_pal)) {stop("col_pal must be a character vector")}
       if (any(is.na(col_pal))) {stop("col_pal must not contain NAs")}
-
+      if (is.null(names(col_pal))) {
+        cat(paste0(' --- col_pal is  c("', paste0(col_pal, collapse = '", "'), '") ---\n\n'))
+      } else {
+        cat(' --- col_pal is  c(')
+        for (i in seq(length(col_pal))) {
+          if (names(col_pal)[i]!="") {
+            cat(paste0(names(col_pal)[i], ' = "'))
+          } else {
+            cat('"')
+          }
+          cat(paste0(col_pal[i], '"'))
+          if (i != length(col_pal)) {
+            cat(', ')
+          }
+        }
+        cat(') ---\n\n')
+      }
     } else {
+      cat(" -- col_pal is  NULL --\n\n")
       col_pal <- build_long_vector_of_colors()
       used_the_long_vector_of_colors <- TRUE
     }
@@ -101,6 +137,8 @@ GCP_plotPCA <- function(GCPlist, raw_or_LFQ = getOption("GetCoolProteopipe.raw_o
     }
 
     if (!all(are.colors(col_pal))) {stop(paste0('col_pal must contain valid colors. In particular, these are not: "', paste(col_pal[!are.colors(col_pal)], collapse = '", "')), '"')}
+  } else {
+    cat("\n -- The name_column_groups considered is NULL --\n\n")
   }
 
   if (length(ellipses_on_score)!=1) {stop("ellipses_on_score must be exclusively TRUE or FALSE")}
@@ -167,14 +205,7 @@ GCP_plotPCA <- function(GCPlist, raw_or_LFQ = getOption("GetCoolProteopipe.raw_o
   if (is.na(ellipses_on_loading)) {stop("ellipses_on_loading must be exclusively TRUE or FALSE")}
 
 
-
-  if (raw_or_LFQ == "raw") {
-    df_intensities <- GetFeatistics::transpose_feat_table(GCPlist$quant_raw, name_first_column = "thesearethesamplenamesused")
-  } else if (raw_or_LFQ == "lfq") {
-    df_intensities <- GetFeatistics::transpose_feat_table(GCPlist$quant_LFQ, name_first_column = "thesearethesamplenamesused")
-  } else {
-    stop('raw_or_LFQ must be one of "raw", "LFQ"')
-  }
+  df_intensities <- GetFeatistics::transpose_feat_table(GCPlist$intensities, name_first_column = "thesearethesamplenamesused")
 
   df_intensities_wg <- df_intensities
 
@@ -249,7 +280,6 @@ GCP_plotPCA <- function(GCPlist, raw_or_LFQ = getOption("GetCoolProteopipe.raw_o
   } else {
     stop('scores_or_loadings must be "scores" or "loadings"')
   }
-
 
   for (nlay in 1:length(object_to_return$layers)) {
     if (!inherits(object_to_return$layers[[nlay]]$geom, "GeomPoint")) {

@@ -1,6 +1,6 @@
 Package: GetCoolProteopipe
 Title: Pipeline for the elaboration of proteomics data!
-Version: 0.3.2
+Version: 0.4
 Authors@R: c(
     person("Gianfranco", "Frigerio", email = "frigerio.gianfranco@hsr.it", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-3538-1443")),
@@ -14,3 +14,7 @@ RoxygenNote: 7.3.3
 Depends: R (>= 4.3.1)
 Imports: tidyverse, readxl, writexl, GetFeatistics, pals, ggvenn, ggpubr, ggdendro, PhosR, sva
 Remotes: github::FrigerioGianfranco/GetFeatistics, bioc::PhosR, bioc::sva
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr

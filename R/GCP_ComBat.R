@@ -4,15 +4,35 @@
 #'
 #' @param GCPlist a list created with the ImportOutputMaxQuant function.
 #' @param batch character of length 1 OR a numeric/factor vector. The name of the column of the sampleINFO table containing the batch indications OR a numeric or factor vector containing the batch indications, that will also be added as column in the sampleINFO data frame under a new 'batch' column.
-#' @param raw_or_LFQ one of the following: "raw", "LFQ". The adjustment for batch effects will be performed only in the specified data intensities.
 #' @param ... Additional arguments passed to sva::ComBat.
 #'
 #' @return The GCPlist with the desired intensity values adjusted for batch effects.
 #'
+#'
+#' @examples
+#' \dontrun{
+#'
+#'
+#' # passing a numeric/factor vector directly to the 'batch' argument:
+#'
+#' GCPlist14b1 <- GCP_ComBat(GCPlist = GCPlist14b,
+#'                           batch = c(1, 2, 3, 1, 2, 3, 1, 2, 3, 1))
+#'
+#' # passing a column name of sampleINFO, containing the numeric/factor vector, to the 'batch' argument:
+#'
+#' GCPlist14b$sampleINFO[, "batches"] <- factor(c("batch1", "batch2", "batch3", "batch1", "batch2", "batch3", "batch1", "batch2", "batch3", "batch1"), levels = c("batch1", "batch2", "batch3"))
+#'
+#' GCPlist14b2 <- GCP_ComBat(GCPlist = GCPlist14b,
+#'                           batch = "batches")
+#'
+#' }
+#'
+#'
 #' @importFrom sva ComBat
 #'
+#'
 #' @export
-GCP_ComBat <- function(GCPlist, batch = "Batch", raw_or_LFQ = getOption("GetCoolProteopipe.raw_or_LFQ"), ...) {
+GCP_ComBat <- function(GCPlist, batch = "Batch", ...) {
 
   checkGCPlist(GCPlist)
 
@@ -39,19 +59,6 @@ GCP_ComBat <- function(GCPlist, batch = "Batch", raw_or_LFQ = getOption("GetCool
   }
   if (is.factor(batch_indications)) {
     batch_indications <- as.numeric(batch_indications)
-  }
-
-  if (!identical(tolower(raw_or_LFQ), c("lfq", "raw"))) {
-    if (length(raw_or_LFQ) != 1) {stop('raw_or_LFQ must be one of "raw", "LFQ"')}
-    if (is.na(raw_or_LFQ)) {stop('raw_or_LFQ must be one of "raw", "LFQ"')}
-  }
-  raw_or_LFQ <- tolower(raw_or_LFQ)
-  raw_or_LFQ <- match.arg(raw_or_LFQ, c("lfq", "raw"))
-
-  if (raw_or_LFQ == "lfq") {
-    cat("\n -- LFQ data are used --\n\n")
-  } else if (raw_or_LFQ == "raw") {
-    cat("\n -- raw data are used --\n\n")
   }
 
   cat("\nThe adjustment for batch effects is performed assigning batches to samples in this way:\n Batch Sample\n")
@@ -99,25 +106,16 @@ GCP_ComBat <- function(GCPlist, batch = "Batch", raw_or_LFQ = getOption("GetCool
   }
   cat("\n")
 
-  if (raw_or_LFQ == "raw") {
-    the_raw_matrix <- as.matrix(GCPlist$quant_raw[, which(colnames(GCPlist$quant_raw)!="protid")])
 
-    combat_raw_matrix <- ComBat(dat = the_raw_matrix, batch = batch_indications, ...)
+  the_matrix <- as.matrix(GCPlist$intensities[, which(colnames(GCPlist$intensities)!="protid")])
 
-    GCPoutput$quant_raw <- as_tibble(combat_raw_matrix)
-    GCPoutput$quant_raw <- add_column(GCPoutput$quant_raw,
-                                      protid = GCPlist$quant_raw$protid,
-                                      .before = which(colnames(GCPlist$quant_raw)=="protid"))
-  } else if (raw_or_LFQ == "lfq") {
-    the_LFQ_matrix <- as.matrix(GCPlist$quant_LFQ[, which(colnames(GCPlist$quant_LFQ)!="protid")])
+  combat_matrix <- ComBat(dat = the_matrix, batch = batch_indications, ...)
 
-    combat_LFQ_matrix <- ComBat(dat = the_LFQ_matrix, batch = batch_indications, ...)
+  GCPoutput$intensities <- as_tibble(combat_matrix)
+  GCPoutput$intensities <- add_column(GCPoutput$intensities,
+                                      protid = GCPlist$intensities$protid,
+                                      .before = which(colnames(GCPlist$intensities)=="protid"))
 
-    GCPoutput$quant_LFQ <- as_tibble(combat_LFQ_matrix)
-    GCPoutput$quant_LFQ <- add_column(GCPoutput$quant_LFQ,
-                                      protid = GCPlist$quant_LFQ$protid,
-                                      .before = which(colnames(GCPlist$quant_LFQ)=="protid"))
-  }
 
   return(GCPoutput)
 }

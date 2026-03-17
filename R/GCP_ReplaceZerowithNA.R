@@ -1,16 +1,24 @@
 #' Replacing zero with NA
 #'
-#' In the quant_raw and the quantLFQ data intensity, it replaces all zeros with missing values.
+#' In the intensities table, it replaces all zeros with missing values.
 #'
 #' @param GCPlist a list created with the ImportOutputMaxQuant function.
 #'
-#' @return a GCPlist list with zero replaced with NAs in the data intensity tables.
+#' @return a GCPlist list with zero replaced with NAs in the data intensity table.
+#'
+#'
+#' @examples
+#' \dontrun{
+#'
+#' GCPlist04 <- GCP_ReplaceZerowithNA(GCPlist03)
+#'
+#' }
+#'
 #'
 #' @export
 GCP_ReplaceZerowithNA <- function(GCPlist) {
 
   checkGCPlist(GCPlist)
-
 
   GCPoutput <- GCPlist
 
@@ -18,46 +26,25 @@ GCP_ReplaceZerowithNA <- function(GCPlist) {
   cat("______\n")
   cat("The number of zeros replaced with NAs is\n")
 
-  counting_tot_raw <- 0
-  total_cells_raw <- nrow(GCPoutput$quant_raw)*length(colnames(GCPoutput$quant_raw)[-which(colnames(GCPoutput$quant_raw) == "protid")])
+  counting_tot <- 0
+  total_cells <- nrow(GCPoutput$intensities)*length(colnames(GCPoutput$intensities)[-which(colnames(GCPoutput$intensities) == "protid")])
 
-  for (a in colnames(GCPoutput$quant_raw)[-which(colnames(GCPoutput$quant_raw) == "protid")]) {
+  for (a in colnames(GCPoutput$intensities)[-which(colnames(GCPoutput$intensities) == "protid")]) {
 
     counting_sa <- 0
 
-    if (length(which(pull(GCPoutput$quant_raw, a) == 0))>0) {
-      for (i in which(pull(GCPoutput$quant_raw, a) == 0)) {
-        GCPoutput$quant_raw[i, a] <- NA
+    if (length(which(pull(GCPoutput$intensities, a) == 0))>0) {
+      for (i in which(pull(GCPoutput$intensities, a) == 0)) {
+        GCPoutput$intensities[i, a] <- NA
         counting_sa <- counting_sa+1
-        counting_tot_raw <- counting_tot_raw+1
+        counting_tot <- counting_tot+1
       }
     }
   }
 
-
-  cat(paste0(" - ", counting_tot_raw, " out of ", total_cells_raw, " (", round(counting_tot_raw/total_cells_raw*100, digits = 1), "%) in the raw table;\n"))
-
-
-  counting_tot_LFQ <- 0
-  total_cells_LFQ <- nrow(GCPoutput$quant_LFQ)*length(colnames(GCPoutput$quant_LFQ)[-which(colnames(GCPoutput$quant_LFQ) == "protid")])
-
-  for (a in colnames(GCPoutput$quant_LFQ)[-which(colnames(GCPoutput$quant_LFQ) == "protid")]) {
-
-    counting_sa <- 0
-
-    if (length(which(pull(GCPoutput$quant_LFQ, a) == 0))>0) {
-      for (i in which(pull(GCPoutput$quant_LFQ, a) == 0)) {
-        GCPoutput$quant_LFQ[i, a] <- NA
-        counting_sa <- counting_sa+1
-        counting_tot_LFQ <- counting_tot_LFQ+1
-      }
-    }
-  }
-
-  cat(paste0(" - ", counting_tot_LFQ, " out of ", total_cells_LFQ, " (", round(counting_tot_LFQ/total_cells_LFQ*100, digits = 1), "%) in the LFQ table.\n"))
+  cat(paste0(" - ", counting_tot, " out of ", total_cells, " (", round(counting_tot/total_cells*100, digits = 1), "%).\n"))
 
   cat("______\n")
 
   return(GCPoutput)
-
 }

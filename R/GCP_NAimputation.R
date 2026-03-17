@@ -1,8 +1,8 @@
 #' Imputation of missing values
 #'
-#' It performs the imputation of missing values, using the same method of the functions scImpute and tImpute from the PhosR package. MORE DESCRIPTION!
+#' It performs the imputation of missing values, using the same method of the functions scImpute and tImpute from the PhosR package.
 #'
-#' @param GCPlist a list created with the ImportOutputMaxQuant function.#'
+#' @param GCPlist a list created with the ImportOutputMaxQuant function.
 #' @param quant_rate numeric, between 0 an 1 (included). Quantification rate per group, considered for the scImpute function.
 #' @param name_column_groups NULL or character of length 1. The name of the column of the sampleINFO table containing the sample groups.
 #' @param seed numeric. The value that will be used for set.seed.
@@ -10,10 +10,21 @@
 #'
 #' @return a GCPlist list with the missing values imputed.
 #'
+#'
+#' @examples
+#' \dontrun{
+#'
+#' GCPlist09 <- GCP_NAimputation(GCPlist = GCPlist08,
+#'                               quant_rate = 0.5)
+#'
+#' }
+#'
+#'
+#'
 #' @importFrom PhosR PhosphoExperiment scImpute tImpute
 #'
 #' @export
-GCP_NAimputation <- function(GCPlist, quant_rate = 0.5, name_column_groups = NULL, seed = 123, method = c("both", "scImpute", "tImpute")) {
+GCP_NAimputation <- function(GCPlist, quant_rate = 0.5, name_column_groups = getOption("GetCoolProteopipe.name_column_groups"), seed = 123, method = c("both", "scImpute", "tImpute")) {
 
   checkGCPlist(GCPlist)
 
@@ -28,6 +39,7 @@ GCP_NAimputation <- function(GCPlist, quant_rate = 0.5, name_column_groups = NUL
     if (length(name_column_groups)!=1) {stop("name_column_groups must be NULL or a character of length 1")}
     if (!is.character(name_column_groups)) {stop("name_column_groups must be NULL or a character of length 1")}
     if (is.na(name_column_groups)) {stop("name_column_groups must be NULL or a character of length 1, not a NA")}
+    cat(paste0("\n -- The name_column_groups considered is '", name_column_groups, "' --\n\n"))
     if (length(which(colnames(GCPlist$sampleINFO) == name_column_groups)) != 1) {stop("The name passed in name_column_groups must be a name of a column of the sampleINFO dataframe")}
 
 
@@ -35,6 +47,8 @@ GCP_NAimputation <- function(GCPlist, quant_rate = 0.5, name_column_groups = NUL
       GCPlist$sampleINFO[,name_column_groups] <- as.factor(pull(GCPlist$sampleINFO, name_column_groups))
     }
 
+  } else {
+    cat("\n -- The name_column_groups considered is NULL --\n\n")
   }
 
   if (length(seed)!=1) {stop("seed must be a numeric of length 1")}
@@ -71,7 +85,6 @@ GCP_NAimputation <- function(GCPlist, quant_rate = 0.5, name_column_groups = NUL
       do_timpute <- TRUE
     }
 
-
   } else if (method == "scimpute") {
 
     if (is.null(name_column_groups)) {
@@ -90,9 +103,9 @@ GCP_NAimputation <- function(GCPlist, quant_rate = 0.5, name_column_groups = NUL
   }
 
 
-  check_ppe_object <- function(ppe_object, rl, the_matrix_type) {
+  check_ppe_object <- function(ppe_object, the_matrix_type) {
 
-    if (rl == "raw") {GCPtable <- GCPlist$quant_raw} else if (rl == "LFQ") {GCPtable <- GCPlist$quant_LFQ}
+    GCPtable <- GCPlist$intensities
 
     if (!is.matrix(ppe_object@assays@data@listData[[the_matrix_type]])) {
       stop("For some reason there was not a matrix inside the created ppe object... that's wired, ask Gianfranco to check!!")
@@ -106,7 +119,7 @@ GCP_NAimputation <- function(GCPlist, quant_rate = 0.5, name_column_groups = NUL
   }
 
 
-  print_missing_info <- function(ppe_object, rl, the_matrix_type) {
+  print_missing_info <- function(ppe_object, the_matrix_type) {
 
     ppe_matrix <- ppe_object@assays@data@listData[[the_matrix_type]]
 
@@ -118,99 +131,49 @@ GCP_NAimputation <- function(GCPlist, quant_rate = 0.5, name_column_groups = NUL
 
   set.seed(seed)
 
-  # raw
+  ppe_intensities <- suppressWarnings(PhosphoExperiment(assays = list(Quantification = as.matrix(GCPlist$intensities[,which(colnames(GCPlist$intensities)!="protid")]))))
 
-  ppe_raw <- suppressWarnings(PhosphoExperiment(assays = list(Quantification = as.matrix(GCPlist$quant_raw[,which(colnames(GCPlist$quant_raw)!="protid")]))))
-
-  check_ppe_object(ppe_raw, "raw", "Quantification")
+  check_ppe_object(ppe_intensities, "Quantification")
 
   if (!is.null(name_column_groups)) {
-    ppe_raw@colData@listData[["condition"]] <- pull(GCPlist$sampleINFO, name_column_groups)
+    ppe_intensities@colData@listData[["condition"]] <- pull(GCPlist$sampleINFO, name_column_groups)
   }
 
 
-  cat("\n______\nIn the raw table, the number of NAs is:")
-  print_missing_info(ppe_raw, "raw", "Quantification")
+  cat("\n______\nIn the intensities table, the number of NAs is:")
+  print_missing_info(ppe_intensities, "Quantification")
   cat(", initially.")
 
   if (do_scimpute) {
 
-    ppe_raw <- suppressWarnings(scImpute(ppe_raw, quant_rate, pull(GCPlist$sampleINFO, name_column_groups)))
+    ppe_intensities <- suppressWarnings(scImpute(ppe_intensities, quant_rate, pull(GCPlist$sampleINFO, name_column_groups)))
 
-    check_ppe_object(ppe_raw, "raw", "imputed")
+    check_ppe_object(ppe_intensities, "imputed")
 
-    print_missing_info(ppe_raw, "raw", "imputed")
+    print_missing_info(ppe_intensities, "imputed")
     cat(", after the scImpute.")
   }
 
   if (do_timpute) {
 
     if (do_scimpute) {
-      ppe_raw <- tImpute(ppe_raw, assay = "imputed")
+      ppe_intensities <- tImpute(ppe_intensities, assay = "imputed")
     } else {
-      ppe_raw <- tImpute(ppe_raw)
+      ppe_intensities <- tImpute(ppe_intensities)
     }
 
-    check_ppe_object(ppe_raw, "raw", "imputed")
+    check_ppe_object(ppe_intensities, "imputed")
 
-    print_missing_info(ppe_raw, "raw", "imputed")
+    print_missing_info(ppe_intensities, "imputed")
     cat(", after the tImpute.")
   }
 
-  GCPoutput$quant_raw <- as_tibble(ppe_raw@assays@data@listData[["imputed"]]) %>%
-    add_column(protid = GCPlist$quant_raw$protid,
-               .before = 1)
-
-
-  # LFQ
-
-  ppe_LFQ <- suppressWarnings(PhosphoExperiment(assays = list(Quantification = as.matrix(GCPlist$quant_LFQ[,which(colnames(GCPlist$quant_LFQ)!="protid")]))))
-
-  check_ppe_object(ppe_LFQ, "LFQ", "Quantification")
-
-  if (!is.null(name_column_groups)) {
-    ppe_LFQ@colData@listData[["condition"]] <- pull(GCPlist$sampleINFO, name_column_groups)
-  }
-
-
-  cat("\n\n____\nIn the LFQ table, the number of NAs is:")
-  print_missing_info(ppe_LFQ, "LFQ", "Quantification")
-  cat(", initially.")
-
-
-  if (do_scimpute) {
-
-    ppe_LFQ <- suppressWarnings(scImpute(ppe_LFQ, quant_rate, pull(GCPlist$sampleINFO, name_column_groups)))
-
-    check_ppe_object(ppe_LFQ, "LFQ", "imputed")
-
-    print_missing_info(ppe_LFQ, "LFQ", "imputed")
-    cat(", after the scImpute.")
-  }
-
-  if (do_timpute) {
-
-    if (do_scimpute) {
-      ppe_LFQ <- tImpute(ppe_LFQ, assay = "imputed")
-    } else {
-      ppe_LFQ <- tImpute(ppe_LFQ)
-    }
-
-
-    check_ppe_object(ppe_LFQ, "LFQ", "imputed")
-
-    print_missing_info(ppe_LFQ, "LFQ", "imputed")
-    cat(", after the tImpute.")
-  }
-
-
-  GCPoutput$quant_LFQ <- as_tibble(ppe_LFQ@assays@data@listData[["imputed"]]) %>%
-    add_column(protid = GCPlist$quant_LFQ$protid,
+  GCPoutput$intensities <- as_tibble(ppe_intensities@assays@data@listData[["imputed"]]) %>%
+    add_column(protid = GCPlist$intensities$protid,
                .before = 1)
 
   cat("\n______\n")
 
   return(GCPoutput)
-
 }
 

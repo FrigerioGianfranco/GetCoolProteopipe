@@ -4,22 +4,31 @@
 \alias{GCP_ratioPTMprotein}
 \title{ratio PTM on protein intensities}
 \usage{
-GCP_ratioPTMprotein(
-  GCPlistPTM,
-  GCPlistProteins,
-  raw_or_LFQ = getOption("GetCoolProteopipe.raw_or_LFQ")
-)
+GCP_ratioPTMprotein(GCPlistPTM, GCPlistProteins, are_log_transf = TRUE)
 }
 \arguments{
 \item{GCPlistPTM}{a list created with the ImportPTMs function.}
 
 \item{GCPlistProteins}{a list created with the ImportOutputMaxQuant function.}
 
-\item{raw_or_LFQ}{one of the following: "raw", "LFQ". If "raw", the denominator of the ratio will be the quant_raw table of GCPlistProteins; if "LFQ", it will be the quantLFQ table.}
+\item{are_log_transf}{logical. If the intensities are log-transformed, specify here as TRUE, so the subtraction will be performed instead of the ratio.}
 }
 \value{
-a GCPlist list with the calculated ratios of intensities in the quant_raw table.
+a GCPlist list with the calculated ratios of intensities in the intensities table.
 }
 \description{
-It takes the each valid feature intensity of the quant_raw table generated from PTM and it divide it by the relative raw intensity of the protein; the match is based on the Accession.
+It takes each valid feature intensity from PTM and it divides it by the relative intensity of the protein; the match is based on the Accession.
+}
+\examples{
+\dontrun{
+
+
+GCPlistPTM09 <- GCP_ratioPTMprotein(GCPlistPTM = GCPlistPTM08,
+                                    GCPlistProteins = GCPlist14,
+                                    are_log_transf = TRUE)
+
+
+}
+
+
 }

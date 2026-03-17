@@ -1,0 +1,685 @@
+---
+title: "GetCoolProteopipe workflow"
+author: "Gianfranco Frigerio"
+date: "2026-03-17"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{GetCoolProteopipe workflow}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+
+LOGO
+
+
+## Introduction
+
+The **GetCoolProteopipe** (GCP) package is the coolest R-package for proteomics data elaboration!
+After acquiring the data from an LC/MS-MS proteomics analysis, and after using the software MaxQuant, this package takes the output of MaxQuant and allows to perform all the following elaborations including data transformation and normalisation, missing value imputation, statistics analyses and data visualisation.
+In this vignette you will find a suggested workflow with an example dataset.
+Moreover, an R-script covering this same workflow can be downloaded from this GitHub repository at: 'GetCoolProteopipe/inst/scripts/20260317_vignette_workflow.R'.
+
+
+## Citation
+
+If you use the package, please cite:
+
+ Frigerio G, Ansermino C, Andolfo A, Braccia C. GetCoolProteopipe R-package (2026). GitHub repository. https://github.com/FrigerioGianfranco/GetCoolProteopipe.
+
+
+## Installation
+
+Before installing, ensure the following are installed:
+
+ - R (version ≥ 4.3.1)
+ - Java (JDK), with the same architecture as R (64-bit or 32-bit).
+ - Git
+
+
+Then open R (or RStudio) and run the following in the R console:
+
+```{r, eval=FALSE}
+if (!require("devtools", quietly = TRUE)) {install.packages("devtools")}
+
+devtools::install_github("FrigerioGianfranco/GetCoolProteopipe", dependencies = TRUE)
+```
+
+Follow the on-screen instructions to install all the dependencies.
+
+### Troubleshooting
+
+If an error occurs, try again by running R with administrator privileges (right-click R and select Run as administrator). If the error persists, please contact me. Thank you for reporting any issues!
+
+
+Remember that the R architecture (64-bit or 32-bit) must match your Java architecture.
+You can check R’s architecture by running in the R console:
+
+```{r, eval=FALSE}
+R.version$arch
+```
+
+To check Java’s architecture, open Command Prompt and run:
+
+```{r, eval=FALSE}
+java -version
+```
+
+If the architectures do not match, re-install R or Java from the official websites. I recommend using the 64-bit architecture for both.
+
+
+## Loading the package
+
+To start cool proteomics data elaboration, run the following code to load the package:
+
+```{r, message=FALSE, warning=FALSE}
+library(GetCoolProteopipe)
+```
+
+
+
+# Import the data
+
+Everything begins with the data import. For this vignette, we will use the data from XXXX
+
+
+The _ImportOutputMaxQuant()_ function will import your data, pay attention for the most important arguments:
+
+- MaxQuant_table_name: the name of the .txt file (or the path file) as exported from MaxQuant.
+- samples_info: This is optional, but if you have some metadata table about your samples, such as which samples belong to certain sample groups, you can upload it here by passing is file name (or the path file).
+- fasta_database: you could leave it as missing; but if you want to fill the missing Protein names and Gene names from MaxQuant, you can specify either "human" or "mouse" (in this case the package will use pre-loaded fasta tables) or if you have your own fasta table you can write here that file name (or the path file) and it will be considered. - CIT FROM WHERE WE TOOK THE FASTA!!
+- raw_or_LFQ: the output of MaxQuant usually have both raw intenstities and such intensities normalised with the "LFQ" (Label-Free Quantification) algorithm. Choose here which ones you want here to be imported for your elaborations.
+- prioritize_MaxQuant_names; in case of different Protein name and Gene names from the fasta database and what imported from MaxQuant, here you can specify with TRUE if you want to prioritise names from MaxQuant.
+- remove_identified_by_site, remove_reverse, remove_potential_contaminant: pass TRUE to these argument if you want to remove rows with those characteristics (an overview of this operation will be printed in the console)
+
+
+```{r, message=FALSE, warning=FALSE}
+proteinGroups_path <- system.file("extdata", "proteinGroups_vignettes.txt.gz", package = "GetCoolProteopipe")
+
+GCPlist00 <- ImportOutputMaxQuant(MaxQuant_table_name = proteinGroups_path,   ## you can just put the name of your file in your current working directory
+                                  samples_info = NULL,                       ## also here potentially
+                                  fasta_database = "mouse",
+                                  raw_or_LFQ = "raw",
+                                  prioritize_MaxQuant_names = TRUE,
+                                  remove_identified_by_site = TRUE,
+                                  remove_reverse = TRUE,
+                                  remove_potential_contaminant = TRUE)
+
+```
+
+Great, this creates the so-called "GCP list"! Throughout the while workflow, we will keep working on this list, which will always be made of 3 data frames:
+
+- intensities: each row is a protein, uniquely identified by the column 'protid', while and each other columns is a sample.
+
+```{r}
+head(GCPlist00$intensities)
+```
+
+- proteinINFO: besides the 'protid' column, same as above, every column contain information related to that protein group.
+
+```{r}
+head(GCPlist00$proteinINFO)
+```
+
+- sampleINFO: the information about the samples, for example the group each sample belongs to.
+
+```{r}
+GCPlist00$sampleINFO
+```
+
+
+# Cleaning of the imported data
+
+Now, there are a bunch of functions that could be used to perform simple operations directly and consistently on this list: the function names are intuitive, and you can always check the full documentation to fund out about all their arguments:
+_GCP_RemoveSamples_, _GCP_ReorderSamples_, _GCP_ChangeSampleNames_, _GCP_AssignGroups_.
+
+Let's see an example of two of them:
+
+```{r}
+GCPlist01 <- GCP_ChangeSampleNames(GCPlist = GCPlist00,
+                                   old_names = GCPlist00$sampleINFO$Sample,
+                                   new_names = c("S_1", "S_2", "S_3", "S_4", "S_5", "V_1", "V_2", "V_3", "V_4", "V_5"))
+```
+
+
+```{r}
+GCPlist02 <- GCP_AssignGroups(GCPlist = GCPlist01,
+                              automatic_assignment = "groupfirst",
+                              separator_automatic_assignment = "_",
+                              name_column_groups = "Condition",
+                              controlgroup = "S")
+```
+
+Very important!! Either you imported the groups through an external table which file name was passed to the argument 'samples_info' argument of the function _ImportOutputMaxQuant_, or you created them with the function _GCP_AssignGroups_, you might want to pass the name of the column of the sampleINFO data frame that contain this group categorisation with the function _set_name_column_groups_:
+
+```{r}
+set_name_column_groups("Condition")
+```
+
+This will set an option in your working environment that, by default, will pass that name to every function that has the argument 'name_column_groups' (and trust me, there are a lot!)
+
+Likewise, to color those groups consistently in all the visualisations, set the colors you want with the function _set_col_pal_
+
+```{r}
+set_col_pal(c(S = "green", V = "orange"))
+```
+
+In the example dataset we are using for this vingettes, the two sample groups (defined in the column 'Condition' of the sampleINFO table) are 'S' and 'V'. What we just set ensure that all the visualisation considering these groups will assign a green color to S and a blue color to V.
+
+
+
+# Pre-processing
+
+It's probably a good idea now to run _GCP_RemoveAllZero_ to remove proteins that have zero as intensity in all samples.
+
+```{r}
+GCPlist03 <- GCP_RemoveAllZero(GCPlist02)
+```
+
+
+...and then, since the output of MaxQuant usually marks as zero the missing intensities, it's better to replace them with actual missing values with the function _GCP_ReplaceZerowithNA_:
+
+```{r}
+GCPlist04 <- GCP_ReplaceZerowithNA(GCPlist03)
+```
+
+
+Now, we could test the normal distribution of the intensities with _GCP_TestNormality_:
+
+```{r}
+GCPlist05 <- GCP_TestNormality(GCPlist04)
+```
+
+As you can see from what is printed in the console, additional columns have been added to the proteinINFO table of the list, in this case with the results of the Shapiro-Wilk test. This will always happen when applying a statistical test.
+
+
+# Visualisation of Pre-processing
+
+Let's visualise our data so far! We have plenty of cool functions, including: _GCP_DensityplotIntensities_, _GCP_QQplotIntensities_, _GCP_BoxPlots_, _GCP_Dendogram_, _GCP_BarPlot_, _GCP_Venn_.
+All the visualisation of this package is saved as a ggplot object: this means that you can use the ggplot grammar to further edit it.
+Moreover, you can use the function _export_figures_ to quickly export it, as I show you below:
+
+```{r}
+Fig01_IntensityDistribution_before_processing <- GCP_DensityplotIntensities(GCPlist = GCPlist05,
+                                                                            Title = "Distribution of intensities, before processing")
+# export_figures(Fig01_IntensityDistribution_before_processing)    ## this would create a .png file with that name on your current working directory
+
+print(Fig01_IntensityDistribution_before_processing)
+```
+
+```{r}
+Fig02_QQ_plot_before_processing <- GCP_QQplotIntensities(GCPlist = GCPlist05,
+                                                         Title = "QQ plot - before processing")
+# export_figures(Fig02_QQ_plot_before_processing)
+
+print(Fig02_QQ_plot_before_processing)
+```
+
+```{r}
+Fig03_BoxPlot_before_processing <- GCP_BoxPlots(GCPlist = GCPlist05,
+                                                by_samples = TRUE,
+                                                Title = "Distribution of intensities, before processing")
+# export_figures(Fig03_BoxPlot_before_processing)
+
+print(Fig03_BoxPlot_before_processing)
+```
+
+```{r}
+Fig04_Dendogram_before_processing <- GCP_Dendogram(GCPlist05)
+# export_figures(Fig04_Dendogram_before_processing)
+
+print(Fig04_Dendogram_before_processing)
+```
+
+```{r}
+Fig05_BarPlot_before_processing <- GCP_BarPlot(GCPlist05)
+# export_figures(Fig05_BarPlot_before_processing)
+
+print(Fig05_BarPlot_before_processing)
+```
+
+```{r}
+Fig06_Venn_before_processing <- GCP_Venn(GCPlist05)
+# export_figures(Fig06_Venn_before_processing)
+
+print(Fig06_Venn_before_processing)
+```
+
+
+It's clear from the figures that there is work to do on these data..!
+
+
+
+# Processing
+
+Then, to ensure a better normal distribution of the data, a log-transofrmation is strongly advised. Use the function _GCP_LogTransformIntensities_:
+
+```{r}
+GCPlist06 <- GCP_LogTransformIntensities(GCPlist = GCPlist05,
+                                         base = 2)
+```
+
+A good idea might also be to remove proteins that are missing values for too many samples. We can use _GCP_FilterNAperCondition_ and a ratio of 0.5 means that a protein will be removed if it has more than 50% of missing values in each condition (the conditions are defined, as always, by how the option 'name_column_groups' is set; or it can be specified explicitly the 'name_column_groups' argument).
+
+```{r}
+GCPlist07 <- GCP_FilterNAperCondition(GCPlist = GCPlist06,
+                                      ratio = 0.5)
+```
+
+
+Great! Let's look now at the bar plots of proteins per samples and at the Venn graph showing proteins shared by the groups:
+
+```{r}
+Fig07_BarPlot_post_filteringNA <- GCP_BarPlot(GCPlist = GCPlist07,
+                                              label_numbers = TRUE,
+                                              showCV = TRUE,
+                                              rotate_sample_names = TRUE)
+# export_figures(Fig07_BarPlot_post_filteringNA)
+
+print(Fig07_BarPlot_post_filteringNA)
+```
+
+```{r}
+Fig08_Venn_post_filteringNA <- GCP_Venn(GCPlist07)
+# export_figures(Fig08_Venn_post_filteringNA)
+
+print(Fig08_Venn_post_filteringNA)
+```
+
+
+Look at the Venn graph we just created: are curious to know more about those lonely protein, aren't you?? Which one can they possibly be???
+No need to freak out!! Just use the function _GCP_ProteinsGrouped_ to mark them on the proteinINFO table!
+
+```{r}
+GCPlist08 <- GCP_ProteinsGrouped(GCPlist07)
+```
+
+And if you want to have a nice overview, you can run _GCP_ProteinsGroupedSummary_ which should (theoretically!) give you the same numbers in the Venn graph.
+The added benefit is that, while Venn graph are limited to a maximum of 4 groups, this approach can be applied to even more, should you have!
+
+```{r}
+SummaryTable_ProteinsGrouped_filteringNA <- GCP_ProteinsGroupedSummary(GCPlist08)
+# export_the_table(SummaryTable_ProteinsGrouped_filteringNA)   ## this would quickly export that table in your working directory!
+
+print(SummaryTable_ProteinsGrouped_filteringNA)
+```
+
+
+
+And now it's time to impute all those missing values! We'll be doing it with the scImpute() and tImpute() functions of the "PhosR" package, and we'll be doing it with a simple easy step using the function _GCP_NAimputation_:
+
+```{r}
+GCPlist09 <- GCP_NAimputation(GCPlist = GCPlist08,
+                              quant_rate = 0.5)
+```
+
+
+A this point, we could further standardise the data. I'd describe you the function _GCP_ScaleIntensities_:
+
+- first argument, as usual, the GCPlist;
+- in the 'subtract' argument you should specify what to subtract, i.e. how to center the data. Choose "mean" if you what to subtract the mean or "median" to subtract the median. There is actually an additional option, "shift_median", which I'll describe later.... (a bit of suspense for it!);
+- in the argument 'divide' you can specify how to scale the data among: "sd" to divide for the standard deviation, "sqrt_sd" to divide for the square root of the standard deviation, "maxmin" to divide by the range (the difference between the maximum and the minimum);
+- by_sample should be TRUE to perform such centering and scaling per sample, or FALSE to perform it by protein.
+
+If, and only if, by_sample is TRUE, and if you don't want negative values out of the centering operation, the option "shift_median" in the argument subtract will center the value to the global median (by just subtracting an offset). VERY IMPORTANT: if you do not specify anything in the last argument 'name_column_groups', it will take what is set in the option as usual, and this shift of the median will be performed differently for each group: i.e.: each sample of a group will be centered to the global median of its group. If you instead do not want to perform such group-wise shift, but just a shift to the global median of all the samples, remember to add and set the further argument 'name_column_groups' to NULL.
+
+```{r}
+GCPlist10 <- GCP_ScaleIntensities(GCPlist = GCPlist09,
+                                  subtract = "shift_median",
+                                  divide = "sqrt_sd",
+                                  by_sample = TRUE)
+```
+
+
+Let's check the normality and visualise the data now after all of this work!
+
+```{r}
+GCPlist11 <- GCP_TestNormality(GCPlist10)
+```
+
+```{r}
+Fig09_IntensityDistribution_post_processing <- GCP_DensityplotIntensities(GCPlist = GCPlist11,
+                                                                          Title = "Distribution of intensities, post processing")
+# export_figures(Fig09_IntensityDistribution_post_processing)
+
+print(Fig09_IntensityDistribution_post_processing)
+```
+
+```{r}
+Fig10_QQ_plot_post_processing <- GCP_QQplotIntensities(GCPlist = GCPlist11,
+                                                       Title = "QQ plot - post processing")
+# export_figures(Fig10_QQ_plot_post_processing)
+
+print(Fig10_QQ_plot_post_processing)
+```
+
+```{r}
+Fig11_BoxPlot_post_processing <- GCP_BoxPlots(GCPlist = GCPlist11,
+                                              by_samples = TRUE,
+                                              Title = "Distribution of intensities, post processing")
+# export_figures(Fig11_BoxPlot_post_processing)
+
+print(Fig11_BoxPlot_post_processing)
+```
+
+```{r}
+Fig12_Dendogram_post_processing <- GCP_Dendogram(GCPlist11)
+# export_figures(Fig12_Dendogram_post_processing)
+
+print(Fig12_Dendogram_post_processing)
+```
+
+
+# PCA
+
+One more visualisation and unsupervised multivariate statistical analysis: the Principal Component Analysis. There are two functions that perform it: _GCP_plotPCA_ produces a plot (a ggplot, as always!), while  _GCP_PCA()_ actually compute the scores and the loadings of the principal components and add them to the sampleINFO table and protinINFO table, respectively.
+
+```{r}
+Fig13_PCA_score_plot <- GCP_plotPCA(GCPlist = GCPlist11,
+                                    scores_or_loadings = "scores",
+                                    PC_to_plot = c("PC1", "PC2"),
+                                    name_column_labels = "Sample",
+                                    ellipses_on_score = TRUE)
+# export_figures(Fig13_PCA_score_plot)
+
+print(Fig13_PCA_score_plot)
+```
+
+```{r}
+Fig14_PCA_loading_plot <- GCP_plotPCA(GCPlist = GCPlist11,
+                                      scores_or_loadings = "loadings",
+                                      PC_to_plot = c("PC1", "PC2"),
+                                      name_column_groups_loading = NULL,
+                                      name_column_labels_loading = "Protein names",
+                                      col_pal_loading = NULL,
+                                      ellipses_on_loading = FALSE)
+# export_figures(Fig14_PCA_loading_plot)
+
+print(Fig14_PCA_loading_plot)
+```
+
+```{r}
+GCPlist12 <- GCP_PCA(GCPlist = GCPlist11)
+```
+
+
+# T-test and Fold Change (FC)
+
+In the example dataset we are looking at in this vignette we have two groups: that's the perfect scenario for running a t-test.
+The following code provide an example of how to use _GCP_ttest_ to perform a paired t-test, with the additional Benjamini-Hochberg False Discovery Rate (FDR) p-value correction.
+
+```{r}
+GCPlist13 <- GCP_ttest(GCPlist = GCPlist12,
+                       paired = TRUE,
+                       FDR = TRUE,
+                       pcutoff = 0.05)
+```
+
+We might want to also look at the Fold Change with the function _GCP_FoldChange_! The following code computes a paired Fold Change (FC) analysis on our data.
+Note that passing TRUE to the argument 'are_log_transf' will tell to the algorithm that the data are log-transformed, and so the FC will be actually calculated with a subtraction, instead of a division!
+Also, even if it's not reported in the example below, a potential further argument 'control_group' would allow you to set what you want as control group, just to be sure.
+
+```{r}
+GCPlist14 <- GCP_FoldChange(GCPlist = GCPlist13,
+                            paired = TRUE,
+                            are_log_transf = TRUE,
+                            log_base = 2)
+```
+
+And now, why not creating a graph plotting the negative logarithm of p-values from the t-test on the Y-axis, and the FC analysis on the X-axis? Easy-job with _GCP_Volcano_!
+
+```{r}                            
+Fig15_Volcano_plot <- GCP_Volcano(GCPlist = GCPlist14,
+                                  x_val = "logFC",
+                                  y_val = "ttest_Pvalues",
+                                  log_base = 2,
+                                  pcutoff_colored = 0.05,
+                                  pcutoff_line = 0.05,
+                                  pcutoff_prot_label = 0.005,
+                                  name_column_proteinlabels = "Protein names",
+                                  name_column_proteingroups = NULL,
+                                  col_pal_difference = c("grey", "blue", "red"),
+                                  col_pal_groups = NULL)
+# export_figures(Fig15_Volcano_plot)
+
+print(Fig15_Volcano_plot)
+```
+
+
+
+# Heat map and box-plots on proteins
+
+We might want to perform an heat map only on statistically significantly different proteins between the two groups (let's consider again the original two groups for this example).
+We can keep only significant proteins with _GCP_FilterProteins_:
+
+```{r}
+GCPlist14f <- GCP_FilterProteins(GCPlist = GCPlist14,
+                                 operation = "ttest_Pvalues < 0.05")
+```
+
+
+And so we run _GCP_HeatMap_. I know it's a function with a of overwhelming assemble of arguments, but trust me they are there to offer you the maximum personalisation of the HeatMap. I would mention some:
+- name_column_groups: here it can be more than one! If more categorisation of the samples are passed (as column names of the sampleINFO table), multiple bars will be showed!
+- name_column_groups_protein: exactly the same of name_column_groups, but for proteins, so for column names of proteinINFO! Use it if you have proteins belonging to certain category
+- col_pal_list: pass the colors you want for those group as a list!
+
+```{r}
+Fig16_The_Heat_Map_sign <- GCP_HeatMap(GCPlist = GCPlist14f,
+                                       name_column_groups = c("Condition", "Replicate"),
+                                       name_column_labels = "Sample",
+                                       name_column_groups_protein = NULL,
+                                       name_column_labels_protein = "Protein names",
+                                       name_rows = FALSE,
+                                       name_columns = TRUE,
+                                       rotate_name_columns = TRUE,
+                                       col_pal_list = list(Condition = c(S = "green", V = "blue"),
+                                                           Replicate = c("lightskyblue", "lightskyblue1", "lightskyblue2", "lightskyblue3", "lightskyblue4")))
+# export_figures(Fig16_The_Heat_Map_sign)
+
+print(Fig16_The_Heat_Map_sign)
+```
+
+
+Still working only on significant proteins, we could now perform box-plots sample-wise, so showing the distribution of single proteins in all the samples grouped by conditions (while the box-plots we saw before were protein-wise, i.e.: showing the distributions of all the protein intensities in each sample).
+To do it, the function is the same, _GCP_BoxPlots_, but just set the argument 'by_samples' as FALSE. Watch out that this will create a list of ggplot objects, one for each protein, and what is exported as indicated in the code below will be single file for each of those.
+
+```{r}
+Fig17_BoxPlots_sign <- GCP_BoxPlots(GCPlist = GCPlist14f,
+                                    by_samples = FALSE)
+# export_figures(Fig17_BoxPlots_sign)                            ## exporting each box-plot as a single png file
+# export_figures(Fig17_BoxPlots_sign, exprt_fig_type = "pdf")    ## exporting all box-plots in a pdf file with many pages
+
+print(Fig17_BoxPlots_sign[1:4])
+```
+
+
+
+
+# ANOVA and multiple FC analyses
+
+If you have more than two group, you would instead run an ANOVA analysis.
+Below I'm going to create four mock groups and run a one-way ANOVA with Tukey HSD post-hoc test with _GCP_ANOVA_, and also FC analyses considering all group pairs with _GCP_FoldChange_Multi_.
+
+```{r} 
+GCPlist14a <- GCPlist14
+GCPlist14a$sampleINFO[, "Group_multi"] <- factor(c("gr1", "gr1", "gr2", "gr2", "gr3", "gr3", "gr3", "gr4", "gr4", "gr4"), levels = c("gr1", "gr2", "gr3", "gr4"))
+
+
+GCPlist14a1 <- GCP_ANOVA(GCPlist = GCPlist14a,
+                         name_column_groups = "Group_multi")
+```
+
+```{r}
+GCPlist14a2 <- GCP_FoldChange_Multi(GCPlist = GCPlist14a1,
+                                  name_column_groups = "Group_multi",
+                                  paired = FALSE,
+                                  are_log_transf = TRUE,
+                                  log_base = 2)
+```
+
+
+
+## batch correction
+
+I'm dedicating now a brief section for a very cool function that can turn very useful in some specific cases: when you run the analyses of your projects across different batches.
+Indeed, the function _GCP_ComBat_ is a wrapper that implement the batch effects adjustment performed by the function ComBat from the "sva" R-package:
+All you need is to pass to the 'batch' argument a numeric/factor vector with the batch information (so this vector must be of the same length of the samples) or a name of the column of sampleINFO containing such information.
+The dataset we are using as example for this vingettes don't need such a batch effects correction, but in the example below I create mock batches to show you how to use the function:
+
+```{r}
+GCPlist14b <- GCPlist14
+
+# passing a numeric/factor vector directly to the 'batch' argument:
+
+GCPlist14b1 <- GCP_ComBat(GCPlist = GCPlist14b,
+                          batch = c(1, 2, 3, 1, 2, 3, 1, 2, 3, 1))
+```
+```{r}
+# passing a column name of sampleINFO, containing the numeric/factor vector, to the 'batch' argument:
+
+GCPlist14b$sampleINFO[, "batches"] <- factor(c("batch1", "batch2", "batch3", "batch1", "batch2", "batch3", "batch1", "batch2", "batch3", "batch1"), levels = c("batch1", "batch2", "batch3"))
+
+GCPlist14b2 <- GCP_ComBat(GCPlist = GCPlist14b,
+                        batch = "batches")
+```
+
+
+# export time!
+
+Working on R is really amazing, isn't it?!! But I guess at some point you would export these elaborations so you can better visualise the big tables, don't you?
+You can do it at any time with the function _ExportGCPlist_.
+You can export in different ways, and you can either export a single GCPlist or multiple GCPlists at once.
+
+To export a single GCPlist.
+- pass it to the first argument of _ExportGCPlist_.
+- In the second argument, 'filename', put the name of the file that will be created (must ends in ".txt", ".csv", or ".xlsx").
+- In the third argument, 'exportype' you can choose if you want to export the intensities, proteinINFO, or sampleINFO table. Moreover, if you select "all", intensities and proteinINFO will be put together and exported together! Moreover, if you select "sheets", all of them will be exported in three different sheets of an Excel file.
+- additional arguments include 'intensity_indication', 'protgenenames', 'protIDclean', 'specific_columns' which give you the possibility of some more personalisation, check the full documentation for those, or leave the default settings, hopefully you will like the outcome anyways!
+
+Since you don't necessary need all those arguments, here the simplest code to export efficiently a single GCPlist.
+This simple command will export: protid, Accession, Protein names, Gene names, the intensities, and all the results we computed (such as the Shapiro-Wilk test, the presence of protein per group, the Principal Components, the t-test, the Fold Change...):
+
+```{r, eval=FALSE}
+ExportGCPlist(GCPlist14, "GCPlist14_single_export.txt")
+```
+
+
+To export at once multiple GCPlists, just pass a list of such lists to the first argument and indicate a file name that ends with ".xlsx" in the second argument.
+This is really cool!
+
+```{r, eval=FALSE}
+GCPlist_of_lists <- list(asimported = GCPlist00,
+                         `before processing` = GCPlist05,
+                         `post processing` = GCPlist11,
+                         with_statistics = GCPlist14,
+                         with_mock_ANOVA = GCPlist14a2,
+                         with_mock_batchcorr = GCPlist14b2)
+
+ExportGCPlist(GCPlist_of_lists, "GCPlists_multiple_export.xlsx")
+```
+
+
+
+# Post-translational modifications (PTMs)
+
+A key highlight of this package is that it elaborates data from post-translational modifications (PTMs) experiment.
+The two functions specifically developed for that are: _ImportPTMs_ and _GCP_ratioPTMprotein_. In the example below we'll be using the first one at the beginning and the latter at the end, in the middle we'll be using a bunch of the functions we already saw!
+
+To import a dataset, the function _ImportPTMs_ is very very similar to _ImportOutputMaxQuant_ we saw. The only two particular arguments of _ImportPTMs_ are:
+- 'pattern_intensity', which should be the character contained in the intensity columns to uniquely identify them: in our example they are "Intensity S1", "Intensity S2", "Intensity S3" ... so we can use "Intensity " as 'pattern_intensity'.
+- 'pattern_isoforms', if you also want to import the different isoforms as separate rows, in addition to the previous argument, also specify here the pattern that can identify the different isoforms: in our example "Intensity S1___1", "Intensity S1___2", "Intensity S1___3", ... so we can use "___" as such pattern.
+The object created will still be a GCPlist (a list with the three tables: intesities, proteinINFO, and sampleINFO).
+
+```{r}
+proteinGroupsPTM_path <- system.file("extdata", "AcetylKSites_vignettes.txt.gz", package = "GetCoolProteopipe")
+
+GCPlistPTM00 <- ImportPTMs(MaxQuant_table_name = proteinGroupsPTM_path,     ## you can just put the name of your file in your current working directory
+                           samples_info = NULL,                             ## also here potentially
+                           fasta_database = "mouse",
+                           prioritize_MaxQuant_names = TRUE,
+                           pattern_intensity = "Intensity ",
+                           pattern_isoforms = "___")
+```
+
+
+Let's further improve the sample names using _GCP_ChangeSampleNames_:
+
+```{r}
+GCPlistPTM01 <- GCP_ChangeSampleNames(GCPlist = GCPlistPTM00,
+                                      old_names = GCPlistPTM00$sampleINFO$Sample,
+                                      new_names = c("S_1", "S_2", "S_3", "S_4", "S_5", "V_1", "V_2", "V_3", "V_4", "V_5"))
+```
+
+
+Followed by a similar workflow to the one we previously saw:
+
+```{r}
+GCPlistPTM02 <- GCP_AssignGroups(GCPlist = GCPlistPTM01,
+                                 automatic_assignment = "groupfirst",
+                                 separator_automatic_assignment = "_",
+                                 name_column_groups = "Condition",
+                                 controlgroup = "S")
+```
+```{r}
+set_name_column_groups("Condition")
+```
+```{r}
+GCPlistPTM03 <- GCP_RemoveAllZero(GCPlistPTM02)
+```
+```{r}
+GCPlistPTM04 <- GCP_ReplaceZerowithNA(GCPlistPTM03)
+```
+```{r}
+GCPlistPTM05 <- GCP_LogTransformIntensities(GCPlist = GCPlistPTM04,
+                                            base = 2)
+```
+```{r}
+GCPlistPTM06 <- GCP_FilterNAperCondition(GCPlist = GCPlistPTM05,
+                                         ratio = 0.5)
+```
+```{r}
+GCPlistPTM07 <- GCP_NAimputation(GCPlist = GCPlistPTM06,
+                                 quant_rate = 0.5)
+```
+```{r}
+GCPlistPTM08 <- GCP_ScaleIntensities(GCPlist = GCPlistPTM07,
+                                  subtract = "shift_median",
+                                  divide = "sqrt_sd",
+                                  by_sample = TRUE)
+```
+
+
+So, the peculiar function _GCP_ratioPTMprotein_ will do something fundamental and unique.
+It has two simple arguments we must fill: a GCPlist created from PTMs and a GCPlist created from proteins.
+Then, for each feature intensity of the PTM, it will check if there is a corresponding protein based on a matching Accession number and, if there is, it will divide those intensities. If there is not, it will simple remove that intensities.
+There is actually a third argument: if the data are log-transformed (such in our example) set 'are_log_transf' as TRUE, so the subtraction will be performed instead of the division.
+
+```{r}
+GCPlistPTM09 <- GCP_ratioPTMprotein(GCPlistPTM = GCPlistPTM08,
+                                    GCPlistProteins = GCPlist14,
+                                    are_log_transf = TRUE)
+```
+
+
+Great! We can then apply statistics and other stuff as already described, but I don't want to repeat myself and I got lazy now, so let's export what we got and we are done!
+
+```{r, eval=FALSE}
+GCPlist_of_PTMlists <- list(asimported = GCPlistPTM00,
+                            `before processing` = GCPlistPTM04,
+                            `post processing` = GCPlistPTM08,
+                            with_ratio_protein = GCPlistPTM09)
+ExportGCPlist(GCPlist_of_PTMlists, "GCPlistsPTM_multiple_export.xlsx")
+```
+
+
+I hope this vingettes was useful for you and that you enjoy using this package as much as I enjoyed programming it!
+For any question on the functions don't hesitate to contact me, while for any question on the proteomics workflow don't hesitate to contact Clarissa!
+
+Long life unicorns and see you at the next package!!

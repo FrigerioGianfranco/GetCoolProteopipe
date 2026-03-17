@@ -5,7 +5,6 @@
 #' @param GCPlist a list created with the ImportOutputMaxQuant function.
 #' @param by_samples logical. If TRUE, a single box plot graph will be returned with a box for each sample. If FALSE, multiple box plots can be generated for each protein, as specified in the only_these_protid or only_the_first arguments.
 #' @param name_column_groups NULL or character of length 1. The name of the column of the sampleINFO table containing the sample groups.
-#' @param raw_or_LFQ one of the following: "raw", "LFQ". The box plots will be performed only in the specified data.
 #' @param col_pal NULL or a character vector containing colors. If NULL, colors from the pals package will be used. To see the colors, run build_long_vector_of_colors().
 #' @param Title NULL or character of length 1. The title you want to ad on the top of the plot. Used only if by_samples is TRUE.
 #' @param only_these_protid NULL or a character vector of protid. Box plots will be performed only for those proteins. Used only if by_samples is FALSE.
@@ -13,8 +12,31 @@
 #'
 #' @return A ggplot object, if by_samples is TRUE; or a list of ggplot objects, if by_samples is FALSE.
 #'
+#'
+#' @examples
+#' \dontrun{
+#'
+#' # A single Box-plot graph with distribution of all proteins for each sample:
+#'
+#' Fig03_BoxPlot_before_processing <- GCP_BoxPlots(GCPlist = GCPlist05,
+#'                                                 by_samples = TRUE,
+#'                                                 Title = "Distribution of intensities, before processing")
+#' export_figures(Fig03_BoxPlot_before_processing)
+#'
+#'
+#' # Multiple Box-plot graphs, each with the distributions of a single protein with boxes by sample groups:
+#'
+#' Fig17_BoxPlots_sign <- GCP_BoxPlots(GCPlist = GCPlist14f,
+#'                                     by_samples = FALSE)
+#' export_figures(Fig17_BoxPlots_sign)                            ## exporting each box-plot as a single png file
+#' export_figures(Fig17_BoxPlots_sign, exprt_fig_type = "pdf")    ## exporting all box-plots in a pdf file with many pages
+#'
+#' }
+#'
+#'
+#'
 #' @export
-GCP_BoxPlots <- function(GCPlist, by_samples = TRUE, name_column_groups = NULL, raw_or_LFQ = getOption("GetCoolProteopipe.raw_or_LFQ"), col_pal = NULL, Title = "Distribution of intensities", only_these_protid = NULL, only_the_first = NULL) {
+GCP_BoxPlots <- function(GCPlist, by_samples = TRUE, name_column_groups = getOption("GetCoolProteopipe.name_column_groups"), col_pal = getOption("GetCoolProteopipe.col_pal"), Title = "Distribution of intensities", only_these_protid = NULL, only_the_first = NULL) {
 
   checkGCPlist(GCPlist)
 
@@ -26,6 +48,7 @@ GCP_BoxPlots <- function(GCPlist, by_samples = TRUE, name_column_groups = NULL, 
     if (length(name_column_groups)!=1) {stop("name_column_groups must be NULL or a character of length 1")}
     if (!is.character(name_column_groups)) {stop("name_column_groups must be NULL or a character of length 1")}
     if (is.na(name_column_groups)) {stop("name_column_groups must be NULL or a character of length 1, not a NA")}
+    cat(paste0("\n -- The name_column_groups considered is '", name_column_groups, "' --\n\n"))
     if (length(which(colnames(GCPlist$sampleINFO) == name_column_groups)) != 1) {stop("The name passed in name_column_groups must be a name of a column of the sampleINFO dataframe")}
     if (name_column_groups == "allwiththis") {stop("Please, just don't pass 'allwiththis' to name_column_groups, thanks!")}
 
@@ -34,30 +57,35 @@ GCP_BoxPlots <- function(GCPlist, by_samples = TRUE, name_column_groups = NULL, 
     }
 
   } else {
+    cat("\n -- The name_column_groups considered is NULL --\n\n")
     if ("allwiththis" %in% colnames(GCPlist$sampleINFO)) {stop("Please, don't call a column of the sampleINFO data frame 'allwiththis' as I need to create one with this name now")}
     GCPlist$sampleINFO <- mutate(GCPlist$sampleINFO, allwiththis = as.factor("theOnlyGroup"))
 
     name_column_groups <- "allwiththis"
   }
 
-  if (!identical(tolower(raw_or_LFQ), c("lfq", "raw"))) {
-    if (length(raw_or_LFQ) != 1) {stop('raw_or_LFQ_or_both must be one of "raw", "LFQ"')}
-    if (is.na(raw_or_LFQ)) {stop('raw_or_LFQ_or_both must be one of "raw", "LFQ"')}
-  }
-  raw_or_LFQ <- tolower(raw_or_LFQ)
-  raw_or_LFQ <- match.arg(raw_or_LFQ, c("lfq", "raw"))
-
-  if (raw_or_LFQ == "lfq") {
-    cat("\n -- LFQ data are used --\n\n")
-  } else if (raw_or_LFQ == "raw") {
-    cat("\n -- raw data are used --\n\n")
-  }
-
   if (!is.null(col_pal)) {
     if (!is.character(col_pal)) stop("col_pal must be a character vector")
     if (any(is.na(col_pal))) stop("col_pal must not contain NAs")
-
+    if (is.null(names(col_pal))) {
+      cat(paste0(' --- col_pal is  c("', paste0(col_pal, collapse = '", "'), '") ---\n\n'))
+    } else {
+      cat(' --- col_pal is  c(')
+      for (i in seq(length(col_pal))) {
+        if (names(col_pal)[i]!="") {
+          cat(paste0(names(col_pal)[i], ' = "'))
+        } else {
+          cat('"')
+        }
+        cat(paste0(col_pal[i], '"'))
+        if (i != length(col_pal)) {
+          cat(', ')
+        }
+      }
+      cat(') ---\n\n')
+    }
   } else {
+    cat(" -- col_pal is  NULL --\n\n")
     col_pal <- build_long_vector_of_colors()
   }
 
@@ -85,15 +113,7 @@ GCP_BoxPlots <- function(GCPlist, by_samples = TRUE, name_column_groups = NULL, 
     if (!all(names(named_colors_bygroup) %in% levels(pull(GCPlist$sampleINFO, name_column_groups)) & levels(pull(GCPlist$sampleINFO, name_column_groups)) %in% names(named_colors_bygroup))) {stop("the names of col_pal don't correspond to the levels of name_column_groups")}
   }
 
-
-
-  if (raw_or_LFQ == "raw") {
-    df_intensities <- GetFeatistics::transpose_feat_table(GCPlist$quant_raw)
-  } else if (raw_or_LFQ == "lfq") {
-    df_intensities <- GetFeatistics::transpose_feat_table(GCPlist$quant_LFQ)
-  } else {
-    stop('raw_or_LFQ must be one of "raw", "LFQ"')
-  }
+  df_intensities <- GetFeatistics::transpose_feat_table(GCPlist$intensities)
 
   df_intensities_wg <- add_column(df_intensities,
                                   allwiththis = factor(NA, levels = levels(pull(GCPlist$sampleINFO, name_column_groups))),
@@ -115,7 +135,6 @@ GCP_BoxPlots <- function(GCPlist, by_samples = TRUE, name_column_groups = NULL, 
         }
       }
     }
-
 
     df_intensities_wg_long <- pivot_longer(df_intensities_wg,
                                            cols = colnames(df_intensities_wg)[which(!colnames(df_intensities_wg) %in% c("samples", name_column_groups))],
@@ -150,8 +169,6 @@ GCP_BoxPlots <- function(GCPlist, by_samples = TRUE, name_column_groups = NULL, 
       if (is.na(only_the_first)) {stop("if not NULL, only_the_first must be a numeric of lenght 1, not a missing value")}
     }
 
-
-
     if (is.null(only_these_protid) & is.null(only_the_first)) {
       prot_to_use <- colnames(df_intensities)[-which(colnames(df_intensities) == "samples")]
     } else if (!is.null(only_these_protid)) {
@@ -163,11 +180,8 @@ GCP_BoxPlots <- function(GCPlist, by_samples = TRUE, name_column_groups = NULL, 
       prot_to_use <- colnames(df_intensities)[-which(colnames(df_intensities) == "samples")][1:only_the_first]
     }
 
-
-
     boxplots_list <- vector(mode = "list", length = length(prot_to_use))
     names(boxplots_list) <- prot_to_use
-
 
     for (this_prot in prot_to_use) {
 

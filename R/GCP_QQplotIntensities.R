@@ -3,30 +3,28 @@
 #' It crates a Q-Q plot considering all the intensities of protein from all samples.
 #'
 #' @param GCPlist a list created with the ImportOutputMaxQuant function.
-#' @param raw_or_LFQ one of the following: "raw", "LFQ".  The plot will be created only with the specified data intensities.
 #' @param Title NULL or character of length 1. The title you want to ad on the top of the plot.
 #'
 #' @return a ggplot object.
 #'
+#'
+#' @examples
+#' \dontrun{
+#'
+#' Fig02_QQ_plot_before_processing <- GCP_QQplotIntensities(GCPlist = GCPlist05,
+#'                                                          Title = "QQ plot - before processing")
+#' export_figures(Fig02_QQ_plot_before_processing)
+#'
+#' }
+#'
+#'
+#'
 #' @importFrom ggpubr ggqqplot
 #'
 #' @export
-GCP_QQplotIntensities <- function(GCPlist, raw_or_LFQ = getOption("GetCoolProteopipe.raw_or_LFQ"), Title = "QQ plot intensities") {
+GCP_QQplotIntensities <- function(GCPlist, Title = "QQ plot intensities") {
 
   checkGCPlist(GCPlist)
-
-  if (!identical(tolower(raw_or_LFQ), c("lfq", "raw"))) {
-    if (length(raw_or_LFQ) != 1) {stop('raw_or_LFQ must be one of "raw", "LFQ"')}
-    if (is.na(raw_or_LFQ)) {stop('raw_or_LFQ must be one of "raw", "LFQ"')}
-  }
-  raw_or_LFQ <- tolower(raw_or_LFQ)
-  raw_or_LFQ <- match.arg(raw_or_LFQ, c("lfq", "raw"))
-
-  if (raw_or_LFQ == "lfq") {
-    cat("\n -- LFQ data are used --\n\n")
-  } else if (raw_or_LFQ == "raw") {
-    cat("\n -- raw data are used --\n\n")
-  }
 
   if (!is.null(Title)) {
     if (length(Title)!=1) {
@@ -38,16 +36,8 @@ GCP_QQplotIntensities <- function(GCPlist, raw_or_LFQ = getOption("GetCoolProteo
     }
   }
 
-  if (raw_or_LFQ == "raw") {
-    all_intensities <- GCPlist$quant_raw[, colnames(GCPlist$quant_raw)[which(colnames(GCPlist$quant_raw) != "protid")]]  %>%
-      gather(key="sample", value="value")
-  } else if (raw_or_LFQ == "lfq") {
-    all_intensities <- GCPlist$quant_LFQ[, colnames(GCPlist$quant_LFQ)[which(colnames(GCPlist$quant_LFQ) != "protid")]]  %>%
-      gather(key="sample", value="value")
-  } else {
-    stop('raw_or_LFQ must be one of "raw", "LFQ"')
-  }
-
+  all_intensities <- GCPlist$intensities[, colnames(GCPlist$intensities)[which(colnames(GCPlist$intensities) != "protid")]]  %>%
+    gather(key="sample", value="value")
 
   the_QQplot <- ggpubr::ggqqplot(all_intensities$value) +
     ggtitle(Title) +

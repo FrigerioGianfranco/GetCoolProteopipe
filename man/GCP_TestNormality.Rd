@@ -6,7 +6,6 @@
 \usage{
 GCP_TestNormality(
   GCPlist,
-  raw_or_LFQ = getOption("GetCoolProteopipe.raw_or_LFQ"),
   print_DensityPlot = FALSE,
   print_QQPlot = FALSE,
   print_only_these_protid = NULL,
@@ -15,8 +14,6 @@ GCP_TestNormality(
 }
 \arguments{
 \item{GCPlist}{a list created with the ImportOutputMaxQuant function.}
-
-\item{raw_or_LFQ}{one of the following: "raw", "LFQ". The normality will be tested only in the specified data intensities.}
 
 \item{print_DensityPlot}{logical. If TRUE, a PDF with the density plots will be created in the current working directory.}
 
@@ -27,8 +24,17 @@ GCP_TestNormality(
 \item{print_only_the_first}{NULL or a numeric integer. Only the density/q-q-plot of the those first proteins will be exported in the pdf files (suggested as usually with more than a thousand proteins, the file will be too big).}
 }
 \value{
-The GCPlist with the results of the Shapiro test in the proteinINFO table.
+The GCPlist with the results of the Shapiro-Wilk test in the proteinINFO table.
 }
 \description{
-It performs the Shapiro test and print out a density plot and a qqplot.
+It performs the Shapiro-Wilk test and print out a density plot and a qqplot.
+}
+\examples{
+\dontrun{
+
+GCPlist05 <- GCP_TestNormality(GCPlist04)
+
+}
+
+
 }

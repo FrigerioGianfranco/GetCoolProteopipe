@@ -7,13 +7,13 @@
 GCP_NAimputation(
   GCPlist,
   quant_rate = 0.5,
-  name_column_groups = NULL,
+  name_column_groups = getOption("GetCoolProteopipe.name_column_groups"),
   seed = 123,
   method = c("both", "scImpute", "tImpute")
 )
 }
 \arguments{
-\item{GCPlist}{a list created with the ImportOutputMaxQuant function.#'}
+\item{GCPlist}{a list created with the ImportOutputMaxQuant function.}
 
 \item{quant_rate}{numeric, between 0 an 1 (included). Quantification rate per group, considered for the scImpute function.}
 
@@ -27,5 +27,16 @@ GCP_NAimputation(
 a GCPlist list with the missing values imputed.
 }
 \description{
-It performs the imputation of missing values, using the same method of the functions scImpute and tImpute from the PhosR package. MORE DESCRIPTION!
+It performs the imputation of missing values, using the same method of the functions scImpute and tImpute from the PhosR package.
+}
+\examples{
+\dontrun{
+
+GCPlist09 <- GCP_NAimputation(GCPlist = GCPlist08,
+                              quant_rate = 0.5)
+
+}
+
+
+
 }

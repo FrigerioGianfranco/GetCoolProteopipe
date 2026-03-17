@@ -6,29 +6,39 @@
 \usage{
 GCP_ScaleIntensities(
   GCPlist,
-  raw_or_LFQ = getOption("GetCoolProteopipe.raw_or_LFQ"),
   subtract = c("shift_median", "mean", "median"),
   divide = c("sqrt_sd", "sd", "maxmin"),
   by_sample = TRUE,
-  name_column_groups = NULL
+  name_column_groups = getOption("GetCoolProteopipe.name_column_groups")
 )
 }
 \arguments{
 \item{GCPlist}{a list created with the ImportOutputMaxQuant function.}
 
-\item{raw_or_LFQ}{one of the following: "raw", "LFQ". The scale will be performed only in the specified data intensities. Please note that it might not be a good idea to do so on LFQ data, so a warning is generated if LFQ is chosen.}
-
 \item{subtract}{NULL, or "shift_median", or "mean", or "median". Specify it to subtract the mean or median value to all values. If "shift_median", an offset will be subtracted in order to center the medians to the global median.}
 
-\item{divide}{NULL, or "sqrt_sd", or "sd", or "maxmin". Specify it to divide all values by the standard deviation, by the square root of the standard deviation, or by the range (max-min), for each protein.}
+\item{divide}{NULL, or "sqrt_sd", or "sd", or "maxmin". Specify it to divide all values by the standard deviation, by the square root of the standard deviation, or by the range (max-min).}
 
 \item{by_sample}{logical. If TRUE, the centering and scaling will be column-wise (per sample); if FALSE; row-wise (per protein).}
 
-\item{name_column_groups}{NULL or character of length 1. The name of the column of the sampleINFO table containing the sample groups. It needs to be passed only if subtract is "shift_median" and you want to center each sample in a group to the global median of that group, instead of the overall global median.}
+\item{name_column_groups}{NULL or character of length 1. The name of the column of the sampleINFO table containing the sample groups. It needs to be passed only if subtract is "shift_median" and you if want to center each sample in a group to the global median of that group, instead of the overall global median.}
 }
 \value{
 a GCPlist list with the scaled data intensity tables.
 }
 \description{
-In the quant_raw and the quantLFQ data intensity, it scale all the intensities as specified.
+In the intensities data table, it scale all the intensities as specified.
+}
+\examples{
+\dontrun{
+
+GCPlist10 <- GCP_ScaleIntensities(GCPlist = GCPlist09,
+                                  subtract = "shift_median",
+                                  divide = "sqrt_sd",
+                                  by_sample = TRUE)
+
+
+}
+
+
 }

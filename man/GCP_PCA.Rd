@@ -4,17 +4,10 @@
 \alias{GCP_PCA}
 \title{Get Principal Component analysis.}
 \usage{
-GCP_PCA(
-  GCPlist,
-  raw_or_LFQ = getOption("GetCoolProteopipe.raw_or_LFQ"),
-  center = TRUE,
-  scale. = FALSE
-)
+GCP_PCA(GCPlist, center = TRUE, scale. = FALSE)
 }
 \arguments{
 \item{GCPlist}{a list created with the ImportOutputMaxQuant function.}
-
-\item{raw_or_LFQ}{one of the following: "raw", "LFQ". The principal component analysis will be performed only in the specified data.}
 
 \item{center}{logical. Whether the variables should be shifted to be zero centered (as in the prcomp function).}
 
@@ -25,4 +18,14 @@ The GCPlist will be returned with the scores in the sampleINFO and the loadings 
 }
 \description{
 It performs a principal component analysis.
+}
+\examples{
+\dontrun{
+
+GCPlist12 <- GCP_PCA(GCPlist = GCPlist11)
+
+}
+
+
+
 }

@@ -27,8 +27,27 @@ GCP_RemoveSamples(
 \item{name_column_groups}{NULL or character of length 1. The name of the column of the sampleINFO table containing the sample groups. It must be specified if you used remove_groups or keep_groups.}
 }
 \value{
-the GCPlist with samples removed from the sampleINFO, quant_raw and quant_LFQ data frames.
+the GCPlist with samples removed from the sampleINFO, and intensities data frames.
 }
 \description{
-Remove samples from both the raw, LFQ and  SampleIFO data frames. Only one of the arguments among remove_samples, keep_samples, remove_groups, or keep_groups has to be specified.
+Remove samples from both the intensities and  SampleINFO data frames. Only one of the arguments among remove_samples, keep_samples, remove_groups, or keep_groups has to be specified.
+}
+\examples{
+\dontrun{
+
+# specify what to remove:
+
+GCPlist00rm1 <- GCP_RemoveSamples(GCPlist = GCPlist00,
+                                  remove_samples = c("S2", "S5"),
+                                  keep_samples = NULL)
+
+# or specify what to keep (same output as above):
+
+GCPlist00rm2 <- GCP_RemoveSamples(GCPlist = GCPlist00,
+                                  remove_samples = NULL,
+                                  keep_samples = c("S1", "S3", "S4", "V1", "V2", "V3", "V4", "V5"))
+
+}
+
+
 }

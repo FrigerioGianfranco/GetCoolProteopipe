@@ -12,8 +12,19 @@ GCP_FilterProteins(GCPlist, operation)
 \item{operation}{character. Operation(s) to be applied considering a column of proteinINFO (for example: "ttest_PvaluesFDR < 0.05"). All the TRUE from the operation will be kept.}
 }
 \value{
-The GCPlist with a potentially reduced number of rows in the quant_raw and quant_LFQ tables.
+The GCPlist with a potentially reduced number of rows in the intensities tables.
 }
 \description{
-It filters the quant_raw and quant_LFQ data frames considering certain criteria.
+It filters the intensities data frame considering certain criteria.
+}
+\examples{
+\dontrun{
+
+GCPlist14f <- GCP_FilterProteins(GCPlist = GCPlist14,
+                                 operation = "ttest_Pvalues < 0.05")
+
+}
+
+
+
 }

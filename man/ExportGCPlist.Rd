@@ -7,7 +7,7 @@
 ExportGCPlist(
   GCPlist,
   filename = "GCP.xlsx",
-  exportype = getOption("GetCoolProteopipe.raw_or_LFQ"),
+  exportype = c("intensities", "proteinINFO", "sampleINFO", "all", "sheets"),
   intensity_indication = TRUE,
   protgenenames = TRUE,
   protIDclean = TRUE,
@@ -19,15 +19,15 @@ ExportGCPlist(
 
 \item{filename}{character. The name of the file to create. It must end with ".txt", ".csv", or ".xlsx"; and the file will be accordingly created of that format.}
 
-\item{exportype}{exportype one of the following: "raw", "LFQ", "proteinINFO", "sampleINFO", "all", "sheets". If "raw", a table with the raw intensities will be exported; if "LFQ", a table with the LFQ intensities will be exported; if "proteinINFO", a table with all the proteinINFO; if "sampleINFO", a table with all the sampleINFO; if "all", a table with combined quant_raw, quant_LFQ, and proteinINFO will be exported; if "sheets", an Excel table with 4 sheets will be exported. Please note that "all" might be too big to be suitably exported as a '.xlsx' file: if so, export it as '.txt' or '.csv'.}
+\item{exportype}{exportype one of the following: "intensities", "proteinINFO", "sampleINFO", "all", "sheets". If "intensities", a table with the intensities will be exported; if "proteinINFO", a table with all the proteinINFO; if "sampleINFO", a table with all the sampleINFO; if "all", a table with combined intensities and proteinINFO will be exported; if "sheets", an Excel table with 3 sheets will be exported. Please note that "all" might be too big to be suitably exported as a '.xlsx' file: if so, export it as '.txt' or '.csv'.}
 
-\item{intensity_indication}{logical. if TRUE and if exportype is either "raw" or "LFQ" the column names of samples will start with "Intensity " for raw intensities or with "LFQ Intensity " for LFQ intensities. Please note that this will happen anyway if exportype is "all".}
+\item{intensity_indication}{logical. if TRUE and if exportype is "intensities", the column names of samples will start with "Intensity ". Please note that this will happen anyway if exportype is "all".}
 
-\item{protgenenames}{logical. If TRUE and if exportype is either "raw", "LFQ", or "proteinINFO", it will export the columns 'Protein IDs' (or 'Accession', see below), 'Protein names', and 'Gene names'.}
+\item{protgenenames}{logical. If TRUE and if exportype is "intensities" or "proteinINFO", it will export the columns 'Protein IDs' (or 'Accession', see below), 'Protein names', and 'Gene names'.}
 
-\item{protIDclean}{logical. If TRUE (and if protgenenames is TRUE, and if exportype is either "raw", "LFQ", or "proteinINFO") it exports the column 'Accession', which contains only the first code of each protein of the Protein IDs. If FALSE it exports the complete 'Protein IDs' column.}
+\item{protIDclean}{logical. If TRUE (and if protgenenames is TRUE, and if exportype is "intensities" or "proteinINFO"), it exports the column 'Accession', which contains only the first code of each protein of the Protein IDs. If FALSE it exports the complete 'Protein IDs' column.}
 
-\item{specific_columns}{character. If exportype is "raw", "LFQ", or "proteinINFO", you can specify here some additional columns to export from the proteinINFO table. Moreover, you can simply pass here a single element to export all the related result columns, in particular: "shap_test", "PC", "ttest", "FC", "ANOVA"; and also "all_stat" for all of those.}
+\item{specific_columns}{character. If exportype is "intensities" or "proteinINFO", you can specify here some additional columns to export from the proteinINFO table. Moreover, you can simply pass here a single element to export all the related result columns, in particular: "shap_test", "PC", "ttest", "FC", "ANOVA", "presence_group"; and also "all_stat" for all of those.}
 }
 \value{
 Export the file in the current working directory.
@@ -38,21 +38,21 @@ It exports a GPClist in a single table file in the current working directory.
 \examples{
 \dontrun{
 
-# Exporting a single GCPlist
+# exporting a single GCPlist:
 
-ExportGCPlist(GCPlist = GCPlist14,
-              filename = "example_single_export.txt")
+ExportGCPlist(GCPlist14, "GCPlist14_single_export.txt")
 
 
-# Exporting a list of GCPlists
+# exporting multiple GCPlists:
 
-list_of_GCPlists <- list(initial = GCPlist00,
-                         after_NAimputation = GCPlist10,
-                         `after scaling` = GCPlist11,
-                         `after statistics` = GCPlist14)
+GCPlist_of_lists <- list(asimported = GCPlist00,
+                         `before processing` = GCPlist05,
+                         `post processing` = GCPlist11,
+                         with_statistics = GCPlist14,
+                         with_mock_ANOVA = GCPlist14a2,
+                         with_mock_batchcorr = GCPlist14b2)
 
-ExportGCPlist(GCPlist = list_of_GCPlists,
-              filename = "example_list_of_lists.xslx")
+ExportGCPlist(GCPlist_of_lists, "GCPlists_multiple_export.xlsx")
 
 
 }

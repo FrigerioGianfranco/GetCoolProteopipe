@@ -1,18 +1,35 @@
 #' ratio PTM on protein intensities
 #'
-#' It takes the each valid feature intensity of the quant_raw table generated from PTM and it divide it by the relative raw intensity of the protein; the match is based on the Accession.
+#' It takes each valid feature intensity from PTM and it divides it by the relative intensity of the protein; the match is based on the Accession.
 #'
 #' @param GCPlistPTM a list created with the ImportPTMs function.
 #' @param GCPlistProteins a list created with the ImportOutputMaxQuant function.
-#' @param raw_or_LFQ one of the following: "raw", "LFQ". If "raw", the denominator of the ratio will be the quant_raw table of GCPlistProteins; if "LFQ", it will be the quantLFQ table.
+#' @param are_log_transf logical. If the intensities are log-transformed, specify here as TRUE, so the subtraction will be performed instead of the ratio.
 #'
-#' @return a GCPlist list with the calculated ratios of intensities in the quant_raw table.
+#' @return a GCPlist list with the calculated ratios of intensities in the intensities table.
+#'
+#'
+#' @examples
+#' \dontrun{
+#'
+#'
+#' GCPlistPTM09 <- GCP_ratioPTMprotein(GCPlistPTM = GCPlistPTM08,
+#'                                     GCPlistProteins = GCPlist14,
+#'                                     are_log_transf = TRUE)
+#'
+#'
+#' }
+#'
 #'
 #' @export
-GCP_ratioPTMprotein <- function(GCPlistPTM, GCPlistProteins, raw_or_LFQ = getOption("GetCoolProteopipe.raw_or_LFQ")) {
+GCP_ratioPTMprotein <- function(GCPlistPTM, GCPlistProteins, are_log_transf = TRUE) {
 
   checkGCPlist(GCPlistPTM)
   checkGCPlist(GCPlistProteins)
+
+  if (length(are_log_transf)!=1) {stop("are_log_transf must be exclusively TRUE or FALSE")}
+  if (!is.logical(are_log_transf)) {stop("are_log_transf must be exclusively TRUE or FALSE")}
+  if (is.na(are_log_transf)) {stop("are_log_transf must be exclusively TRUE or FALSE")}
 
 
   if (!"Accession"%in%colnames(GCPlistPTM$proteinINFO)) {stop("The column Accession is not present in the proteinINFO table of GCPlistPTM")}
@@ -23,26 +40,12 @@ GCP_ratioPTMprotein <- function(GCPlistPTM, GCPlistProteins, raw_or_LFQ = getOpt
                 paste0(GCPlistProteins$proteinINFO$Accession[which(duplicated(GCPlistProteins$proteinINFO$Accession))], collapse = "\n")))
   }
 
-  if (!identical(tolower(raw_or_LFQ), c("lfq", "raw"))) {
-    if (length(raw_or_LFQ) != 1) {stop('raw_or_LFQ must be one of "raw", "LFQ"')}
-    if (is.na(raw_or_LFQ)) {stop('raw_or_LFQ must be one of "raw", "LFQ"')}
-  }
-  raw_or_LFQ <- tolower(raw_or_LFQ)
-  raw_or_LFQ <- match.arg(raw_or_LFQ, c("lfq", "raw"))
-
-  if (raw_or_LFQ == "lfq") {
-    cat("\n -- LFQ data are used for proteins as denominator --\n\n")
-  } else if (raw_or_LFQ == "raw") {
-    cat("\n -- raw data are used for proteins as denominator --\n\n")
-  }
-
-
-  all_protidPTM <- GCPlistPTM$quant_raw$protid
+  all_protidPTM <- GCPlistPTM$intensities$protid
   valid_protidPTM <- character()
   negative_protidPTM <- character()
 
   for (i in 1:length(all_protidPTM)) {
-    this_prot_values <- as.numeric(GCPlistPTM$quant_raw[which(GCPlistPTM$quant_raw$protid==all_protidPTM[i]), which(colnames(GCPlistPTM$quant_raw)!="protid")])
+    this_prot_values <- as.numeric(GCPlistPTM$intensities[which(GCPlistPTM$intensities$protid==all_protidPTM[i]), which(colnames(GCPlistPTM$intensities)!="protid")])
     this_prot_values_noNA <- this_prot_values[which(!is.na(this_prot_values))]
     this_prot_values_noNA_noZERO <- this_prot_values_noNA[which(this_prot_values_noNA!=0)]
 
@@ -66,11 +69,9 @@ GCP_ratioPTMprotein <- function(GCPlistPTM, GCPlistProteins, raw_or_LFQ = getOpt
   }
 
 
-  if (raw_or_LFQ == "lfq") {
-    Protein_proteinINFO_filtered <- GCPlistProteins$proteinINFO[which(GCPlistProteins$proteinINFO$protid%in%GCPlistProteins$quant_LFQ$protid),]
-  } else if (raw_or_LFQ == "raw") {
-    Protein_proteinINFO_filtered <- GCPlistProteins$proteinINFO[which(GCPlistProteins$proteinINFO$protid%in%GCPlistProteins$quant_raw$protid),]
-  }
+
+  Protein_proteinINFO_filtered <- GCPlistProteins$proteinINFO[which(GCPlistProteins$proteinINFO$protid%in%GCPlistProteins$intensities$protid),]
+
 
 
   GCPoutput_nr <- GCPlistPTM
@@ -88,10 +89,8 @@ GCP_ratioPTMprotein <- function(GCPlistPTM, GCPlistProteins, raw_or_LFQ = getOpt
     tibble_validPTM_found <- filter(tibble_validPTM,
                                     Accession %in% Protein_proteinINFO_filtered$Accession)
 
-    GCPoutput_nr$quant_raw <- filter(GCPoutput_nr$quant_raw,
-                                     protid %in% tibble_validPTM_found$protid)
-    GCPoutput_nr$quant_LFQ <- filter(GCPoutput_nr$quant_LFQ,
-                                     protid %in% tibble_validPTM_found$protid)
+    GCPoutput_nr$intensities <- filter(GCPoutput_nr$intensities,
+                                       protid %in% tibble_validPTM_found$protid)
 
   } else {
 
@@ -106,13 +105,9 @@ GCP_ratioPTMprotein <- function(GCPlistPTM, GCPlistProteins, raw_or_LFQ = getOpt
     tibble_validPTM_found_paired[i, "protidProteins"] <- Protein_proteinINFO_filtered$protid[which(Protein_proteinINFO_filtered$Accession == tibble_validPTM_found_paired$Accession[i])]
   }
 
-  if (raw_or_LFQ == "lfq") {
-    protein_table_to_use <- GCPlistProteins$quant_LFQ[which(GCPlistProteins$quant_LFQ$protid %in% tibble_validPTM_found_paired$protidProteins),]
-  } else if (raw_or_LFQ == "raw") {
-    protein_table_to_use <- GCPlistProteins$quant_raw[which(GCPlistProteins$quant_raw$protid %in% tibble_validPTM_found_paired$protidProteins),]
-  } else {
-    stop('raw_or_LFQ must be "raw" or "LFQ"')
-  }
+
+  protein_table_to_use <- GCPlistProteins$intensities[which(GCPlistProteins$intensities$protid %in% tibble_validPTM_found_paired$protidProteins),]
+
 
 
 
@@ -129,38 +124,39 @@ GCP_ratioPTMprotein <- function(GCPlistPTM, GCPlistProteins, raw_or_LFQ = getOpt
   }
 
 
-  if (!all(colnames(GCPoutput_nr$quant_raw)[which(colnames(GCPoutput_nr$quant_raw)!="protid")] %in% colnames(protein_table_to_use)[which(colnames(protein_table_to_use)!="protid")])) {
+  if (!all(colnames(GCPoutput_nr$intensities)[which(colnames(GCPoutput_nr$intensities)!="protid")] %in% colnames(protein_table_to_use)[which(colnames(protein_table_to_use)!="protid")])) {
     stop(paste0("The following samples are not present in the protein table:\n",
-                paste0(colnames(GCPoutput_nr$quant_raw)[which(colnames(GCPoutput_nr$quant_raw)!="protid")][which(!colnames(GCPoutput_nr$quant_raw)[which(colnames(GCPoutput_nr$quant_raw)!="protid")] %in% colnames(protein_table_to_use)[which(colnames(protein_table_to_use)!="protid")])],
+                paste0(colnames(GCPoutput_nr$intensities)[which(colnames(GCPoutput_nr$intensities)!="protid")][which(!colnames(GCPoutput_nr$intensities)[which(colnames(GCPoutput_nr$intensities)!="protid")] %in% colnames(protein_table_to_use)[which(colnames(protein_table_to_use)!="protid")])],
                        collapse = "\n")))
   }
 
-  proteinINFO_prot_with_validID <-
 
-
-    if (!all(tibble_validPTM$Accession %in% Protein_proteinINFO_filtered$Accession)) {
-      cat(paste0("\n\n  ", nrow(tibble_validPTM_not_found), " out of ", nrow(tibble_validPTM), " has been removed as there is no correspondence with any Accession in the protein table:\n"))
-      print(as.data.frame(tibble_validPTM_not_found))
-    } else {
-      cat("\n\n  Found a correspondence for all the Accension of the protein table!")
-    }
+  if (!all(tibble_validPTM$Accession %in% Protein_proteinINFO_filtered$Accession)) {
+    cat(paste0("\n\n  ", nrow(tibble_validPTM_not_found), " out of ", nrow(tibble_validPTM), " has been removed as there is no correspondence with any Accession in the protein table:\n"))
+    print(as.data.frame(tibble_validPTM_not_found))
+  } else {
+    cat("\n\n  Found a correspondence for all the Accension of the protein table!")
+  }
   cat("\n")
 
 
 
   GCPoutput <- GCPoutput_nr
 
-  for (o in 1:nrow(GCPoutput_nr$quant_raw)) {
+  for (o in 1:nrow(GCPoutput_nr$intensities)) {
 
-    this_protidPTM <- GCPoutput_nr$quant_raw$protid[o]
+    this_protidPTM <- GCPoutput_nr$intensities$protid[o]
     this_protidProteins <- tibble_validPTM_found_paired$protidProteins[which(tibble_validPTM_found_paired$protid==this_protidPTM)]
 
-    for (a in colnames(GCPoutput_nr$quant_raw)[which(colnames(GCPoutput_nr$quant_raw)!="protid")]) {
+    for (a in colnames(GCPoutput_nr$intensities)[which(colnames(GCPoutput_nr$intensities)!="protid")]) {
 
-      if (!is.na(pull(GCPoutput_nr$quant_raw, a)[o])) {
-        GCPoutput$quant_raw[o, a] <- pull(GCPoutput_nr$quant_raw, a)[o]/pull(protein_table_to_use, a)[which(protein_table_to_use$protid==this_protidProteins)]
+      if (!is.na(pull(GCPoutput_nr$intensities, a)[o])) {
+        if (!are_log_transf) {
+          GCPoutput$intensities[o, a] <- pull(GCPoutput_nr$intensities, a)[o]/pull(protein_table_to_use, a)[which(protein_table_to_use$protid==this_protidProteins)]
+        } else {
+          GCPoutput$intensities[o, a] <- pull(GCPoutput_nr$intensities, a)[o]-pull(protein_table_to_use, a)[which(protein_table_to_use$protid==this_protidProteins)]
+        }
       }
-
     }
   }
 

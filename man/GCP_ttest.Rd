@@ -6,8 +6,7 @@
 \usage{
 GCP_ttest(
   GCPlist,
-  raw_or_LFQ = getOption("GetCoolProteopipe.raw_or_LFQ"),
-  name_column_groups,
+  name_column_groups = getOption("GetCoolProteopipe.name_column_groups"),
   paired = FALSE,
   FDR = TRUE,
   pcutoff = 0.05
@@ -15,8 +14,6 @@ GCP_ttest(
 }
 \arguments{
 \item{GCPlist}{a list created with the ImportOutputMaxQuant function.}
-
-\item{raw_or_LFQ}{one of the following: "raw", "LFQ". The t-test will be performed only in the specified data intensities.}
 
 \item{name_column_groups}{character of length 1. The name of the column of the sampleINFO table containing the sample groups. Since this is a t-test, there must be exactly two groups.}
 
@@ -31,4 +28,17 @@ The GCPlist with the results of the t-test added to the proteinINFO data frame.
 }
 \description{
 It performs a t-test analyses on the proteins intensities.
+}
+\examples{
+\dontrun{
+
+GCPlist13 <- GCP_ttest(GCPlist = GCPlist12,
+                       paired = TRUE,
+                       FDR = TRUE,
+                       pcutoff = 0.05)
+
+}
+
+
+
 }

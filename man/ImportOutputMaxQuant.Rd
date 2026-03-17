@@ -8,6 +8,7 @@ ImportOutputMaxQuant(
   MaxQuant_table_name,
   samples_info = NULL,
   fasta_database = NA,
+  raw_or_LFQ = c("LFQ", "raw"),
   prioritize_MaxQuant_names = TRUE,
   remove_identified_by_site = TRUE,
   remove_reverse = TRUE,
@@ -21,6 +22,8 @@ ImportOutputMaxQuant(
 
 \item{fasta_database}{NULL or NA or either "human" or "mouse", or a name of a table in the current working directory (in .txt or .csv format). You can specify the fasta database to use to fill the missing Protein names and Gene names from the MaxQuant table.}
 
+\item{raw_or_LFQ}{one of the following: "raw", "LFQ". Only such data intensities will be imported.}
+
 \item{prioritize_MaxQuant_names}{logical. If TRUE and if a fasta_database is provided, the final "Protein names" and "Gene names" will be primarily taken from the  MaxQuant table (they will be taken from the fasta database only if missing). If FALSE, the opposite will happen.}
 
 \item{remove_identified_by_site}{logical. Do you want to remove rows that contains "+" in the column "Only identified by site"?}
@@ -30,14 +33,30 @@ ImportOutputMaxQuant(
 \item{remove_potential_contaminant}{logical. Do you want to remove rows that contains "+" in the column "Potential contaminant"?}
 }
 \value{
-a GCPlist, i.e.: a list with 4 dataframes (tibbles):#'
+a GCPlist, i.e.: a list with 3 dataframes (tibbles):
 \itemize{
-\item \code{quant_raw}: the raw intensities.
-\item \code{quant_LFQ}: the LFQ intensities.
+\item \code{intensities}: the protein intensities.
 \item \code{proteinINFO}: all the information for each rows.
 \item \code{sampleINFO}: the information about the samples.
 }
 }
 \description{
 Starting from the output of the MaxQuant, it performs some cleaning such as filtering out proteins that are only identified by site, the reverse and the potential contaminants, then it adds protein names from a fasta database.
+}
+\examples{
+\dontrun{
+
+GCPlist00 <- ImportOutputMaxQuant(MaxQuant_table_name = "MaxQuant OUTPUT FILE NAME.txt",     ## you can just put the name of your file in your current working directory
+                                  samples_info = NULL,                                       ## also here potentially
+                                  fasta_database = "mouse",
+                                  raw_or_LFQ = "raw",
+                                  prioritize_MaxQuant_names = TRUE,
+                                  remove_identified_by_site = TRUE,
+                                  remove_reverse = TRUE,
+                                  remove_potential_contaminant = TRUE)
+
+
+}
+
+
 }

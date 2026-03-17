@@ -7,7 +7,18 @@
 #' @param new_names character containing the new name of samples.
 #' @param old_new_names_table alternatively, you can bass here a table with old names in the first column and new names in the second column. If you pass an argument here, this will be considered instead of old_names and new_names.
 #'
-#' @return the GCPlist with the sample names updated in the sampleINFO, quant_raw and quant_LFQ data frames.
+#' @return the GCPlist with the sample names updated in the sampleINFO, and intensities data frames.
+#'
+#'
+#' @examples
+#' \dontrun{
+#'
+#' GCPlist01 <- GCP_ChangeSampleNames(GCPlist = GCPlist00,
+#'                                    old_names = GCPlist00$sampleINFO$Sample,
+#'                                    new_names = c("S_1", "S_2", "S_3", "S_4", "S_5", "V_1", "V_2", "V_3", "V_4", "V_5"))
+#'
+#' }
+#'
 #'
 #' @export
 GCP_ChangeSampleNames <- function(GCPlist, old_names = pull(GCPlist$sampleINFO, 1), new_names = paste0(old_names, "_updated"), old_new_names_table = NULL) {
@@ -63,8 +74,7 @@ GCP_ChangeSampleNames <- function(GCPlist, old_names = pull(GCPlist$sampleINFO, 
   for (i in 1:nrow(name_changing_table)) {
 
     GCPoutput$sampleINFO[which(pull(GCPoutput$sampleINFO, 1) == name_changing_table$old[i]), 1] <- name_changing_table$new[i]
-    colnames(GCPoutput$quant_raw)[which(colnames(GCPoutput$quant_raw) == name_changing_table$old[i])] <- name_changing_table$new[i]
-    colnames(GCPoutput$quant_LFQ)[which(colnames(GCPoutput$quant_LFQ) == name_changing_table$old[i])] <- name_changing_table$new[i]
+    colnames(GCPoutput$intensities)[which(colnames(GCPoutput$intensities) == name_changing_table$old[i])] <- name_changing_table$new[i]
 
   }
 

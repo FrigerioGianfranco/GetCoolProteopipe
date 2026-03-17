@@ -4,32 +4,32 @@
 #'
 #' @param GCPlist a list created with the ImportOutputMaxQuant function or a list of such lists. If the second is passed, the following filename argument must end with ".xlsx" as a sheet for each of those list will be created.
 #' @param filename character. The name of the file to create. It must end with ".txt", ".csv", or ".xlsx"; and the file will be accordingly created of that format.
-#' @param exportype exportype one of the following: "raw", "LFQ", "proteinINFO", "sampleINFO", "all", "sheets". If "raw", a table with the raw intensities will be exported; if "LFQ", a table with the LFQ intensities will be exported; if "proteinINFO", a table with all the proteinINFO; if "sampleINFO", a table with all the sampleINFO; if "all", a table with combined quant_raw, quant_LFQ, and proteinINFO will be exported; if "sheets", an Excel table with 4 sheets will be exported. Please note that "all" might be too big to be suitably exported as a '.xlsx' file: if so, export it as '.txt' or '.csv'.
-#' @param intensity_indication logical. if TRUE and if exportype is either "raw" or "LFQ" the column names of samples will start with "Intensity " for raw intensities or with "LFQ Intensity " for LFQ intensities. Please note that this will happen anyway if exportype is "all".
-#' @param protgenenames logical. If TRUE and if exportype is either "raw", "LFQ", or "proteinINFO", it will export the columns 'Protein IDs' (or 'Accession', see below), 'Protein names', and 'Gene names'.
-#' @param protIDclean logical. If TRUE (and if protgenenames is TRUE, and if exportype is either "raw", "LFQ", or "proteinINFO") it exports the column 'Accession', which contains only the first code of each protein of the Protein IDs. If FALSE it exports the complete 'Protein IDs' column.
-#' @param specific_columns character. If exportype is "raw", "LFQ", or "proteinINFO", you can specify here some additional columns to export from the proteinINFO table. Moreover, you can simply pass here a single element to export all the related result columns, in particular: "shap_test", "PC", "ttest", "FC", "ANOVA"; and also "all_stat" for all of those.
+#' @param exportype exportype one of the following: "intensities", "proteinINFO", "sampleINFO", "all", "sheets". If "intensities", a table with the intensities will be exported; if "proteinINFO", a table with all the proteinINFO; if "sampleINFO", a table with all the sampleINFO; if "all", a table with combined intensities and proteinINFO will be exported; if "sheets", an Excel table with 3 sheets will be exported. Please note that "all" might be too big to be suitably exported as a '.xlsx' file: if so, export it as '.txt' or '.csv'.
+#' @param intensity_indication logical. if TRUE and if exportype is "intensities", the column names of samples will start with "Intensity ". Please note that this will happen anyway if exportype is "all".
+#' @param protgenenames logical. If TRUE and if exportype is "intensities" or "proteinINFO", it will export the columns 'Protein IDs' (or 'Accession', see below), 'Protein names', and 'Gene names'.
+#' @param protIDclean logical. If TRUE (and if protgenenames is TRUE, and if exportype is "intensities" or "proteinINFO"), it exports the column 'Accession', which contains only the first code of each protein of the Protein IDs. If FALSE it exports the complete 'Protein IDs' column.
+#' @param specific_columns character. If exportype is "intensities" or "proteinINFO", you can specify here some additional columns to export from the proteinINFO table. Moreover, you can simply pass here a single element to export all the related result columns, in particular: "shap_test", "PC", "ttest", "FC", "ANOVA", "presence_group"; and also "all_stat" for all of those.
 #'
 #' @return Export the file in the current working directory.
 #'
 #' @examples
 #' \dontrun{
 #'
-#' # Exporting a single GCPlist
+#' # exporting a single GCPlist:
 #'
-#' ExportGCPlist(GCPlist = GCPlist14,
-#'               filename = "example_single_export.txt")
+#' ExportGCPlist(GCPlist14, "GCPlist14_single_export.txt")
 #'
 #'
-#' # Exporting a list of GCPlists
+#' # exporting multiple GCPlists:
 #'
-#' list_of_GCPlists <- list(initial = GCPlist00,
-#'                          after_NAimputation = GCPlist10,
-#'                          `after scaling` = GCPlist11,
-#'                          `after statistics` = GCPlist14)
+#' GCPlist_of_lists <- list(asimported = GCPlist00,
+#'                          `before processing` = GCPlist05,
+#'                          `post processing` = GCPlist11,
+#'                          with_statistics = GCPlist14,
+#'                          with_mock_ANOVA = GCPlist14a2,
+#'                          with_mock_batchcorr = GCPlist14b2)
 #'
-#' ExportGCPlist(GCPlist = list_of_GCPlists,
-#'               filename = "example_list_of_lists.xslx")
+#' ExportGCPlist(GCPlist_of_lists, "GCPlists_multiple_export.xlsx")
 #'
 #'
 #' }
@@ -38,7 +38,7 @@
 #' @importFrom writexl write_xlsx
 #'
 #' @export
-ExportGCPlist <- function(GCPlist, filename = "GCP.xlsx", exportype = getOption("GetCoolProteopipe.raw_or_LFQ"), intensity_indication = TRUE, protgenenames = TRUE, protIDclean = TRUE, specific_columns = "all_stat") {
+ExportGCPlist <- function(GCPlist, filename = "GCP.xlsx", exportype = c("intensities", "proteinINFO", "sampleINFO", "all", "sheets"), intensity_indication = TRUE, protgenenames = TRUE, protIDclean = TRUE, specific_columns = "all_stat") {
 
   if (!is.list(GCPlist)) {stop("GCPlist must be a list")}
   if (length(GCPlist)<1) {stop("GCPlist is empty!")}
@@ -73,30 +73,16 @@ ExportGCPlist <- function(GCPlist, filename = "GCP.xlsx", exportype = getOption(
     if (!endsWith(toupper(filename), ".XLSX")) {stop('Since you have a list of lists, filename must end with ".xlsx"')}
   }
 
-  if (!identical(toupper(exportype), c("RAW", "LFQ", "PROTEININFO", "SAMPLEINFO", "ALL", "SHEETS"))) {
-    if (length(exportype) != 1) {stop('exportype must be one of "raw", "LFQ", "proteinINFO", "sampleINFO", "all", "sheets"')}
-    if (is.na(exportype)) {stop('exportype must be one of "raw", "LFQ", "proteinINFO", "sampleINFO", "all", "sheets"')}
+  if (!identical(toupper(exportype), c("INTENSITIES", "PROTEININFO", "SAMPLEINFO", "ALL", "SHEETS"))) {
+    if (length(exportype) != 1) {stop('exportype must be one of "intensities", "proteinINFO", "sampleINFO", "all", "sheets"')}
+    if (is.na(exportype)) {stop('exportype must be one of "intensities", "proteinINFO", "sampleINFO", "all", "sheets"')}
   }
   exportype <- toupper(exportype)
-  exportype <- match.arg(exportype, c("RAW", "LFQ", "PROTEININFO", "SAMPLEINFO", "ALL", "SHEETS"))
+  exportype <- match.arg(exportype, c("INTENSITIES", "PROTEININFO", "SAMPLEINFO", "ALL", "SHEETS"))
 
   if (toupper(exportype) == "SHEETS" & !endsWith(toupper(filename), ".XLSX")) {stop('If you select exportype as "sheets", the filename must end in ".xlsx"')}
   if (list_of_lists) {
     if (toupper(exportype) == "SHEETS") {stop('Since you have a list of lists, exportype cannot be "sheets"')}
-  }
-
-  if (toupper(exportype) == "LFQ") {
-    cat("\n -- LFQ data are being exported --\n\n")
-  } else if (toupper(exportype) == "RAW") {
-    cat("\n -- raw data are being exported --\n\n")
-  } else if (toupper(exportype) == "PROTEININFO") {
-    cat("\n -- proteinINFO are being exported --\n\n")
-  } else if (toupper(exportype) == "SAMPLEINFO") {
-    cat("\n -- sampleINFO are being exported --\n\n")
-  } else if (toupper(exportype) == "ALL") {
-    cat("\n -- all of raw data, LFQ data, and proteinINFO are being exported --\n\n")
-  } else if (toupper(exportype) == "SHEETS") {
-    cat("\n -- The tables quant_raw, quant_LFQ, proteinINFO, and sampleINFO of this list are being exported --\n\n")
   }
 
   if (length(intensity_indication) != 1) {stop("intensity_indication must be either TRUE or FALSE")}
@@ -112,8 +98,35 @@ ExportGCPlist <- function(GCPlist, filename = "GCP.xlsx", exportype = getOption(
   if (is.na(protIDclean)) {stop("protIDclean must be either TRUE or FALSE")}
 
 
+  if (toupper(exportype) == "INTENSITIES") {
+    cat("\n -- the intensities are being exported")
+
+    if (protgenenames & protIDclean) {
+      cat(",\n    preceded by 'Accession', 'Protein names', and 'Gene names'")
+    } else if (protgenenames & !protIDclean) {
+      cat(",\n    preceded by 'Protein IDs', 'Protein names', and 'Gene names'")
+    }
+
+    if (!is.null(specific_columns)) {
+      cat(",\n    and followed by columns of results if present")
+    }
+
+    cat(" --\n\n")
+
+  } else if (toupper(exportype) == "PROTEININFO") {
+    cat("\n -- proteinINFO are being exported --\n\n")
+  } else if (toupper(exportype) == "SAMPLEINFO") {
+    cat("\n -- sampleINFO are being exported --\n\n")
+  } else if (toupper(exportype) == "ALL") {
+    cat("\n -- all of intensities and proteinINFO are being exported --\n\n")
+  } else if (toupper(exportype) == "SHEETS") {
+    cat("\n -- The tables intensities, proteinINFO, and sampleINFO of this list are being exported --\n\n")
+  }
+
+
+
   things_to_do_to_each_GCPlist <- function(GCPlist, exportype, intensity_indication, protgenenames, protIDclean, specific_columns) {
-    if (exportype %in% c("RAW", "LFQ", "PROTEININFO", "SHEETS")) {
+    if (exportype %in% c("INTENSITIES", "PROTEININFO", "SHEETS")) {
       if (!is.null(specific_columns)) {
         if (!is.character(specific_columns)) {stop("specific_columns must be a character vector")}
         if (length(specific_columns) < 1) {
@@ -132,7 +145,8 @@ ExportGCPlist <- function(GCPlist, filename = "GCP.xlsx", exportype = getOption(
                                                                                    grepl("^ttest_", colnames(GCPlist$proteinINFO)) |
                                                                                    colnames(GCPlist$proteinINFO)=="FC" | colnames(GCPlist$proteinINFO)=="logFC" | colnames(GCPlist$proteinINFO)=="FCcomparison" |
                                                                                    endsWith(colnames(GCPlist$proteinINFO), "_FC") | endsWith(colnames(GCPlist$proteinINFO), "_logFC") |
-                                                                                   grepl("^ANOVA_", colnames(GCPlist$proteinINFO)))])
+                                                                                   grepl("^ANOVA_", colnames(GCPlist$proteinINFO)) |
+                                                                                   grepl("^present_", colnames(GCPlist$proteinINFO)) | grepl("^combination_", colnames(GCPlist$proteinINFO)))])
             } else if (tolower(sc) == "shap_test") {
               specific_columns_verified <- c(specific_columns_verified,
                                              colnames(GCPlist$proteinINFO)[which(grepl("^shap_test_", colnames(GCPlist$proteinINFO)))])
@@ -149,6 +163,9 @@ ExportGCPlist <- function(GCPlist, filename = "GCP.xlsx", exportype = getOption(
             } else if (tolower(sc) == "anova") {
               specific_columns_verified <- c(specific_columns_verified,
                                              colnames(GCPlist$proteinINFO)[which(grepl("^ANOVA_", colnames(GCPlist$proteinINFO)))])
+            } else if (tolower(sc) == "presence_group") {
+              specific_columns_verified <- c(specific_columns_verified,
+                                             colnames(GCPlist$proteinINFO)[which(colnames(GCPlist$proteinINFO)=="present_" | colnames(GCPlist$proteinINFO)=="combination_")])
             } else if (!sc %in% colnames(GCPlist$proteinINFO)) {
               stop(paste0('the specific_column "', sc, '" does not exist among the columns of proteinINFO'))
             } else {
@@ -162,27 +179,21 @@ ExportGCPlist <- function(GCPlist, filename = "GCP.xlsx", exportype = getOption(
     }
 
 
-    if (((toupper(exportype) == "RAW" | toupper(exportype) == "LFQ") & intensity_indication) | toupper(exportype) == "ALL"| toupper(exportype) == "SHEETS") {
-      colnames(GCPlist$quant_raw)[-which(colnames(GCPlist$quant_raw) == "protid")] <- paste0("Intensity ", colnames(GCPlist$quant_raw)[-which(colnames(GCPlist$quant_raw) == "protid")])
-      colnames(GCPlist$quant_LFQ)[-which(colnames(GCPlist$quant_LFQ) == "protid")] <- paste0("LFQ Intensity ", colnames(GCPlist$quant_LFQ)[-which(colnames(GCPlist$quant_LFQ) == "protid")])
+    if ((toupper(exportype) == "INTENSITIES" & intensity_indication) | toupper(exportype) == "ALL"| toupper(exportype) == "SHEETS") {
+      colnames(GCPlist$intensities)[-which(colnames(GCPlist$intensities) == "protid")] <- paste0("Intensity ", colnames(GCPlist$intensities)[-which(colnames(GCPlist$intensities) == "protid")])
     }
-
 
     if (toupper(exportype) == "SAMPLEINFO") {
       table_to_export <- GCPlist$sampleINFO
 
     } else if (toupper(exportype) == "ALL") {
 
-      table_to_export_1 <- left_join(x = GCPlist$proteinINFO, y = GCPlist$quant_raw, by = "protid", suffix = c("_INFO", "_raw"))
-      table_to_export <- left_join(x = table_to_export_1, y = GCPlist$quant_LFQ, by = "protid", suffix = c("_INFO", "_LFQ"))
-
+      table_to_export <- left_join(x = GCPlist$proteinINFO, y = GCPlist$intensities, by = "protid", suffix = c("_INFO", "_intensities"))
 
     } else {
 
-      if (protgenenames == FALSE & is.null(specific_columns) & toupper(exportype) == "RAW") {
-        table_to_export <- GCPlist$quant_raw
-      } else if (protgenenames == FALSE & is.null(specific_columns) & toupper(exportype) == "LFQ") {
-        table_to_export <- GCPlist$quant_LFQ
+      if (protgenenames == FALSE & is.null(specific_columns) & toupper(exportype) == "INTENSITIES") {
+        table_to_export <- GCPlist$intensities
       } else if (protgenenames == FALSE & is.null(specific_columns) & toupper(exportype) == "PROTEININFO") {
         table_to_export <- GCPlist$proteinINFO
       } else {
@@ -214,21 +225,11 @@ ExportGCPlist <- function(GCPlist, filename = "GCP.xlsx", exportype = getOption(
         colproteinINFO_to_export <- unique(colproteinINFO_to_export)
 
 
-        if (toupper(exportype) == "RAW") {
+        if (toupper(exportype) == "INTENSITIES") {
 
-          proteinINFO_fil <- GCPlist$proteinINFO[which(GCPlist$proteinINFO$protid%in%GCPlist$quant_raw$protid),]
+          proteinINFO_fil <- GCPlist$proteinINFO[which(GCPlist$proteinINFO$protid%in%GCPlist$intensities$protid),]
 
-          table_to_export <- left_join(x = select(proteinINFO_fil, all_of(colproteinINFO_to_export)), y = GCPlist$quant_raw, by = "protid", suffix = c("_INFO", "_raw"))
-
-          if (!is.null(specific_columns)) {
-            table_to_export <- relocate(table_to_export, all_of(specific_columns_verified), .after = last_col())
-          }
-
-        } else if (toupper(exportype) == "LFQ") {
-
-          proteinINFO_fil <- GCPlist$proteinINFO[which(GCPlist$proteinINFO$protid%in%GCPlist$quant_LFQ$protid),]
-
-          table_to_export <- left_join(x = select(proteinINFO_fil, all_of(colproteinINFO_to_export)), y = GCPlist$quant_LFQ, by = "protid", suffix = c("_INFO", "_LFQ"))
+          table_to_export <- left_join(x = select(proteinINFO_fil, all_of(colproteinINFO_to_export)), y = GCPlist$intensities, by = "protid", suffix = c("_INFO", "_intensities"))
 
           if (!is.null(specific_columns)) {
             table_to_export <- relocate(table_to_export, all_of(specific_columns_verified), .after = last_col())
@@ -268,7 +269,6 @@ ExportGCPlist <- function(GCPlist, filename = "GCP.xlsx", exportype = getOption(
     }
 
   }
-
 
 
   if (endsWith(toupper(filename), ".TXT")) {

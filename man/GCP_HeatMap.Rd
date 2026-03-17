@@ -6,8 +6,7 @@
 \usage{
 GCP_HeatMap(
   GCPlist,
-  raw_or_LFQ = getOption("GetCoolProteopipe.raw_or_LFQ"),
-  name_column_groups = NULL,
+  name_column_groups = getOption("GetCoolProteopipe.name_column_groups"),
   name_column_labels = NULL,
   name_column_groups_protein = NULL,
   name_column_labels_protein = NULL,
@@ -22,13 +21,11 @@ GCP_HeatMap(
   three_heat_colors = c("red", "white", "blue"),
   set_heat_colors_limits = FALSE,
   heat_colors_limits = NULL,
-  col_pal_list = NULL
+  col_pal_list = getOption("GetCoolProteopipe.col_pal")
 )
 }
 \arguments{
 \item{GCPlist}{a list created with the ImportOutputMaxQuant function.}
-
-\item{raw_or_LFQ}{one of the following: "raw", "LFQ". The heat map will be performed only in the specified data.}
 
 \item{name_column_groups}{NULL or character vector. Name(s) of the column(s) of the sampleINFO table. Specify it if you want to have those groups specified on the heatmap.}
 
@@ -67,4 +64,24 @@ a ggplot object.
 }
 \description{
 It performs a heat map out of GCPdata.
+}
+\examples{
+\dontrun{
+
+Fig16_The_Heat_Map_sign <- GCP_HeatMap(GCPlist = GCPlist14f,
+                                       name_column_groups = c("Condition", "Replicate"),
+                                       name_column_labels = "Sample",
+                                       name_column_groups_protein = NULL,
+                                       name_column_labels_protein = "Protein names",
+                                       name_rows = FALSE,
+                                       name_columns = TRUE,
+                                       rotate_name_columns = TRUE,
+                                       col_pal_list = list(Condition = c(S = "green", V = "blue"),
+                                                           Replicate = c("lightskyblue", "lightskyblue1", "lightskyblue2", "lightskyblue3", "lightskyblue4")))
+export_figures(Fig16_The_Heat_Map_sign)
+
+}
+
+
+
 }

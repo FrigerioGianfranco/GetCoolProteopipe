@@ -4,14 +4,25 @@
 #'
 #' @param GCPlist a list created with the ImportOutputMaxQuant function.
 #' @param name_column_groups character of length 1. The name of the column of the sampleINFO table containing the sample groups.
-#' @param raw_or_LFQ one of the following: "raw", "LFQ".
 #' @param digits_perc NULL or numeric integer of length 1. The number of digits to round the percentages.
 #' @param add_perc_symbol logical. If TRUE, it will add the ' %' symbol at the percentages.
 #'
 #' @return A tibble with summary of the presence of proteins in indicated groups.
 #'
+#'
+#'
+#' @examples
+#' \dontrun{
+#'
+#' SummaryTable_ProteinsGrouped_filteringNA <- GCP_ProteinsGroupedSummary(GCPlist08)
+#' export_the_table(SummaryTable_ProteinsGrouped_filteringNA)
+#'
+#' }
+#'
+#'
+#'
 #' @export
-GCP_ProteinsGroupedSummary <- function(GCPlist, name_column_groups = NULL, raw_or_LFQ = getOption("GetCoolProteopipe.raw_or_LFQ"), digits_perc = NULL, add_perc_symbol = FALSE) {
+GCP_ProteinsGroupedSummary <- function(GCPlist, name_column_groups = getOption("GetCoolProteopipe.name_column_groups"), digits_perc = NULL, add_perc_symbol = FALSE) {
 
   checkGCPlist(GCPlist)
 
@@ -19,6 +30,7 @@ GCP_ProteinsGroupedSummary <- function(GCPlist, name_column_groups = NULL, raw_o
     if (length(name_column_groups)!=1) {stop("name_column_groups must be a character of length 1")}
     if (!is.character(name_column_groups)) {stop("name_column_groups must be a character of length 1")}
     if (is.na(name_column_groups)) {stop("name_column_groups must be a character of length 1, not a NA")}
+    cat(paste0("\n -- The name_column_groups considered is '", name_column_groups, "' --\n\n"))
     if (length(which(colnames(GCPlist$sampleINFO) == name_column_groups)) != 1) {stop("The name passed in name_column_groups must be a name of a column of the sampleINFO dataframe")}
 
     if (!is.factor(pull(GCPlist$sampleINFO, name_column_groups))) {
@@ -28,20 +40,8 @@ GCP_ProteinsGroupedSummary <- function(GCPlist, name_column_groups = NULL, raw_o
     if (length(levels(pull(GCPlist$sampleINFO, name_column_groups))) < 2) {stop("The sample groups must be at least 2")}
 
   } else {
+    cat("\n -- The name_column_groups considered is NULL --\n\n")
     stop("please, specifiy the name of the sample group column in the name_column_groups argoument")
-  }
-
-  if (!identical(tolower(raw_or_LFQ), c("lfq", "raw"))) {
-    if (length(raw_or_LFQ) != 1) {stop('raw_or_LFQ must be one of "raw", "LFQ"')}
-    if (is.na(raw_or_LFQ)) {stop('raw_or_LFQ must be one of "raw", "LFQ"')}
-  }
-  raw_or_LFQ <- tolower(raw_or_LFQ)
-  raw_or_LFQ <- match.arg(raw_or_LFQ, c("lfq", "raw"))
-
-  if (raw_or_LFQ == "lfq") {
-    cat("\n -- LFQ data are used --\n\n")
-  } else if (raw_or_LFQ == "raw") {
-    cat("\n -- raw data are used --\n\n")
   }
 
   if(!is.null(digits_perc)) {
@@ -57,8 +57,8 @@ GCP_ProteinsGroupedSummary <- function(GCPlist, name_column_groups = NULL, raw_o
   if (is.na(add_perc_symbol)) {stop("add_perc_symbol must be either TRUE or FALSE")}
 
 
-  present_cols <- paste0("present_", raw_or_LFQ, "_", levels(pull(GCPlist$sampleINFO, name_column_groups)))
-  combination_col <- paste0("combination_", raw_or_LFQ, "_", name_column_groups)
+  present_cols <- paste0("present_", levels(pull(GCPlist$sampleINFO, name_column_groups)))
+  combination_col <- paste0("combination_", name_column_groups)
 
   present_combination_cols <- c(present_cols, combination_col)
 

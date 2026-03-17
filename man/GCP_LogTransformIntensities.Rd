@@ -12,8 +12,18 @@ GCP_LogTransformIntensities(GCPlist, base = exp(1))
 \item{base}{numeric. The base of the logarithm to use.}
 }
 \value{
-a GCPlist list with log-transformed data intensity tables.
+a GCPlist list with log-transformed data intensity table.
 }
 \description{
-In the quant_raw and the quantLFQ data intensity, it log-transforms all the intensities.
+It log-transforms all the intensities of the intensities table.
+}
+\examples{
+\dontrun{
+
+GCPlist06 <- GCP_LogTransformIntensities(GCPlist = GCPlist05,
+                                         base = 2)
+
+}
+
+
 }

@@ -6,8 +6,7 @@
 \usage{
 GCP_FoldChange_Multi(
   GCPlist,
-  raw_or_LFQ = getOption("GetCoolProteopipe.raw_or_LFQ"),
-  name_column_groups,
+  name_column_groups = getOption("GetCoolProteopipe.name_column_groups"),
   group_order = NULL,
   paired = FALSE,
   are_log_transf = TRUE,
@@ -16,8 +15,6 @@ GCP_FoldChange_Multi(
 }
 \arguments{
 \item{GCPlist}{a list created with the ImportOutputMaxQuant function. IMPORTANT: All protein intensities should be positive, or unreliable results will be generated!}
-
-\item{raw_or_LFQ}{one of the following: "raw", "LFQ". The Fold Change analysis will be performed only in the specified data intensities.}
 
 \item{name_column_groups}{character of length 1. The name of the column of the sampleINFO table containing the sample groups. 3 or more groups should be indicated here.}
 
@@ -34,4 +31,18 @@ The GCPlist with the results of the Fold Change analyses added to the proteinINF
 }
 \description{
 It performs a Fold Change analyses on the proteins intensities, performing multiple pair comparisons. Please, be aware that the Fold Change analysis should be performed only on positive data! Indeed, all protein intensities should be positive, or unreliable results will be generated!
+}
+\examples{
+\dontrun{
+
+GCPlist14a2 <- GCP_FoldChange_Multi(GCPlist = GCPlist14a1,
+                                    name_column_groups = "Group_multi",
+                                    paired = FALSE,
+                                    are_log_transf = TRUE,
+                                    log_base = 2)
+
+}
+
+
+
 }

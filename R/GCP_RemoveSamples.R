@@ -1,6 +1,6 @@
 #' Remove samples from the dataset
 #'
-#' Remove samples from both the raw, LFQ and  SampleIFO data frames. Only one of the arguments among remove_samples, keep_samples, remove_groups, or keep_groups has to be specified.
+#' Remove samples from both the intensities and  SampleINFO data frames. Only one of the arguments among remove_samples, keep_samples, remove_groups, or keep_groups has to be specified.
 #'
 #' @param GCPlist a list created with the ImportOutputMaxQuant function.
 #' @param remove_samples NULL or a character containing the name of samples to remove.
@@ -9,7 +9,26 @@
 #' @param keep_groups NULL or a character containing the name of groups to keep.
 #' @param name_column_groups NULL or character of length 1. The name of the column of the sampleINFO table containing the sample groups. It must be specified if you used remove_groups or keep_groups.
 #'
-#' @return the GCPlist with samples removed from the sampleINFO, quant_raw and quant_LFQ data frames.
+#' @return the GCPlist with samples removed from the sampleINFO, and intensities data frames.
+#'
+#'
+#' @examples
+#' \dontrun{
+#'
+#' # specify what to remove:
+#'
+#' GCPlist00rm1 <- GCP_RemoveSamples(GCPlist = GCPlist00,
+#'                                   remove_samples = c("S2", "S5"),
+#'                                   keep_samples = NULL)
+#'
+#' # or specify what to keep (same output as above):
+#'
+#' GCPlist00rm2 <- GCP_RemoveSamples(GCPlist = GCPlist00,
+#'                                   remove_samples = NULL,
+#'                                   keep_samples = c("S1", "S3", "S4", "V1", "V2", "V3", "V4", "V5"))
+#'
+#' }
+#'
 #'
 #' @export
 GCP_RemoveSamples <- function(GCPlist, remove_samples = NULL, keep_samples = NULL, remove_groups = NULL, keep_groups = NULL, name_column_groups = NULL) {
@@ -98,8 +117,7 @@ GCP_RemoveSamples <- function(GCPlist, remove_samples = NULL, keep_samples = NUL
 
 
     GCPoutput$sampleINFO <- GCPoutput$sampleINFO[which(pull(GCPoutput$sampleINFO, 1) %in% samples_to_keep),]
-    GCPoutput$quant_raw <- GCPoutput$quant_raw[, c("protid", samples_to_keep)]
-    GCPoutput$quant_LFQ <- GCPoutput$quant_LFQ[, c("protid", samples_to_keep)]
+    GCPoutput$intensities <- GCPoutput$intensities[, c("protid", samples_to_keep)]
 
     if (change_order) {
       GCPoutput$sampleINFO <- GCPoutput$sampleINFO[match(samples_to_keep, pull(GCPoutput$sampleINFO, 1)),]

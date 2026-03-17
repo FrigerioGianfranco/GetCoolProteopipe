@@ -47,3 +47,24 @@ A ggplot object.
 \description{
 It performs a Volcano plot on the results of statistical analyses such as t-test and a Fold Change.
 }
+\examples{
+\dontrun{
+
+Fig15_Volcano_plot <- GCP_Volcano(GCPlist = GCPlist14,
+                                  x_val = "logFC",
+                                  y_val = "ttest_PvaluesFDR",
+                                  log_base = 2,
+                                  pcutoff_colored = 0.05,
+                                  pcutoff_line = 0.05,
+                                  pcutoff_prot_label = 0.005,
+                                  name_column_proteinlabels = "Protein names",
+                                  name_column_proteingroups = NULL,
+                                  col_pal_difference = c("grey", "blue", "red"),
+                                  col_pal_groups = NULL)
+export_figures(Fig15_Volcano_plot)
+
+}
+
+
+
+}

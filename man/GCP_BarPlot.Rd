@@ -6,9 +6,8 @@
 \usage{
 GCP_BarPlot(
   GCPlist,
-  name_column_groups = NULL,
-  raw_or_LFQ_or_both = getOption("GetCoolProteopipe.raw_or_LFQ"),
-  col_pal = NULL,
+  name_column_groups = getOption("GetCoolProteopipe.name_column_groups"),
+  col_pal = getOption("GetCoolProteopipe.col_pal"),
   bar_width = NULL,
   label_numbers = TRUE,
   label_numbers_size = NULL,
@@ -20,8 +19,6 @@ GCP_BarPlot(
 \item{GCPlist}{a list created with the ImportOutputMaxQuant function.}
 
 \item{name_column_groups}{NULL or character of length 1. The name of the column of the sampleINFO table containing the sample groups.}
-
-\item{raw_or_LFQ_or_both}{one of the following: "raw", "LFQ", "both". The barplot will be performed only in the specified data, or a facet_wrap plot will be generated if "both" is specified.}
 
 \item{col_pal}{NULL or a character vector containing colors. If NULL, colors from the pals package will be used (see function build_long_vector_of_colors).}
 
@@ -40,4 +37,18 @@ A ggplot object.
 }
 \description{
 It create bar plots to show the number of valid proteins per samples.
+}
+\examples{
+\dontrun{
+
+Fig07_BarPlot_post_filteringNA <- GCP_BarPlot(GCPlist = GCPlist07,
+                                              label_numbers = TRUE,
+                                              showCV = TRUE,
+                                              rotate_sample_names = TRUE)
+export_figures(Fig07_BarPlot_post_filteringNA)
+
+}
+
+
+
 }

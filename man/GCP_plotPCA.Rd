@@ -6,14 +6,13 @@
 \usage{
 GCP_plotPCA(
   GCPlist,
-  raw_or_LFQ = getOption("GetCoolProteopipe.raw_or_LFQ"),
   scores_or_loadings = c("scores", "loadings"),
   PC_to_plot = c("PC1", "PC2"),
   center = TRUE,
   scale. = FALSE,
-  name_column_groups = NULL,
+  name_column_groups = getOption("GetCoolProteopipe.name_column_groups"),
   name_column_labels = NULL,
-  col_pal = NULL,
+  col_pal = getOption("GetCoolProteopipe.col_pal"),
   ellipses_on_score = TRUE,
   name_column_groups_loading = NULL,
   name_column_labels_loading = NULL,
@@ -23,8 +22,6 @@ GCP_plotPCA(
 }
 \arguments{
 \item{GCPlist}{a list created with the ImportOutputMaxQuant function.}
-
-\item{raw_or_LFQ}{one of the following: "raw", "LFQ". The principal component analysis will be performed only in the specified data.}
 
 \item{scores_or_loadings}{one of the following: "scores", "loadings". Specify here if you want to plot the scores or the loadings.}
 
@@ -55,4 +52,33 @@ A ggplot object.
 }
 \description{
 It plots a principal component analysis.
+}
+\examples{
+\dontrun{
+
+# to get a score plot:
+
+Fig13_PCA_score_plot <- GCP_plotPCA(GCPlist = GCPlist11,
+                                    scores_or_loadings = "scores",
+                                    PC_to_plot = c("PC1", "PC2"),
+                                    name_column_labels = "Sample",
+                                    ellipses_on_score = TRUE)
+export_figures(Fig13_PCA_score_plot)
+
+
+# to get a loading plot:
+
+Fig14_PCA_loading_plot <- GCP_plotPCA(GCPlist = GCPlist11,
+                                      scores_or_loadings = "loadings",
+                                      PC_to_plot = c("PC1", "PC2"),
+                                      name_column_groups_loading = NULL,
+                                      name_column_labels_loading = "Protein names",
+                                      col_pal_loading = NULL,
+                                      ellipses_on_loading = FALSE)
+export_figures(Fig14_PCA_loading_plot)
+
+}
+
+
+
 }

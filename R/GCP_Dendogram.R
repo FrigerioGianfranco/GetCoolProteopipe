@@ -4,16 +4,26 @@
 #'
 #' @param GCPlist a list created with the ImportOutputMaxQuant function.
 #' @param name_column_groups NULL or character of length 1. The name of the column of the sampleINFO table containing the sample groups.
-#' @param raw_or_LFQ one of the following: "raw", "LFQ". The dendogram will be performed only in the specified data.
 #' @param col_pal NULL or a character vector containing colors. If NULL, colors from the pals package will be used (see function build_long_vector_of_colors).
 #' @param rotate_names logical. If  TRUE, the names will be rotated vertically.
 #'
 #' @return A ggplot object.
 #'
+#'
+#' @examples
+#' \dontrun{
+#'
+#' Fig04_Dendogram_before_processing <- GCP_Dendogram(GCPlist05)
+#' export_figures(Fig04_Dendogram_before_processing)
+#'
+#' }
+#'
+#'
+#'
 #' @import ggdendro
 #'
 #' @export
-GCP_Dendogram <- function(GCPlist, name_column_groups = NULL, raw_or_LFQ = getOption("GetCoolProteopipe.raw_or_LFQ"), col_pal = NULL, rotate_names = TRUE) {
+GCP_Dendogram <- function(GCPlist, name_column_groups = getOption("GetCoolProteopipe.name_column_groups"), col_pal = getOption("GetCoolProteopipe.col_pal"), rotate_names = TRUE) {
 
   checkGCPlist(GCPlist)
 
@@ -21,6 +31,7 @@ GCP_Dendogram <- function(GCPlist, name_column_groups = NULL, raw_or_LFQ = getOp
     if (length(name_column_groups)!=1) {stop("name_column_groups must be NULL or a character of length 1")}
     if (!is.character(name_column_groups)) {stop("name_column_groups must be NULL or a character of length 1")}
     if (is.na(name_column_groups)) {stop("name_column_groups must be NULL or a character of length 1, not a NA")}
+    cat(paste0("\n -- The name_column_groups considered is '", name_column_groups, "' --\n\n"))
     if (length(which(colnames(GCPlist$sampleINFO) == name_column_groups)) != 1) {stop("The name passed in name_column_groups must be a name of a column of the sampleINFO dataframe")}
     if (name_column_groups == "allwiththis") {stop("Please, just don't pass 'allwiththis' to name_column_groups, thanks!")}
 
@@ -29,30 +40,35 @@ GCP_Dendogram <- function(GCPlist, name_column_groups = NULL, raw_or_LFQ = getOp
     }
 
   } else {
+    cat("\n -- The name_column_groups considered is NULL --\n\n")
     if ("allwiththis" %in% colnames(GCPlist$sampleINFO)) {stop("Please, don't call a column of the sampleINFO data frame 'allwiththis' as I need to create one with this name now")}
     GCPlist$sampleINFO <- mutate(GCPlist$sampleINFO, allwiththis = as.factor("theOnlyGroup"))
 
     name_column_groups <- "allwiththis"
   }
 
-  if (!identical(tolower(raw_or_LFQ), c("lfq", "raw"))) {
-    if (length(raw_or_LFQ) != 1) {stop('raw_or_LFQ must be one of "raw", "LFQ"')}
-    if (is.na(raw_or_LFQ)) {stop('raw_or_LFQ must be one of "raw", "LFQ"')}
-  }
-  raw_or_LFQ <- tolower(raw_or_LFQ)
-  raw_or_LFQ <- match.arg(raw_or_LFQ, c("lfq", "raw"))
-
-  if (raw_or_LFQ == "lfq") {
-    cat("\n -- LFQ data are used --\n\n")
-  } else if (raw_or_LFQ == "raw") {
-    cat("\n -- raw data are used --\n\n")
-  }
-
   if (!is.null(col_pal)) {
     if (!is.character(col_pal)) stop("col_pal must be a character vector")
     if (any(is.na(col_pal))) stop("col_pal must not contain NAs")
-
+    if (is.null(names(col_pal))) {
+      cat(paste0(' --- col_pal is  c("', paste0(col_pal, collapse = '", "'), '") ---\n\n'))
+    } else {
+      cat(' --- col_pal is  c(')
+      for (i in seq(length(col_pal))) {
+        if (names(col_pal)[i]!="") {
+          cat(paste0(names(col_pal)[i], ' = "'))
+        } else {
+          cat('"')
+        }
+        cat(paste0(col_pal[i], '"'))
+        if (i != length(col_pal)) {
+          cat(', ')
+        }
+      }
+      cat(') ---\n\n')
+    }
   } else {
+    cat(" -- col_pal is  NULL --\n\n")
     if (name_column_groups == "allwiththis") {
       col_pal <- "black"
     } else {
@@ -84,24 +100,16 @@ GCP_Dendogram <- function(GCPlist, name_column_groups = NULL, raw_or_LFQ = getOp
     if (!all(names(named_colors_bygroup) %in% levels(pull(GCPlist$sampleINFO, name_column_groups)) & levels(pull(GCPlist$sampleINFO, name_column_groups)) %in% names(named_colors_bygroup))) {stop("the names of col_pal don't correspond to the levels of name_column_groups")}
   }
 
-
   if (length(rotate_names)!=1) {stop("rotate_names must be exclusively TRUE or FALSE")}
   if (!is.logical(rotate_names)) {stop("rotate_names must be exclusively TRUE or FALSE")}
   if (is.na(rotate_names)) {stop("rotate_names must be exclusively TRUE or FALSE")}
 
+  df_intensities <- GetFeatistics::transpose_feat_table(GCPlist$intensities, name_first_column = colnames(GCPlist$sampleINFO)[1])
 
-  if (raw_or_LFQ == "raw") {
-    df_intensities <- GetFeatistics::transpose_feat_table(GCPlist$quant_raw, name_first_column = colnames(GCPlist$sampleINFO)[1])
-  } else if (raw_or_LFQ == "lfq") {
-    df_intensities <- GetFeatistics::transpose_feat_table(GCPlist$quant_LFQ, name_first_column = colnames(GCPlist$sampleINFO)[1])
-  } else {
-    stop('raw_or_LFQ must be one of "raw", "LFQ"')
-  }
 
   df_intensities_wrn <- as.data.frame(df_intensities)
   rownames(df_intensities_wrn) <- pull(df_intensities, colnames(GCPlist$sampleINFO)[1])
   df_intensities_wrn <- df_intensities_wrn[, which(colnames(df_intensities_wrn) != colnames(GCPlist$sampleINFO)[1])]
-
 
 
   the_model <- hclust(dist(df_intensities_wrn), "ave")
@@ -113,11 +121,9 @@ GCP_Dendogram <- function(GCPlist, name_column_groups = NULL, raw_or_LFQ = getOp
     the_dendro_data$labels[i, name_column_groups] <- pull(GCPlist$sampleINFO, name_column_groups)[which(pull(GCPlist$sampleINFO, 1) == the_dendro_data$labels$label[i])]
   }
 
-
   the_plot <- ggplot(segment(the_dendro_data)) +
     geom_segment(aes(x = x, y = y, xend = xend, yend = yend)) +
     theme_dendro()
-
 
   if (rotate_names) {
     the_plot <- the_plot +
@@ -135,7 +141,6 @@ GCP_Dendogram <- function(GCPlist, name_column_groups = NULL, raw_or_LFQ = getOp
       scale_color_manual(values = named_colors_bygroup)
   }
 
-
   if (name_column_groups != "allwiththis") {
 
     the_plot <- the_plot +
@@ -143,9 +148,7 @@ GCP_Dendogram <- function(GCPlist, name_column_groups = NULL, raw_or_LFQ = getOp
       guides(colour = guide_legend(override.aes = list(alpha = 1, size = 3)))
   }
 
-
   return(the_plot)
-
 }
 
 

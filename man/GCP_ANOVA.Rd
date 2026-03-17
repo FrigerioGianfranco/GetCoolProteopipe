@@ -6,16 +6,13 @@
 \usage{
 GCP_ANOVA(
   GCPlist,
-  raw_or_LFQ = getOption("GetCoolProteopipe.raw_or_LFQ"),
-  name_column_groups,
+  name_column_groups = getOption("GetCoolProteopipe.name_column_groups"),
   FDR = TRUE,
   pcutoff = 0.05
 )
 }
 \arguments{
 \item{GCPlist}{a list created with the ImportOutputMaxQuant function.}
-
-\item{raw_or_LFQ}{one of the following: "raw", "LFQ". The ANOVA will be performed only in the specified data intensities.}
 
 \item{name_column_groups}{character of length 1. The name of the column of the sampleINFO table containing the sample groups. Since this is an ANOVA, there must be at least three groups.}
 
@@ -28,4 +25,15 @@ The GCPlist with the results of the ANOVA added to the proteinINFO data frame.
 }
 \description{
 It performs a one-way analysis of variance on protein intensities, with also a post-hoc Tukey's Test.
+}
+\examples{
+\dontrun{
+
+GCPlist14a1 <- GCP_ANOVA(GCPlist = GCPlist14a,
+                         name_column_groups = "Group_multi")
+
+}
+
+
+
 }

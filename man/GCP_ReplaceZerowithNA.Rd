@@ -10,8 +10,17 @@ GCP_ReplaceZerowithNA(GCPlist)
 \item{GCPlist}{a list created with the ImportOutputMaxQuant function.}
 }
 \value{
-a GCPlist list with zero replaced with NAs in the data intensity tables.
+a GCPlist list with zero replaced with NAs in the data intensity table.
 }
 \description{
-In the quant_raw and the quantLFQ data intensity, it replaces all zeros with missing values.
+In the intensities table, it replaces all zeros with missing values.
+}
+\examples{
+\dontrun{
+
+GCPlist04 <- GCP_ReplaceZerowithNA(GCPlist03)
+
+}
+
+
 }

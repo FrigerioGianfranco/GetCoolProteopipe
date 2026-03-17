@@ -9,7 +9,8 @@ ImportPTMs(
   samples_info = NULL,
   fasta_database = NA,
   prioritize_MaxQuant_names = TRUE,
-  pattern_intensity = "Rep"
+  pattern_intensity = "Intensity ",
+  pattern_isoforms = "___"
 )
 }
 \arguments{
@@ -22,16 +23,32 @@ ImportPTMs(
 \item{prioritize_MaxQuant_names}{logical. If TRUE and if a fasta_database is provided, the final "Protein names" and "Gene names" will be primarily taken from the  MaxQuant table (they will be taken from the fasta database only if missing). If FALSE, the opposite will happen.}
 
 \item{pattern_intensity}{a character vector of length 1. The character pattern that must be uniquely present in the column names of protein intensities.}
+
+\item{pattern_isoforms}{NULL or a character vector of length 1. If not NULL, this function will import the different isoforms as separate rows identified with the specified pattern (as example: "___1", "___2", "___3").}
 }
 \value{
-a GCPlist, i.e.: a list with 4 dataframes (tibbles):#'
+a GCPlist, i.e.: a list with 3 dataframes (tibbles):
 \itemize{
-\item \code{quant_raw}: the raw intensities.
-\item \code{quant_LFQ}: the LFQ intensities. (all NA fo this import)
+\item \code{intensities}: the intensities.
 \item \code{proteinINFO}: all the information for each rows.
 \item \code{sampleINFO}: the information about the samples.
 }
 }
 \description{
-Starting from the output of PTMs, it stores the raw data in a list as the GCPlist.
+Starting from the output of PTMs, it stores the data in a list as the GCPlist.
+}
+\examples{
+\dontrun{
+
+
+GCPlistPTM00 <- ImportPTMs(MaxQuant_table_name = "PTM FILE NAME.txt",      ## you can just put the name of your file in your current working directory
+                           samples_info = NULL,                             ## also here potentially
+                           fasta_database = "mouse",
+                           prioritize_MaxQuant_names = TRUE,
+                           pattern_intensity = "Intensity ",
+                           pattern_isoforms = "___")
+
+}
+
+
 }

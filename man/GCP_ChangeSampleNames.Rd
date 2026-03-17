@@ -21,8 +21,19 @@ GCP_ChangeSampleNames(
 \item{old_new_names_table}{alternatively, you can bass here a table with old names in the first column and new names in the second column. If you pass an argument here, this will be considered instead of old_names and new_names.}
 }
 \value{
-the GCPlist with the sample names updated in the sampleINFO, quant_raw and quant_LFQ data frames.
+the GCPlist with the sample names updated in the sampleINFO, and intensities data frames.
 }
 \description{
 Change the name of some samples.
+}
+\examples{
+\dontrun{
+
+GCPlist01 <- GCP_ChangeSampleNames(GCPlist = GCPlist00,
+                                   old_names = GCPlist00$sampleINFO$Sample,
+                                   new_names = c("S_1", "S_2", "S_3", "S_4", "S_5", "V_1", "V_2", "V_3", "V_4", "V_5"))
+
+}
+
+
 }

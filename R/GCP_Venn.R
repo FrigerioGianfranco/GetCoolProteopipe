@@ -4,18 +4,28 @@
 #'
 #' @param GCPlist a list created with the ImportOutputMaxQuant function.
 #' @param name_column_groups character of length 1. The name of the column of the sampleINFO table containing the sample groups. The sample groups must be between 2 and 4.
-#' @param raw_or_LFQ one of the following: "raw", "LFQ". The venn diagram will be performed only in the specified data.
-#' @param consider_genenames logical. If TRUE, the gene names will be considered to perform the grouping, instead of the protid.
 #' @param col_pal NULL or a character vector containing colors. If NULL, colors from the pals package will be used (see function build_long_vector_of_colors).
+#' @param consider_genenames logical. If TRUE, the gene names will be considered to perform the grouping, instead of the protid.
 #' @param auto_scale_circles logical. If TRUE and if there are only 2 groups, the dimensions of circles will be scaled to the number of intersections.
 #' @param add_title logical. If TRUE, a short default title is added at the top of the graph.
 #'
 #' @return A ggplot object.
 #'
+#'
+#' @examples
+#' \dontrun{
+#'
+#' Fig08_Venn_post_filteringNA <- GCP_Venn(GCPlist07)
+#' export_figures(Fig08_Venn_post_filteringNA)
+#'
+#' }
+#'
+#'
+#'
 #' @import ggvenn
 #'
 #' @export
-GCP_Venn <- function(GCPlist, name_column_groups = NULL, raw_or_LFQ = getOption("GetCoolProteopipe.raw_or_LFQ"), consider_genenames = FALSE, col_pal = NULL, auto_scale_circles = FALSE, add_title = FALSE) {
+GCP_Venn <- function(GCPlist, name_column_groups = getOption("GetCoolProteopipe.name_column_groups"), col_pal = getOption("GetCoolProteopipe.col_pal"), consider_genenames = FALSE, auto_scale_circles = FALSE, add_title = FALSE) {
 
   checkGCPlist(GCPlist)
 
@@ -23,6 +33,7 @@ GCP_Venn <- function(GCPlist, name_column_groups = NULL, raw_or_LFQ = getOption(
     if (length(name_column_groups)!=1) {stop("name_column_groups must be a character of length 1")}
     if (!is.character(name_column_groups)) {stop("name_column_groups must be a character of length 1")}
     if (is.na(name_column_groups)) {stop("name_column_groups must be a character of length 1, not a NA")}
+    cat(paste0("\n -- The name_column_groups considered is '", name_column_groups, "' --\n\n"))
     if (length(which(colnames(GCPlist$sampleINFO) == name_column_groups)) != 1) {stop("The name passed in name_column_groups must be a name of a column of the sampleINFO dataframe")}
 
     if (!is.factor(pull(GCPlist$sampleINFO, name_column_groups))) {
@@ -32,35 +43,32 @@ GCP_Venn <- function(GCPlist, name_column_groups = NULL, raw_or_LFQ = getOption(
     if (length(levels(pull(GCPlist$sampleINFO, name_column_groups))) < 2 | length(levels(pull(GCPlist$sampleINFO, name_column_groups))) > 4) {stop("The sample groups must be only 2, 3 or 4")}
 
   } else {
+    cat("\n -- The name_column_groups considered is NULL --\n\n")
     stop("please, specifiy the name of the sample group column in the name_column_groups argoument")
   }
-
-  if (!identical(tolower(raw_or_LFQ), c("lfq", "raw"))) {
-    if (length(raw_or_LFQ) != 1) {stop('raw_or_LFQ must be one of "raw", "LFQ"')}
-    if (is.na(raw_or_LFQ)) {stop('raw_or_LFQ must be one of "raw", "LFQ"')}
-  }
-  raw_or_LFQ <- tolower(raw_or_LFQ)
-  raw_or_LFQ <- match.arg(raw_or_LFQ, c("lfq", "raw"))
-
-  if (raw_or_LFQ == "lfq") {
-    cat("\n -- LFQ data are used --\n\n")
-  } else if (raw_or_LFQ == "raw") {
-    cat("\n -- raw data are used --\n\n")
-  }
-
-  if (length(consider_genenames)!=1) {stop("consider_genenames must be exclusively TRUE or FALSE")}
-  if (!is.logical(consider_genenames)) {stop("consider_genenames must be exclusively TRUE or FALSE")}
-  if (is.na(consider_genenames)) {stop("consider_genenames must be exclusively TRUE or FALSE")}
-  if (consider_genenames) {
-    if (length(which(colnames(GCPlist$proteinINFO)=="Gene names")) != 1) {stop("The proteinINFO data frame must have one column named 'Gene names'")}
-  }
-
 
   if (!is.null(col_pal)) {
     if (!is.character(col_pal)) stop("col_pal must be a character vector")
     if (any(is.na(col_pal))) stop("col_pal must not contain NAs")
-
+    if (is.null(names(col_pal))) {
+      cat(paste0(' --- col_pal is  c("', paste0(col_pal, collapse = '", "'), '") ---\n\n'))
+    } else {
+      cat(' --- col_pal is  c(')
+      for (i in seq(length(col_pal))) {
+        if (names(col_pal)[i]!="") {
+          cat(paste0(names(col_pal)[i], ' = "'))
+        } else {
+          cat('"')
+        }
+        cat(paste0(col_pal[i], '"'))
+        if (i != length(col_pal)) {
+          cat(', ')
+        }
+      }
+      cat(') ---\n\n')
+    }
   } else {
+    cat(" -- col_pal is  NULL --\n\n")
     col_pal <- build_long_vector_of_colors()
   }
 
@@ -79,6 +87,13 @@ GCP_Venn <- function(GCPlist, name_column_groups = NULL, raw_or_LFQ = getOption(
   }
   if (!all(are.colors(col_pal))) {stop(paste0('col_pal must contain valid colors. In particular, these are not: "', paste(col_pal[!are.colors(col_pal)], collapse = '", "')), '"')}
 
+  if (length(consider_genenames)!=1) {stop("consider_genenames must be exclusively TRUE or FALSE")}
+  if (!is.logical(consider_genenames)) {stop("consider_genenames must be exclusively TRUE or FALSE")}
+  if (is.na(consider_genenames)) {stop("consider_genenames must be exclusively TRUE or FALSE")}
+  if (consider_genenames) {
+    if (length(which(colnames(GCPlist$proteinINFO)=="Gene names")) != 1) {stop("The proteinINFO data frame must have one column named 'Gene names'")}
+  }
+
   if (length(auto_scale_circles)!=1) {stop("auto_scale_circles must be exclusively TRUE or FALSE")}
   if (!is.logical(auto_scale_circles)) {stop("auto_scale_circles must be exclusively TRUE or FALSE")}
   if (is.na(auto_scale_circles)) {stop("auto_scale_circles must be exclusively TRUE or FALSE")}
@@ -88,13 +103,7 @@ GCP_Venn <- function(GCPlist, name_column_groups = NULL, raw_or_LFQ = getOption(
   if (is.na(add_title)) {stop("add_title must be exclusively TRUE or FALSE")}
 
 
-  if (raw_or_LFQ == "raw") {
-    df_intensities <- GetFeatistics::transpose_feat_table(GCPlist$quant_raw, name_first_column = colnames(GCPlist$sampleINFO)[1])
-  } else if (raw_or_LFQ == "lfq") {
-    df_intensities <- GetFeatistics::transpose_feat_table(GCPlist$quant_LFQ, name_first_column = colnames(GCPlist$sampleINFO)[1])
-  } else {
-    stop('raw_or_LFQ must be one of "raw", "LFQ"')
-  }
+  df_intensities <- GetFeatistics::transpose_feat_table(GCPlist$intensities, name_first_column = colnames(GCPlist$sampleINFO)[1])
 
   df_intensities_w_groups <- left_join(x = GCPlist$sampleINFO[,unique(c(colnames(GCPlist$sampleINFO)[1], name_column_groups))], y = df_intensities, by = colnames(GCPlist$sampleINFO)[1], suffix = c("_INFO", "_intensities"))
 
@@ -128,13 +137,8 @@ GCP_Venn <- function(GCPlist, name_column_groups = NULL, raw_or_LFQ = getOption(
     list_for_ggven <- list_for_ggven_gn
   }
 
-
-
   fill_vector <- col_pal
   names(fill_vector) <- NULL
-
-
-
 
   if (length(levels(pull(GCPlist$sampleINFO, name_column_groups))) == 2 & auto_scale_circles) {
     ggven_graph <- ggvenn(list_for_ggven, fill_color = fill_vector, auto_scale = TRUE) + theme_bw() + theme(axis.title = element_blank(),
@@ -156,16 +160,11 @@ GCP_Venn <- function(GCPlist, name_column_groups = NULL, raw_or_LFQ = getOption(
                                                                                          plot.background = element_blank())
   }
 
+  if (add_title) {
 
-  if (raw_or_LFQ == "raw" & add_title) {
+    ggven_graph <- ggven_graph + ggtitle("Proteins in groups") + theme(plot.title = element_text(hjust = 0.5))
 
-    ggven_graph <- ggven_graph + ggtitle("Proteins in groups, raw data") + theme(plot.title = element_text(hjust = 0.5))
-
-  } else if (raw_or_LFQ == "lfq" & add_title) {
-
-    ggven_graph <- ggven_graph + ggtitle("Proteins in groups, LFQ data") + theme(plot.title = element_text(hjust = 0.5))
   }
-
 
   return(ggven_graph)
 }

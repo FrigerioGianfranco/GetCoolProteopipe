@@ -4,16 +4,10 @@
 \alias{GCP_QQplotIntensities}
 \title{Plotting an overall Q-Q plot}
 \usage{
-GCP_QQplotIntensities(
-  GCPlist,
-  raw_or_LFQ = getOption("GetCoolProteopipe.raw_or_LFQ"),
-  Title = "QQ plot intensities"
-)
+GCP_QQplotIntensities(GCPlist, Title = "QQ plot intensities")
 }
 \arguments{
 \item{GCPlist}{a list created with the ImportOutputMaxQuant function.}
-
-\item{raw_or_LFQ}{one of the following: "raw", "LFQ".  The plot will be created only with the specified data intensities.}
 
 \item{Title}{NULL or character of length 1. The title you want to ad on the top of the plot.}
 }
@@ -22,4 +16,16 @@ a ggplot object.
 }
 \description{
 It crates a Q-Q plot considering all the intensities of protein from all samples.
+}
+\examples{
+\dontrun{
+
+Fig02_QQ_plot_before_processing <- GCP_QQplotIntensities(GCPlist = GCPlist05,
+                                                         Title = "QQ plot - before processing")
+export_figures(Fig02_QQ_plot_before_processing)
+
+}
+
+
+
 }

@@ -6,20 +6,27 @@
 \usage{
 GCP_ProteinsGrouped(
   GCPlist,
-  name_column_groups = NULL,
-  raw_or_LFQ = getOption("GetCoolProteopipe.raw_or_LFQ")
+  name_column_groups = getOption("GetCoolProteopipe.name_column_groups")
 )
 }
 \arguments{
 \item{GCPlist}{a list created with the ImportOutputMaxQuant function.}
 
 \item{name_column_groups}{character of length 1. The name of the column of the sampleINFO table containing the sample groups. The sample groups must be between at least 2.}
-
-\item{raw_or_LFQ}{one of the following: "raw", "LFQ".}
 }
 \value{
 The GCPlist with an additional column in the proteinINFO data frame.
 }
 \description{
 It creates an additional column in the proteinINFO data frame containing where in which groups proteins are present.
+}
+\examples{
+\dontrun{
+
+GCPlist08 <- GCP_ProteinsGrouped(GCPlist07)
+
+}
+
+
+
 }

@@ -3,7 +3,6 @@
 #' It performs a heat map out of GCPdata.
 #'
 #' @param GCPlist a list created with the ImportOutputMaxQuant function.
-#' @param raw_or_LFQ one of the following: "raw", "LFQ". The heat map will be performed only in the specified data.
 #' @param name_column_groups NULL or character vector. Name(s) of the column(s) of the sampleINFO table. Specify it if you want to have those groups specified on the heatmap.
 #' @param name_column_labels NULL or a character of length 1. The name of the column of sampleINFO containing the sample names. You need to pass it only if you want sample names on the heat map.
 #' @param name_column_groups_protein NULL or character vector. Name(s) of the column(s) of the proteinINFO table. Specify it if you want to have those groups specified on the heatmap.
@@ -23,38 +22,53 @@
 #'
 #' @return a ggplot object.
 #'
+#'
+#'
+#' @examples
+#' \dontrun{
+#'
+#' Fig16_The_Heat_Map_sign <- GCP_HeatMap(GCPlist = GCPlist14f,
+#'                                        name_column_groups = c("Condition", "Replicate"),
+#'                                        name_column_labels = "Sample",
+#'                                        name_column_groups_protein = NULL,
+#'                                        name_column_labels_protein = "Protein names",
+#'                                        name_rows = FALSE,
+#'                                        name_columns = TRUE,
+#'                                        rotate_name_columns = TRUE,
+#'                                        col_pal_list = list(Condition = c(S = "green", V = "blue"),
+#'                                                            Replicate = c("lightskyblue", "lightskyblue1", "lightskyblue2", "lightskyblue3", "lightskyblue4")))
+#' export_figures(Fig16_The_Heat_Map_sign)
+#'
+#' }
+#'
+#'
+#'
 #' @export
-GCP_HeatMap <- function(GCPlist, raw_or_LFQ = getOption("GetCoolProteopipe.raw_or_LFQ"),
-                        name_column_groups = NULL, name_column_labels = NULL,
+GCP_HeatMap <- function(GCPlist,
+                        name_column_groups = getOption("GetCoolProteopipe.name_column_groups"), name_column_labels = NULL,
                         name_column_groups_protein = NULL, name_column_labels_protein = NULL,
                         order_samples_by = NULL, order_protein_by = NULL,
                         trnsp = TRUE, cluster_rows = TRUE, cluster_columns = TRUE,
                         name_rows = FALSE, name_columns = FALSE, rotate_name_columns = TRUE,
                         three_heat_colors = c("red", "white", "blue"), set_heat_colors_limits = FALSE, heat_colors_limits = NULL,
-                        col_pal_list = NULL) {
+                        col_pal_list = getOption("GetCoolProteopipe.col_pal")) {
 
   checkGCPlist(GCPlist)
-
-  if (!identical(tolower(raw_or_LFQ), c("lfq", "raw"))) {
-    if (length(raw_or_LFQ) != 1) {stop('raw_or_LFQ must be one of "raw", "LFQ"')}
-    if (is.na(raw_or_LFQ)) {stop('raw_or_LFQ must be one of "raw", "LFQ"')}
-  }
-  raw_or_LFQ <- tolower(raw_or_LFQ)
-  raw_or_LFQ <- match.arg(raw_or_LFQ, c("lfq", "raw"))
-
-  if (raw_or_LFQ == "lfq") {
-    cat("\n -- LFQ data are used --\n\n")
-  } else if (raw_or_LFQ == "raw") {
-    cat("\n -- raw data are used --\n\n")
-  }
 
   if (!is.null(name_column_groups)) {
     if (!is.character(name_column_groups)) {stop("name_column_groups must be NULL or a character")}
     if (any(is.na(name_column_groups))) {stop("name_column_groups must not contain NAs")}
+    if (length(name_column_groups)==1) {
+      cat(paste0("\n -- The name_column_groups considered is '", name_column_groups, "' --\n\n"))
+    } else {
+      cat(paste0("\n -- The name_column_groups considered is c('", paste0(name_column_groups, collapse = "', '"), "') --\n\n"))
+    }
     if (!all(name_column_groups %in% colnames(GCPlist$sampleINFO))) {stop("The names passed in name_column_groups must names of columns of the sampleINFO dataframe")}
     if (any(duplicated(colnames(GCPlist$sampleINFO)[which(colnames(GCPlist$sampleINFO)%in%name_column_groups)]))) {stop("there are duplicates in the name of sampleINFO considering the name_column_groups")}
     if (any(name_column_groups == "allwiththis")) {stop("Please, just don't pass 'allwiththis' to name_column_groups, thanks!")}
     if (any(name_column_groups == "thesearethesamplenamesused")) {stop("Please, just don't pass 'thesearethesamplenamesused' to name_column_groups, thanks!")}
+  } else {
+    cat("\n -- The name_column_groups considered is NULL --\n\n")
   }
 
   if (!is.null(name_column_labels)) {
@@ -159,20 +173,17 @@ GCP_HeatMap <- function(GCPlist, raw_or_LFQ = getOption("GetCoolProteopipe.raw_o
           stop("if not NULL, col_pal_list must be a list with character vector of colors to match name_column_groups and name_column_groups_protein")
         }
       }
+      cat("\n -- col_pal_list is a list of colors:\n")
+      print(col_pal_list)
+      cat("--\n\n")
+    } else {
+      cat("\n -- col_pal_list is  NULL --\n\n")
     }
   }
 
 
-
-  if (raw_or_LFQ == "raw") {
-    df_intensities <- GetFeatistics::transpose_feat_table(GCPlist$quant_raw, name_first_column = "thesearethesamplenamesused")
-    used_protid <- GCPlist$quant_raw$protid
-  } else if (raw_or_LFQ == "lfq") {
-    df_intensities <- GetFeatistics::transpose_feat_table(GCPlist$quant_LFQ, name_first_column = "thesearethesamplenamesused")
-    used_protid <- GCPlist$quant_LFQ$protid
-  } else {
-    stop('raw_or_LFQ must be one of "raw", "LFQ"')
-  }
+  df_intensities <- GetFeatistics::transpose_feat_table(GCPlist$intensities, name_first_column = "thesearethesamplenamesused")
+  used_protid <- GCPlist$intensities$protid
 
   df_intensities_wg <- df_intensities
 

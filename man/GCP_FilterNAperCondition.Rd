@@ -4,7 +4,11 @@
 \alias{GCP_FilterNAperCondition}
 \title{Filter proteins based on missing values per condition}
 \usage{
-GCP_FilterNAperCondition(GCPlist, ratio = 0.5, name_column_groups = NULL)
+GCP_FilterNAperCondition(
+  GCPlist,
+  ratio = 0.5,
+  name_column_groups = getOption("GetCoolProteopipe.name_column_groups")
+)
 }
 \arguments{
 \item{GCPlist}{a list created with the ImportOutputMaxQuant function.}
@@ -17,5 +21,16 @@ GCP_FilterNAperCondition(GCPlist, ratio = 0.5, name_column_groups = NULL)
 a GCPlist list with filtered tables.
 }
 \description{
-In the quant_raw and the quantLFQ data intensity, it keeps only proteins that are not missing values for a defined ratio in at least one of the specified conditions (sample groups).
+In the intensities table, it keeps only proteins that are not missing values for a defined ratio in at least one of the specified sample groups.
+}
+\examples{
+\dontrun{
+
+GCPlist07 <- GCP_FilterNAperCondition(GCPlist = GCPlist06,
+                                      ratio = 0.5)
+
+}
+
+
+
 }

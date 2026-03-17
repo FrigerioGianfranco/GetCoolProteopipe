@@ -3,39 +3,37 @@
 #' It performs a principal component analysis.
 #'
 #' @param GCPlist a list created with the ImportOutputMaxQuant function.
-#' @param raw_or_LFQ one of the following: "raw", "LFQ". The principal component analysis will be performed only in the specified data.
 #' @param center logical. Whether the variables should be shifted to be zero centered (as in the prcomp function).
 #' @param scale. logical. whether the variables should be scaled to have unit variance before the analysis takes place (as in prcomp function).
 #'
 #' @return The GCPlist will be returned with the scores in the sampleINFO and the loadings in the proteinINFO.
 #'
+#'
+#'
+#' @examples
+#' \dontrun{
+#'
+#' GCPlist12 <- GCP_PCA(GCPlist = GCPlist11)
+#'
+#' }
+#'
+#'
+#'
 #' @export
-GCP_PCA <- function(GCPlist, raw_or_LFQ = getOption("GetCoolProteopipe.raw_or_LFQ"), center = TRUE, scale. = FALSE) {
+GCP_PCA <- function(GCPlist, center = TRUE, scale. = FALSE) {
 
   checkGCPlist(GCPlist)
 
-  if (!identical(tolower(raw_or_LFQ), c("lfq", "raw"))) {
-    if (length(raw_or_LFQ) != 1) {stop('raw_or_LFQ must be one of "raw", "LFQ"')}
-    if (is.na(raw_or_LFQ)) {stop('raw_or_LFQ must be one of "raw", "LFQ"')}
-  }
-  raw_or_LFQ <- tolower(raw_or_LFQ)
-  raw_or_LFQ <- match.arg(raw_or_LFQ, c("lfq", "raw"))
+  if (length(center)!=1) {stop("center must be exclusively TRUE or FALSE")}
+  if (!is.logical(center)) {stop("center must be exclusively TRUE or FALSE")}
+  if (is.na(center)) {stop("center must be exclusively TRUE or FALSE")}
 
-  if (raw_or_LFQ == "lfq") {
-    cat("\n -- LFQ data are used --\n\n")
-  } else if (raw_or_LFQ == "raw") {
-    cat("\n -- raw data are used --\n\n")
-  }
+  if (length(scale.)!=1) {stop("scale. must be exclusively TRUE or FALSE")}
+  if (!is.logical(scale.)) {stop("scale. must be exclusively TRUE or FALSE")}
+  if (is.na(scale.)) {stop("scale. must be exclusively TRUE or FALSE")}
 
 
-  if (raw_or_LFQ == "raw") {
-    df_intensities <- GetFeatistics::transpose_feat_table(GCPlist$quant_raw, name_first_column = "thesearethesamplenamesused")
-  } else if (raw_or_LFQ == "lfq") {
-    df_intensities <- GetFeatistics::transpose_feat_table(GCPlist$quant_LFQ, name_first_column = "thesearethesamplenamesused")
-  } else {
-    stop('raw_or_LFQ must be one of "raw", "LFQ"')
-  }
-
+  df_intensities <- GetFeatistics::transpose_feat_table(GCPlist$intensities, name_first_column = "thesearethesamplenamesused")
 
   PCA_list <- GetFeatistics::getPCA(df = df_intensities,
                                     v = colnames(df_intensities)[-1],
@@ -69,8 +67,6 @@ GCP_PCA <- function(GCPlist, raw_or_LFQ = getOption("GetCoolProteopipe.raw_or_LF
 
 
   GCPoutput$sampleINFO <- left_join(GCPlist$sampleINFO, the_score_table, by = colnames(GCPlist$sampleINFO)[1])
-
-
 
 
   the_loading_table <- PCA_list$dfv_with_loadings_table[, colnames(PCA_list$dfv_with_loadings_table)[which(!colnames(PCA_list$dfv_with_loadings_table)%in%colnames(GCPlist$proteinINFO)[-1])]]
