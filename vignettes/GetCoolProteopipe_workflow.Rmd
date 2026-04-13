@@ -85,14 +85,14 @@ library(GetCoolProteopipe)
 
 
 
-# Import the data
+# Import the untargeted data
 
 Everything begins with the data import. For this vignette, we will use the data from XXXX
 
 
 The _ImportOutputMaxQuant()_ function will import your data, pay attention for the most important arguments:
 
-- MaxQuant_table_name: the name of the .txt file (or the path file) as exported from MaxQuant.
+- MaxQuant_table_name: the "proteinGroups.txt" file (or the path file) as exported from MaxQuant within the txt folder.
 - samples_info: This is optional, but if you have some metadata table about your samples, such as which samples belong to certain sample groups, you can upload it here by passing is file name (or the path file).
 - fasta_database: you could leave it as missing; but if you want to fill the missing Protein names and Gene names from MaxQuant, you can specify either "human" or "mouse" (in this case the package will use pre-loaded fasta tables) or if you have your own fasta table you can write here that file name (or the path file) and it will be considered. - CIT FROM WHERE WE TOOK THE FASTA!!
 - raw_or_LFQ: the output of MaxQuant usually have both raw intenstities and such intensities normalised with the "LFQ" (Label-Free Quantification) algorithm. Choose here which ones you want here to be imported for your elaborations.
@@ -177,7 +177,7 @@ In the example dataset we are using for this vingettes, the two sample groups (d
 
 # Pre-processing
 
-It's probably a good idea now to run _GCP_RemoveAllZero_ to remove proteins that have zero as intensity in all samples.
+It's probably a good idea now to run _GCP_RemoveAllZero_ to remove proteins that have zero as intensity in all samples, especially if working with LFQ intensities.
 
 ```{r}
 GCPlist03 <- GCP_RemoveAllZero(GCPlist02)
@@ -204,7 +204,7 @@ As you can see from what is printed in the console, additional columns have been
 
 Let's visualise our data so far! We have plenty of cool functions, including: _GCP_DensityplotIntensities_, _GCP_QQplotIntensities_, _GCP_BoxPlots_, _GCP_Dendogram_, _GCP_BarPlot_, _GCP_Venn_.
 All the visualisation of this package is saved as a ggplot object: this means that you can use the ggplot grammar to further edit it.
-Moreover, you can use the function _export_figures_ to quickly export it, as I show you below:
+Moreover, you can use the function _export_figures_ to quickly export it, as showed below:
 
 ```{r}
 Fig01_IntensityDistribution_before_processing <- GCP_DensityplotIntensities(GCPlist = GCPlist05,
@@ -321,7 +321,7 @@ GCPlist09 <- GCP_NAimputation(GCPlist = GCPlist08,
 ```
 
 
-A this point, we could further standardise the data. I'd describe you the function _GCP_ScaleIntensities_:
+A this point, we could further standardise the data, if you're not using LFQ intensities. I'd describe you the function _GCP_ScaleIntensities_:
 
 - first argument, as usual, the GCPlist;
 - in the 'subtract' argument you should specify what to subtract, i.e. how to center the data. Choose "mean" if you what to subtract the mean or "median" to subtract the median. There is actually an additional option, "shift_median", which I'll describe later.... (a bit of suspense for it!);
@@ -375,7 +375,7 @@ Fig12_Dendogram_post_processing <- GCP_Dendogram(GCPlist11)
 
 print(Fig12_Dendogram_post_processing)
 ```
-
+### Here I would add the example of patchwotk to see the effect of processing steps on proteins distribution and clustering of the samples.... 
 
 # PCA
 
