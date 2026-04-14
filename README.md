@@ -1,5 +1,5 @@
 <img src="man/figures/Logo.png" height="100" align="left" />
-<img src="man/figures/LogoSmall.png" height="160" align="right" /><br><br><br><br>
+<img src="man/figures/LogoSmall.png" height="170" align="right" /><br><br><br><br>
 
 The **GetCoolProteopipe** (GCP) package is the coolest R-package for proteomics data elaboration! 
 After acquiring the data from an LC/MS-MS proteomics analysis, and after using the software MaxQuant, this package takes the output of MaxQuant and allows to perform elaborations such as data transformation and normalisation, missing value imputation, statistics analyses and data visualisation.
