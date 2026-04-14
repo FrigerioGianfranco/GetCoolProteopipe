@@ -4,7 +4,7 @@
 The **GetCoolProteopipe** (GCP) package is the coolest R-package for proteomics data elaboration! 
 After acquiring the data from an LC/MS-MS proteomics analysis, and after using the software MaxQuant, this package takes the output of MaxQuant and allows to perform elaborations such as data transformation and normalisation, missing value imputation, statistics analyses and data visualisation.
 
-## Installation
+## ⚙️ Installation
 
 Before installing, ensure the following are installed:
 
@@ -24,7 +24,7 @@ devtools::install_github("FrigerioGianfranco/GetCoolProteopipe", dependencies = 
 Follow the on-screen instructions to install all the dependencies.
 
 
-## Workflow
+## 📊 Workflow
 
 A pleasant-to-read and complete vingettes to explain the full workflow is there for you, why don't you have a look at it:
 
@@ -39,7 +39,7 @@ Or maybe you can more quickly type on the R-console '?' followed by the name of 
 Please, do not hesitate to contact Gianfranco (the cheminformatics nerd expert) for any questions about the functions he wrote, or Clarissa (the proteomics expert) for any questions about the proteomics workflow she conceived.
 
 
-## Citation
+## 📖 Citation
 
 If you use the package, please cite it as follows:
 
@@ -47,7 +47,7 @@ If you use the package, please cite it as follows:
 
 
 
-## Credits
+## ✍️ Credits
 
 The idea that led to this work came from Clarissa Braccia's mind. She conceived the proteomics workflow and wrote initial R scripts; tested the functions and suggested many improvements to them, revised all the documentations and contributed to some examples, and supervised the whole work.
 
@@ -60,7 +60,7 @@ The group ProMeFa belongs to the Center for Omics Sciences (COSR) of the IRCCS S
 
 
 
-## Dependencies
+## 📦 Dependencies
 
 This package relies on external packages, cited below:
 
