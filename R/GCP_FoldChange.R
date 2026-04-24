@@ -27,7 +27,7 @@
 #'
 #' @export
 GCP_FoldChange <- function(GCPlist, name_column_groups = getOption("GetCoolProteopipe.name_column_groups"), control_group = NULL,
-                           paired = FALSE, are_log_transf = TRUE, log_base = exp(1)) {
+                           paired = FALSE, are_log_transf = TRUE, log_base = getOption("GetCoolProteopipe.log_base")) {
 
   checkGCPlist(GCPlist)
 
@@ -42,7 +42,13 @@ GCP_FoldChange <- function(GCPlist, name_column_groups = getOption("GetCoolProte
   if (!is.factor(pull(GCPlist$sampleINFO, name_column_groups))) {
     GCPlist$sampleINFO[,name_column_groups] <- as.factor(pull(GCPlist$sampleINFO, name_column_groups))
   }
-  if (length(levels(pull(GCPlist$sampleINFO, name_column_groups))) != 2) {stop("To perform a Fold Change analyses, you must have exactly 2 groups!")}
+  if (any(table(pull(GCPlist$sampleINFO, name_column_groups)) == 0)) {
+    GCPlist$sampleINFO[,name_column_groups] <- droplevels(pull(GCPlist$sampleINFO, name_column_groups))
+  }
+
+  if (length(levels(pull(GCPlist$sampleINFO, name_column_groups))) != 2) {
+    stop(paste0("To perform a Fold Change analyses, you must have exactly 2 groups! The groups in '", name_column_groups, "' are:\n", paste0(levels(pull(GCPlist$sampleINFO, name_column_groups)), collapse = "\n")))
+  }
 
   if (is.null(control_group)) {
     cat(paste0('\n"', levels(pull(GCPlist$sampleINFO, name_column_groups))[1], '" has been used as control group. If that is not fine for you, specify which group you want in the argument control_group\n\n'))
@@ -78,6 +84,8 @@ GCP_FoldChange <- function(GCPlist, name_column_groups = getOption("GetCoolProte
   if (is.na(log_base)) {stop("log_base must be a number")}
   if (!is.numeric(log_base)) {stop("log_base must be a number")}
 
+  cat(paste0("\n -- The log_base considered is ", log_base, " --\n\n"))
+
 
 
   df_intensities <- GetFeatistics::transpose_feat_table(GCPlist$intensities, name_first_column = "thesearethesamplenamesused")
@@ -106,10 +114,12 @@ GCP_FoldChange <- function(GCPlist, name_column_groups = getOption("GetCoolProte
                             filter_sign = FALSE)
   colnames(the_FC_table)[1] <- "protid"
 
-  the_FC_table <- mutate(the_FC_table, FCcomparison = rep(ifelse(second_to_first_ratio,
-                                                                 paste0(levels(pull(df_intensities_wg, name_column_groups))[2], " vs ", levels(pull(df_intensities_wg, name_column_groups))[1]),
-                                                                 paste0(levels(pull(df_intensities_wg, name_column_groups))[1], " vs ", levels(pull(df_intensities_wg, name_column_groups))[2])),
-                                                          nrow(the_FC_table)))
+  prefix_to_add_to_columns <- ifelse(second_to_first_ratio,
+                                     paste0(levels(pull(df_intensities_wg, name_column_groups))[2], "_vs_", levels(pull(df_intensities_wg, name_column_groups))[1]),
+                                     paste0(levels(pull(df_intensities_wg, name_column_groups))[1], "_vs_", levels(pull(df_intensities_wg, name_column_groups))[2]))
+
+  colnames(the_FC_table)[which(colnames(the_FC_table)!="protid")] <- paste0(prefix_to_add_to_columns, "_" , colnames(the_FC_table)[which(colnames(the_FC_table)!="protid")])
+
 
   colnames_noprotid <- colnames(the_FC_table)[which(colnames(the_FC_table)!="protid")]
   colnames_noprotid_present <- colnames_noprotid[which(colnames_noprotid %in% colnames(GCPlist$proteinINFO))]

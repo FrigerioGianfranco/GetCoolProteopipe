@@ -36,8 +36,13 @@ GCP_ProteinsGroupedSummary <- function(GCPlist, name_column_groups = getOption("
     if (!is.factor(pull(GCPlist$sampleINFO, name_column_groups))) {
       GCPlist$sampleINFO[,name_column_groups] <- as.factor(pull(GCPlist$sampleINFO, name_column_groups))
     }
+    if (any(table(pull(GCPlist$sampleINFO, name_column_groups)) == 0)) {
+      GCPlist$sampleINFO[,name_column_groups] <- droplevels(pull(GCPlist$sampleINFO, name_column_groups))
+    }
 
-    if (length(levels(pull(GCPlist$sampleINFO, name_column_groups))) < 2) {stop("The sample groups must be at least 2")}
+    if (length(levels(pull(GCPlist$sampleINFO, name_column_groups))) < 2) {
+      stop(paste0("The sample groups must be at least 2! The groups in '", name_column_groups, "' are:\n", paste0(levels(pull(GCPlist$sampleINFO, name_column_groups)), collapse = "\n")))
+    }
 
   } else {
     cat("\n -- The name_column_groups considered is NULL --\n\n")

@@ -23,7 +23,6 @@
 #' Fig15_Volcano_plot <- GCP_Volcano(GCPlist = GCPlist14,
 #'                                   x_val = "logFC",
 #'                                   y_val = "ttest_PvaluesFDR",
-#'                                   log_base = 2,
 #'                                   pcutoff_colored = 0.05,
 #'                                   pcutoff_line = 0.05,
 #'                                   pcutoff_prot_label = 0.005,
@@ -38,16 +37,28 @@
 #'
 #'
 #' @export
-GCP_Volcano <- function(GCPlist, x_val = "logFC", y_val = "ttest_PvaluesFDR", log_base = exp(1), pcutoff_colored = 0.05, pcutoff_line = 0.05, pcutoff_prot_label = NULL, name_column_proteinlabels = NULL, name_column_proteingroups = NULL, col_pal_difference = c("grey", "blue", "red"), col_pal_groups = NULL) {
+GCP_Volcano <- function(GCPlist, x_val = "logFC", y_val = "ttest_PvaluesFDR", log_base = getOption("GetCoolProteopipe.log_base"), pcutoff_colored = 0.05, pcutoff_line = 0.05, pcutoff_prot_label = NULL, name_column_proteinlabels = NULL, name_column_proteingroups = NULL, col_pal_difference = c("grey", "blue", "red"), col_pal_groups = NULL) {
 
   checkGCPlist(GCPlist)
 
   if (length(x_val)!=1) {stop("x_val must be a character of length 1")}
   if (is.na(x_val)) {stop("x_val must be a character of length 1, not a NA")}
   if (!is.character(x_val)) {stop("x_val must be a character of length 1")}
-  if (length(which(colnames(GCPlist$proteinINFO) == x_val)) != 1) {stop("The name passed in x_val must be a name of a column of the proteinINFO dataframe")}
-  if (!is.numeric(pull(GCPlist$proteinINFO, x_val))) {stop("The name passed in x_val must be a name of a column of the proteinINFO dataframe containing numeric data!")}
   if (x_val != "logFC" & !endsWith(x_val, "_logFC")) {stop("The name passed in x_val should be 'logFC' or end with '_logFC'")}
+  if (!x_val%in%colnames(GCPlist$proteinINFO)) {
+    if (!x_val%in%c("logFC", "_logFC")) {
+     stop("The name passed in x_val should ideally be a name of a column of the proteinINFO dataframe")
+    } else {
+      if (sum(grepl("logFC", colnames(GCPlist$proteinINFO)))==1) {
+        x_val <- colnames(GCPlist$proteinINFO)[which(grepl("logFC", colnames(GCPlist$proteinINFO)))]
+      } else if (sum(grepl("logFC", colnames(GCPlist$proteinINFO)))>1) {
+        stop("There are too many columns that can be related to 'logFC' in the proteinINFO dataframe, please specify better which one you exactly want to consider in the x_val argument")
+      } else {
+        stop("There are no column that can be related to 'logFC' in the proteinINFO dataframe")
+      }
+    }
+  }
+  if (!is.numeric(pull(GCPlist$proteinINFO, x_val))) {stop(paste0("The values considered for the x-axis are not numeric! They were taken from the column '", x_val ,"' of the proteinINFO dataframe"))}
 
   if (length(y_val)!=1) {stop("y_val must be a character of length 1")}
   if (is.na(y_val)) {stop("y_val must be a character of length 1, not a NA")}
@@ -59,6 +70,8 @@ GCP_Volcano <- function(GCPlist, x_val = "logFC", y_val = "ttest_PvaluesFDR", lo
   if (length(log_base)!=1) {stop("log_base must be a number")}
   if (is.na(log_base)) {stop("log_base must be a number")}
   if (!is.numeric(log_base)) {stop("log_base must be a number")}
+
+  cat(paste0("\n -- The log_base considered is ", log_base, " --\n\n"))
 
   if (!is.null(pcutoff_colored) & is.null(name_column_proteingroups)) {
     if (length(pcutoff_colored)!=1) {stop("pcutoff_colored must be a single number between 0 and 1")}
@@ -94,6 +107,9 @@ GCP_Volcano <- function(GCPlist, x_val = "logFC", y_val = "ttest_PvaluesFDR", lo
 
     if (!is.factor(pull(GCPlist$proteinINFO, name_column_proteingroups))) {
       GCPlist$proteinINFO[, name_column_proteingroups] <- as.factor(pull(GCPlist$proteinINFO, name_column_proteingroups))
+    }
+    if (any(table(pull(GCPlist$proteinINFO, name_column_proteingroups)) == 0)) {
+      GCPlist$proteinINFO[, name_column_proteingroups] <- droplevels(pull(GCPlist$proteinINFO, name_column_proteingroups))
     }
   }
 

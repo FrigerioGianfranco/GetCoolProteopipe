@@ -4,7 +4,10 @@
 \alias{GCP_LogTransformIntensities}
 \title{Log-transform intensities}
 \usage{
-GCP_LogTransformIntensities(GCPlist, base = exp(1))
+GCP_LogTransformIntensities(
+  GCPlist,
+  base = getOption("GetCoolProteopipe.log_base")
+)
 }
 \arguments{
 \item{GCPlist}{a list created with the ImportOutputMaxQuant function.}

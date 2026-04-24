@@ -18,13 +18,16 @@
 #'
 #'
 #' @export
-GCP_LogTransformIntensities <- function(GCPlist, base = exp(1)) {
+GCP_LogTransformIntensities <- function(GCPlist, base = getOption("GetCoolProteopipe.log_base")) {
 
   checkGCPlist(GCPlist)
 
   if (length(base)!=1) {stop("base must be a numeric of length 1")}
   if (!is.numeric(base)) {stop("base must be a numeric of length 1")}
   if (is.na(base)) {stop("base must be a numeric of length 1, not a missing value")}
+
+  cat(paste0("\n -- The base of the logarithm considered is ", base, " --\n\n"))
+
 
   if (any(map_lgl(GCPlist$intensities[, -which(colnames(GCPlist$intensities) == "protid")], \(x) any(x[which(!is.na(x))] == 0)))) {
     cat("\n")

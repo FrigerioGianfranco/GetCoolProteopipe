@@ -37,7 +37,12 @@ GCP_ANOVA <- function(GCPlist, name_column_groups = getOption("GetCoolProteopipe
   if (!is.factor(pull(GCPlist$sampleINFO, name_column_groups))) {
     GCPlist$sampleINFO[,name_column_groups] <- as.factor(pull(GCPlist$sampleINFO, name_column_groups))
   }
-  if (length(levels(pull(GCPlist$sampleINFO, name_column_groups))) < 3) {stop("To perform an ANOVA, you must have at least 3 groups!")}
+  if (any(table(pull(GCPlist$sampleINFO, name_column_groups)) == 0)) {
+    GCPlist$sampleINFO[,name_column_groups] <- droplevels(pull(GCPlist$sampleINFO, name_column_groups))
+  }
+  if (length(levels(pull(GCPlist$sampleINFO, name_column_groups))) < 3) {
+    stop(paste0("To perform an ANOVA, you must have at least 3 groups! The groups in '", name_column_groups, "' are:\n", paste0(levels(pull(GCPlist$sampleINFO, name_column_groups)), collapse = "\n")))
+  }
 
   if (length(FDR)!=1) {stop("FDR must be exclusively TRUE or FALSE")}
   if (!is.logical(FDR)) {stop("FDR must be exclusively TRUE or FALSE")}

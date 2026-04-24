@@ -46,6 +46,10 @@ GCP_NAimputation <- function(GCPlist, quant_rate = 0.5, name_column_groups = get
     if (!is.factor(pull(GCPlist$sampleINFO, name_column_groups))) {
       GCPlist$sampleINFO[,name_column_groups] <- as.factor(pull(GCPlist$sampleINFO, name_column_groups))
     }
+    if (any(table(pull(GCPlist$sampleINFO, name_column_groups)) == 0)) {
+      GCPlist$sampleINFO[,name_column_groups] <- droplevels(pull(GCPlist$sampleINFO, name_column_groups))
+    }
+
 
   } else {
     cat("\n -- The name_column_groups considered is NULL --\n\n")

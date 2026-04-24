@@ -143,6 +143,14 @@ GCP_RemoveSamples <- function(GCPlist, remove_samples = NULL, keep_samples = NUL
 
     }
 
+    if (any(map_lgl(GCPoutput$sampleINFO, is.factor))) {
+      for (aa in colnames(GCPoutput$sampleINFO)[which(map_lgl(GCPoutput$sampleINFO, is.factor))]) {
+        if (any(table(pull(GCPoutput$sampleINFO, aa)) == 0)) {
+          GCPoutput$sampleINFO[,aa] <- droplevels(pull(GCPoutput$sampleINFO, aa))
+        }
+      }
+    }
+
 
     return(GCPoutput)
 

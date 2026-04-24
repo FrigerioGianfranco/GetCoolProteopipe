@@ -8,7 +8,8 @@
   op <- options()
   op_pkg <- list(
     GetCoolProteopipe.name_column_groups = NULL,
-    GetCoolProteopipe.col_pal = NULL
+    GetCoolProteopipe.col_pal = NULL,
+    GetCoolProteopipe.log_base = 2
   )
   toset <- !(names(op_pkg) %in% names(op))
   if (any(toset)) {options(op_pkg[toset])}
@@ -45,6 +46,12 @@
         }
       }
       cat(') ---\n\n')
+    }
+  }
+
+  if (!is.null(getOption("GetCoolProteopipe.log_base"))) {
+    if (getOption("GetCoolProteopipe.log_base")!=2) {
+      cat(paste0("\n --- the log_base option is set to be ", getOption("GetCoolProteopipe.log_base"), " ---\n\n"))
     }
   }
 }

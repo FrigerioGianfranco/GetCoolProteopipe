@@ -28,7 +28,7 @@
 #'
 #' @export
 GCP_FoldChange_Multi <- function(GCPlist, name_column_groups = getOption("GetCoolProteopipe.name_column_groups"), group_order = NULL,
-                                 paired = FALSE, are_log_transf = TRUE, log_base = exp(1)) {
+                                 paired = FALSE, are_log_transf = TRUE, log_base = getOption("GetCoolProteopipe.log_base")) {
 
   checkGCPlist(GCPlist)
 
@@ -43,14 +43,22 @@ GCP_FoldChange_Multi <- function(GCPlist, name_column_groups = getOption("GetCoo
   if (!is.factor(pull(GCPlist$sampleINFO, name_column_groups))) {
     GCPlist$sampleINFO[,name_column_groups] <- as.factor(pull(GCPlist$sampleINFO, name_column_groups))
   }
-  if (length(levels(pull(GCPlist$sampleINFO, name_column_groups))) <= 2) {stop("To perform these multiple Fold Change analyses, you should have more than 2 groups!")}
+  if (any(table(pull(GCPlist$sampleINFO, name_column_groups)) == 0)) {
+    GCPlist$sampleINFO[,name_column_groups] <- droplevels(pull(GCPlist$sampleINFO, name_column_groups))
+  }
+
+  if (length(levels(pull(GCPlist$sampleINFO, name_column_groups))) <= 2) {
+    stop(paste0("To perform these multiple Fold Change analyses, you should have more than 2 groups! The groups in '", name_column_groups, "' are:\n", paste0(levels(pull(GCPlist$sampleINFO, name_column_groups)), collapse = "\n")))
+  }
 
   if (!is.null(group_order)) {
     if (length(group_order)!=length(levels(pull(GCPlist$sampleINFO, name_column_groups)))) {stop("the length of group_order must be the same of the groups")}
     if (any(is.na(group_order))) {stop("group_order must not contain NAs")}
     if (!is.character(group_order)) {stop("group_order must be a character")}
     if (any(duplicated(group_order))) {stop("group_order must not contain duplicated")}
-    if (!all(group_order %in% levels(pull(GCPlist$sampleINFO, name_column_groups)))) {stop("group_order must contain the levels of the factor!")}
+    if (!all(group_order %in% levels(pull(GCPlist$sampleINFO, name_column_groups)))) {
+      stop(paste0("group_order must contain the levels of the factor! The levels in '", name_column_groups, "' are:\n", paste0(levels(pull(GCPlist$sampleINFO, name_column_groups)), collapse = "\n")))
+    }
 
     GCPlist$sampleINFO[,name_column_groups] <- factor(as.character(pull(GCPlist$sampleINFO, name_column_groups)), levels = group_order)
   }
@@ -66,6 +74,8 @@ GCP_FoldChange_Multi <- function(GCPlist, name_column_groups = getOption("GetCoo
   if (length(log_base)!=1) {stop("log_base must be a number")}
   if (is.na(log_base)) {stop("log_base must be a number")}
   if (!is.numeric(log_base)) {stop("log_base must be a number")}
+
+  cat(paste0("\n -- The log_base considered is ", log_base, " --\n\n"))
 
 
   df_intensities <- GetFeatistics::transpose_feat_table(GCPlist$intensities, name_first_column = "thesearethesamplenamesused")

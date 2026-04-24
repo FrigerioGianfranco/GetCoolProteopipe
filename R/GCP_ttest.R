@@ -40,7 +40,12 @@ GCP_ttest <- function(GCPlist, name_column_groups = getOption("GetCoolProteopipe
   if (!is.factor(pull(GCPlist$sampleINFO, name_column_groups))) {
     GCPlist$sampleINFO[,name_column_groups] <- as.factor(pull(GCPlist$sampleINFO, name_column_groups))
   }
-  if (length(levels(pull(GCPlist$sampleINFO, name_column_groups))) != 2) {stop("To perform a t-test, you must have exactly 2 groups!")}
+  if (any(table(pull(GCPlist$sampleINFO, name_column_groups)) == 0)) {
+    GCPlist$sampleINFO[,name_column_groups] <- droplevels(pull(GCPlist$sampleINFO, name_column_groups))
+  }
+  if (length(levels(pull(GCPlist$sampleINFO, name_column_groups))) != 2) {
+    stop(paste0("To perform a t-test, you must have exactly 2 groups! The groups in '", name_column_groups, "' are:\n", paste0(levels(pull(GCPlist$sampleINFO, name_column_groups)), collapse = "\n")))
+  }
 
 
   if (length(paired)!=1) {stop("paired must be exclusively TRUE or FALSE")}

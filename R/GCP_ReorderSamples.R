@@ -56,6 +56,9 @@ GCP_ReorderSamples <- function(GCPlist, sample_names_ordered = NULL, name_column
     if (!is.factor(pull(GCPlist$sampleINFO, name_column_groups))) {
       GCPlist$sampleINFO[,name_column_groups] <- as.factor(pull(GCPlist$sampleINFO, name_column_groups))
     }
+    if (any(table(pull(GCPlist$sampleINFO, name_column_groups)) == 0)) {
+      GCPlist$sampleINFO[,name_column_groups] <- droplevels(pull(GCPlist$sampleINFO, name_column_groups))
+    }
 
     GCPoutput <- GCPlist
 

@@ -37,6 +37,12 @@ GCP_FilterNAperCondition <- function(GCPlist, ratio = 0.5, name_column_groups = 
     if (length(which(colnames(GCPlist$sampleINFO) == name_column_groups)) != 1) {stop("The name passed in name_column_groups must be a name of a column of the sampleINFO dataframe")}
     if (any(pull(GCPlist$sampleINFO, name_column_groups)%in%c("prot", "so_to_keep"))) {stop("Please, don't call any group 'prot' or 'so_to_keep'")}
     if (name_column_groups == "allwiththis") {stop("Please, just don't pass 'allwiththis' to name_column_groups, thanks!")}
+    if (!is.factor(pull(GCPlist$sampleINFO, name_column_groups))) {
+      GCPlist$sampleINFO[,name_column_groups] <- as.factor(pull(GCPlist$sampleINFO, name_column_groups))
+    }
+    if (any(table(pull(GCPlist$sampleINFO, name_column_groups)) == 0)) {
+      GCPlist$sampleINFO[,name_column_groups] <- droplevels(pull(GCPlist$sampleINFO, name_column_groups))
+    }
   }
 
   if (is.null(name_column_groups)) {

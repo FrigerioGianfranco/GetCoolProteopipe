@@ -103,6 +103,10 @@ GCP_plotPCA <- function(GCPlist,
     if (!is.factor(pull(GCPlist$sampleINFO, name_column_groups))) {
       GCPlist$sampleINFO[,name_column_groups] <- as.factor(pull(GCPlist$sampleINFO, name_column_groups))
     }
+    if (any(table(pull(GCPlist$sampleINFO, name_column_groups)) == 0)) {
+      GCPlist$sampleINFO[,name_column_groups] <- droplevels(pull(GCPlist$sampleINFO, name_column_groups))
+    }
+
 
     if (!is.null(col_pal)) {
       if (!is.character(col_pal)) {stop("col_pal must be a character vector")}
@@ -156,6 +160,9 @@ GCP_plotPCA <- function(GCPlist,
 
     if (!is.factor(pull(GCPlist$proteinINFO, name_column_groups_loading))) {
       GCPlist$proteinINFO[,name_column_groups_loading] <- as.factor(pull(GCPlist$proteinINFO, name_column_groups_loading))
+    }
+    if (any(table(pull(GCPlist$proteinINFO, name_column_groups_loading)) == 0)) {
+      GCPlist$proteinINFO[,name_column_groups_loading] <- droplevels(pull(GCPlist$proteinINFO, name_column_groups_loading))
     }
 
     if (!is.null(col_pal_loading)) {

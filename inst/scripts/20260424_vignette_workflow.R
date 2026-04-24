@@ -120,8 +120,7 @@ export_figures(Fig06_Venn_before_processing)
 # processing:
 
 
-GCPlist06 <- GCP_LogTransformIntensities(GCPlist = GCPlist05,
-                                         base = 2)
+GCPlist06 <- GCP_LogTransformIntensities(GCPlist = GCPlist05)
 
 GCPlist07 <- GCP_FilterNAperCondition(GCPlist = GCPlist06,
                                       ratio = 0.5)
@@ -232,14 +231,12 @@ GCPlist13 <- GCP_ttest(GCPlist = GCPlist12,
 
 GCPlist14 <- GCP_FoldChange(GCPlist = GCPlist13,
                             paired = TRUE,
-                            are_log_transf = TRUE,
-                            log_base = 2)
+                            are_log_transf = TRUE)
 
 
 Fig15_Volcano_plot <- GCP_Volcano(GCPlist = GCPlist14,
                                   x_val = "logFC",
                                   y_val = "ttest_PvaluesFDR",
-                                  log_base = 2,
                                   pcutoff_colored = 0.05,
                                   pcutoff_line = 0.05,
                                   pcutoff_prot_label = 0.005,
@@ -297,8 +294,7 @@ GCPlist14a1 <- GCP_ANOVA(GCPlist = GCPlist14a,
 GCPlist14a2 <- GCP_FoldChange_Multi(GCPlist = GCPlist14a1,
                                     name_column_groups = "Group_multi",
                                     paired = FALSE,
-                                    are_log_transf = TRUE,
-                                    log_base = 2)
+                                    are_log_transf = TRUE)
 
 
 
@@ -369,8 +365,7 @@ GCPlistPTM03 <- GCP_RemoveAllZero(GCPlistPTM02)
 
 GCPlistPTM04 <- GCP_ReplaceZerowithNA(GCPlistPTM03)
 
-GCPlistPTM05 <- GCP_LogTransformIntensities(GCPlist = GCPlistPTM04,
-                                            base = 2)
+GCPlistPTM05 <- GCP_LogTransformIntensities(GCPlist = GCPlistPTM04)
 
 GCPlistPTM06 <- GCP_FilterNAperCondition(GCPlist = GCPlistPTM05,
                                          ratio = 0.5)

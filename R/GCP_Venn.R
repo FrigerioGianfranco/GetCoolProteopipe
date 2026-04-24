@@ -39,8 +39,13 @@ GCP_Venn <- function(GCPlist, name_column_groups = getOption("GetCoolProteopipe.
     if (!is.factor(pull(GCPlist$sampleINFO, name_column_groups))) {
       GCPlist$sampleINFO[,name_column_groups] <- as.factor(pull(GCPlist$sampleINFO, name_column_groups))
     }
+    if (any(table(pull(GCPlist$sampleINFO, name_column_groups)) == 0)) {
+      GCPlist$sampleINFO[,name_column_groups] <- droplevels(pull(GCPlist$sampleINFO, name_column_groups))
+    }
 
-    if (length(levels(pull(GCPlist$sampleINFO, name_column_groups))) < 2 | length(levels(pull(GCPlist$sampleINFO, name_column_groups))) > 4) {stop("The sample groups must be only 2, 3 or 4")}
+    if (length(levels(pull(GCPlist$sampleINFO, name_column_groups))) < 2 | length(levels(pull(GCPlist$sampleINFO, name_column_groups))) > 4) {
+      stop(paste0("The sample groups must be only 2, 3 or 4! The groups in '", name_column_groups, "' are:\n", paste0(levels(pull(GCPlist$sampleINFO, name_column_groups)), collapse = "\n")))
+    }
 
   } else {
     cat("\n -- The name_column_groups considered is NULL --\n\n")
