@@ -1,5 +1,5 @@
-<img src="man/figures/Logo_long_white.png" height="110" align="left" />
-<img src="man/figures/Logo_Small_white.png" height="170" align="right" /><br><br><br><br>
+<img src="vignettes/figures/Logo_long_white.png" height="110" align="left" />
+<img src="vignettes/figures/Logo_Small_white.png" height="170" align="right" /><br><br><br><br>
 
 
 The **GetCoolProteopipe** (GCP) package is the coolest R-package for downstream analysis of MaxQuant proteomics outputs!
@@ -43,7 +43,7 @@ Or maybe you can more quickly type on the R-console '?' followed by the name of 
 Please, do not hesitate to contact Gianfranco (the cheminformatics nerd expert) for any questions about the functions he wrote, or Clarissa (the proteomics expert) for any questions about the proteomics workflow she conceived.
 
 
-<img src="man/figures/20260430_GCP_workflow.png" height="800" />
+<img src="vignettes/figures/20260430_GCP_workflow.png" height="800" />
 
 
 ## 📖 Citation
