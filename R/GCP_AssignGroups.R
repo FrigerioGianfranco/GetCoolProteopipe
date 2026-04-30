@@ -25,6 +25,14 @@
 #'                               name_column_groups = "Condition",
 #'                               controlgroup = "S")
 #'
+#'
+#' ## to just modify the order of levels of a group already present:
+#'
+#' GCPlist02bis <- GCP_AssignGroups(GCPlist = GCPlist02,
+#'                                  group_names = GCPlist02$sampleINFO$Condition,
+#'                                  name_column_groups = "Condition",
+#'                                  factorlevels = c("S", "V"))
+#'
 #' }
 #'
 #'

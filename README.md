@@ -1,8 +1,12 @@
 <img src="man/figures/Logo_long_white.png" height="110" align="left" />
 <img src="man/figures/Logo_Small_white.png" height="170" align="right" /><br><br><br><br>
 
-The **GetCoolProteopipe** (GCP) package is the coolest R-package for proteomics data elaboration! 
-After acquiring the data from an LC/MS-MS proteomics analysis, and after using the software MaxQuant, this package takes the output of MaxQuant and allows to perform elaborations such as data transformation and normalisation, missing value imputation, statistics analyses and data visualisation.
+
+The **GetCoolProteopipe** (GCP) package is the coolest R-package for downstream analysis of MaxQuant proteomics outputs!
+
+The package enables reproducible processing for non-programmers in the R environment, including data transformation, normalisation, missing-value imputation, batch effect correction, statistical inference and publication-ready visualisation; all in a single unified pipeline!
+
+With GCP you can perform elaboration of both global proteomics and post-translational modifications (PTMs) analysis, and the way the latter is computed is a key novelty of this package!
 
 ## ⚙️ Installation
 
@@ -37,6 +41,9 @@ LINK DOCUMENTATION
 Or maybe you can more quickly type on the R-console '?' followed by the name of the function you want to know everything about: you will see the description of it and of all the needed arguments, along with useful example codes!
 
 Please, do not hesitate to contact Gianfranco (the cheminformatics nerd expert) for any questions about the functions he wrote, or Clarissa (the proteomics expert) for any questions about the proteomics workflow she conceived.
+
+
+<img src="man/figures/20260430_GCP_workflow.png" height="800" />
 
 
 ## 📖 Citation
