@@ -30,9 +30,9 @@ Follow the on-screen instructions to install all the dependencies.
 
 ## 📊 Workflow
 
-A pleasant-to-read and complete vingettes to explain the full workflow is there for you, why don't you have a look at it:
+A pleasant-to-read and complete vignettes to explain the full workflow is there for you, why don't you have a look at it:
 
-LINK VINGETTES
+LINK vignetteS
 
 The next link is more boring, but if you want to look at the full documentation of all the functions you can see it by clicking on this:
 
@@ -62,9 +62,12 @@ The cheminformatics skills that allowed this package to exist belong to Gianfran
 
 A fundamental contribution was made by Chiara Ansermino, who gave her inputs and ideas for the development of functions, contributed to their testing, and designed the logo of the package.
 
-The work has been conducted within the Proteomics and Metabolomics group (ProMeFa) led by Annapaola Andolfo, who gave some inputs and performed some testing.
-The group ProMeFa belongs to the Center for Omics Sciences (COSR) of the IRCCS San Raffaele Scientific Institute, Milan, Italy.
+The work has been conducted within the Proteomics and Metabolomics group (ProMeFa) led by Annapaola Andolfo, who gave important inputs, supervised the development of the pipeline and revised the vignettes. The group ProMeFa works at the IRCCS San Raffaele Scientific Institute, Milan, Italy.
 
+
+## Acknowledgement
+
+We acknowledge the entire ProMeFa group for their support. We also thank Edoardo Niccolò Bellini for the initial idea on how to prepare group names, which was integrated into the automatic_assignment option of the GCP_AssignGroups function.
 
 
 ## 📦 Dependencies

@@ -20,7 +20,7 @@ ImportOutputMaxQuant(
 
 \item{samples_info}{NULL or NA or a character vector of length 1 with the name of the table in the current working directory, containing information for each sample. The table must be in txt, csv, or xslsx format. In particular, the first column of the table must contain the names of the samples exactly as they are in the MaxQuant table.}
 
-\item{fasta_database}{NULL or NA or either "human" or "mouse", or a name of a table in the current working directory (in .txt or .csv format). You can specify the fasta database to use to fill the missing Protein names and Gene names from the MaxQuant table.}
+\item{fasta_database}{NULL or NA or either "human" or "mouse", or a name of a table in the current working directory (in .txt or .csv format). You can specify the fasta database to use to fill the missing Protein names and Gene names from the MaxQuant table. If you choose "mouse" or "human", the fasta table implemented were downloaded and reprocessed from Mascot on 5 May 2024.}
 
 \item{raw_or_LFQ}{one of the following: "raw", "LFQ". Only such data intensities will be imported.}
 

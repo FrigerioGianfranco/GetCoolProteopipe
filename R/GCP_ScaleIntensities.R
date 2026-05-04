@@ -179,7 +179,7 @@ GCP_ScaleIntensities <- function(GCPlist, subtract = c("shift_median", "mean", "
       if (is.null(name_column_groups)) {
         cat(",\n centered to the global median")
       } else {
-        cat(paste0(",\n centered to the global median for each sample group (accorting to the '", name_column_groups, "' column)"))
+        cat(paste0(",\n centered to the global median for each sample group (according to the '", name_column_groups, "' column)"))
       }
     }
   }

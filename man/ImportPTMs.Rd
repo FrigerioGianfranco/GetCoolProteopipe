@@ -18,13 +18,13 @@ ImportPTMs(
 
 \item{samples_info}{NULL or NA or a character vector of length 1 with the name of the table in the current working directory, containing information for each sample. The table must be in txt, csv, or xslsx format. In particular, the first column of the table must contain the names of the samples exactly as they are in the MaxQuant table.}
 
-\item{fasta_database}{NULL or NA or either "human" or "mouse", or a name of a table in the current working directory (in .txt or .csv format). You can specify the fasta database to use to fill the missing Protein names and Gene names from the MaxQuant table.}
+\item{fasta_database}{NULL or NA or either "human" or "mouse", or a name of a table in the current working directory (in .txt or .csv format). You can specify the fasta database to use to fill the missing Protein names and Gene names from the MaxQuant table. If you choose "mouse" or "human", the fasta table implemented were downloaded and reprocessed from Mascot on 5 May 2024.}
 
 \item{prioritize_MaxQuant_names}{logical. If TRUE and if a fasta_database is provided, the final "Protein names" and "Gene names" will be primarily taken from the  MaxQuant table (they will be taken from the fasta database only if missing). If FALSE, the opposite will happen.}
 
 \item{pattern_intensity}{a character vector of length 1. The character pattern that must be uniquely present in the column names of protein intensities.}
 
-\item{pattern_isoforms}{NULL or a character vector of length 1. If not NULL, this function will import the different isoforms as separate rows identified with the specified pattern (as example: "___1", "___2", "___3").}
+\item{pattern_isoforms}{NULL or a character vector of length 1. If not NULL, this function will import the different isoforms of each peptide as separate rows identified with the specified pattern (as example: "___1", "___2", "___3").}
 }
 \value{
 a GCPlist, i.e.: a list with 3 dataframes (tibbles):
