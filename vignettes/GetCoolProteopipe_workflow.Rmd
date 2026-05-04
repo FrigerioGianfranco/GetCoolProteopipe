@@ -95,14 +95,14 @@ library(GetCoolProteopipe)
 
 ## Import of MaxQuant output
 
-Everything begins with the data import. For this vignette, we will use the data from a study published in 2025 (doi: 10.1038/s41419-025-07595-z), in which mouse muscle tissues were analyzed by both untargeted proteomics and PTM-based approaches. 
+Everything begins with the data import. For this vignette, we will use the data from a study published in 2025 (doi paper: 10.1038/s41419-025-07595-z; doi raw data: 10.6019/PXD054747), in which mouse muscle tissues were analyzed by both untargeted proteomics and PTM-based approaches. 
 
 
 The _ImportOutputMaxQuant()_ function will import your data, pay attention for the most important arguments:
 
 - MaxQuant_table_name: the "proteinGroups.txt" file (or the path file) as exported from MaxQuant within the txt folder.
 - samples_info: This is optional, but if you have some metadata table about your samples, such as which samples belong to certain sample groups, you can upload it here by passing is file name (or the path file).
-- fasta_database: you could leave it as missing; but if you want to fill the missing Protein names and Gene names from MaxQuant, you can specify either "human" or "mouse" (in this case the package will use pre-loaded fasta tables) or if you have your own fasta table you can write here that file name (or the path file) and it will be considered. The `fasta` input used in this function is a simplified version of the reference proteome FASTA file downloaded from the UniProt website (or, more generally, the same FASTA file used for the MaxQuant search). The original FASTA file is adapted into a tabular format containing only three fields required for annotation: Accession, Protein name, and Gene name.
+- fasta_database: you could leave it as missing; but if you want to fill the missing Protein names and Gene names from MaxQuant, you can specify either "human" or "mouse" (in this case the package will use pre-loaded fasta tables) or if you have your own fasta table you can write here that file name (or the path file) and it will be considered. The `fasta` input used in this function is a simplified version of the reference proteome FASTA file downloaded from the UniProt website on 05/03/2024 (or, more generally, the same FASTA file used for the MaxQuant search). The original FASTA file is adapted into a tabular format containing only three fields required for annotation: Accession, Protein name, and Gene name.
 - raw_or_LFQ: the output of MaxQuant usually have both raw intenstities and such intensities normalised with the "LFQ" (Label-Free Quantification) algorithm. Choose here which ones you want here to be imported for your elaborations.
 - prioritize_MaxQuant_names; in case of different Protein name and Gene names from the fasta database and what imported from MaxQuant, here you can specify with TRUE if you want to prioritise names from MaxQuant.
 - remove_identified_by_site, remove_reverse, remove_potential_contaminant: pass TRUE to these argument if you want to remove rows with those characteristics (an overview of this operation will be printed in the console)
