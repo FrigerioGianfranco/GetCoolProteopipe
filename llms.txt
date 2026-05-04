@@ -1,7 +1,4 @@
-![](articles/figures/Logo_long_white.png)![](articles/figures/Logo_Small_white.png)  
-  
-  
-  
+![](articles/figures/Logo_long_white.png)
 
 The **GetCoolProteopipe** (GCP) package is the coolest R-package for
 downstream analysis of MaxQuant proteomics outputs!
@@ -14,6 +11,8 @@ publication-ready visualisation; all in a single unified pipeline!
 With GCP you can perform elaboration of both global proteomics and
 post-translational modifications (PTMs) analysis, and the way the latter
 is computed is a key novelty of this package!
+
+![](articles/figures/Logo_Small_white.png)
 
 ## ⚙️ Installation
 
@@ -38,12 +37,12 @@ Follow the on-screen instructions to install all the dependencies.
 A pleasant-to-read and complete vignettes to explain the full workflow
 is there for you, why don’t you have a look at it:
 
-LINK vignetteS
+<https://frigeriogianfranco.github.io/GetCoolProteopipe/articles/GetCoolProteopipe_workflow.html>
 
 The next link is more boring, but if you want to look at the full
 documentation of all the functions you can see it by clicking on this:
 
-LINK DOCUMENTATION
+<https://frigeriogianfranco.github.io/GetCoolProteopipe/reference/index.html>
 
 Or maybe you can more quickly type on the R-console ‘?’ followed by the
 name of the function you want to know everything about: you will see the

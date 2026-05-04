@@ -7,6 +7,8 @@
 
 - **Chiara Ansermino**. Author.
 
+- **Annapaola Andolfo**. Author.
+
 - **Clarissa Braccia**. Author.
 
 ## Citation
