@@ -1,10 +1,11 @@
 Package: GetCoolProteopipe
 Title: Pipeline for the elaboration of proteomics data!
-Version: 0.4.2.3
+Version: 0.4.2.4
 Authors@R: c(
     person("Gianfranco", "Frigerio", email = "frigerio.gianfranco@hsr.it", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-3538-1443")),
     person("Chiara", "Ansermino", email = "ansermino.chiara@hsr.it", role = "aut"),
+    person("Annapaola", "Andolfo", email = "andolfo.annapaola@hsr.it", role = "aut"),
     person("Clarissa", "Braccia", email = "braccia.clarissa@hsr.it", role = "aut"))
 Description: Starting from the output of the MaxQuant, this package performs data elaborations for proteomics studies.
 License: GPL-3
