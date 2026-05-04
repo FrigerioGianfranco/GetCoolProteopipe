@@ -1,0 +1,115 @@
+# Assign samples to groups.
+
+It assigns each samples to a desired groups.
+
+## Usage
+
+``` r
+GCP_AssignGroups(
+  GCPlist,
+  automatic_assignment = c("no", "groupfirst", "replicatefirst"),
+  separator_automatic_assignment = "_",
+  sample_names = pull(GCPlist$sampleINFO, 1),
+  group_names = rep("not_assigned", length(sample_names)),
+  sample_group_table = NULL,
+  name_column_groups = "Condition",
+  name_column_replicates = "Replicate",
+  factorlevels = NULL,
+  controlgroup = NULL
+)
+```
+
+## Arguments
+
+- GCPlist:
+
+  a list created with the ImportOutputMaxQuant function.
+
+- automatic_assignment:
+
+  One of the following: "no", "groupfirst", "replicatefirst". If "no" is
+  selected, groups will be assigned considering the other following
+  arguments; if "groupfirst" or "replicatefirst", the groups will be
+  automatically created from sample names, considering the separator
+  passed to separator_automatic_assignment, and an additional column
+  called as name_column_replicates will be also created.
+
+- separator_automatic_assignment:
+
+  character of length 1. If automatic_assignment is "groupfirst" or
+  "replicatefirst", this separator will be used to distinguish group
+  from sample names. Example: if sample names are "control_01",
+  "control_02", "disease_03", "disease_04"; automatic_assignment is
+  "groupfirst"; and separator_automatic_assignment is "\_", the samples
+  "control_01", "control_02", will be assigned to the "control" group
+  and the samples "disease_03", "disease_04" will be assigned to the
+  "disease" group. An additional column, called as
+  name_column_replicates, with "01", "02", "03", "04" will be also
+  created.
+
+- sample_names:
+
+  character vector containing the existing name of samples (Will be
+  considered if automatic_assignment is "no").
+
+- group_names:
+
+  character vector containing the groups corresponding to the samples
+  passed to sample_names (Will be considered if automatic_assignment is
+  "no").
+
+- sample_group_table:
+
+  alternatively, you can pass here a table with the sample names in the
+  first column and the relative group in the second column. If you pass
+  an argument here (and if automatic_assignment is "no"), this will be
+  considered instead of sample_names and group_names.
+
+- name_column_groups:
+
+  character of length 1. The name of the new column that will contain
+  the groups.
+
+- name_column_replicates:
+
+  character of length 1. The name of the new column that will contain
+  the replicates (it will be used if automatic_assignment is not "no").
+
+- factorlevels:
+
+  NULL or character. You can specify here the levels of the groups (the
+  reference group should be put as first element). If NULL, it will just
+  apply the function as.factor.
+
+- controlgroup:
+
+  NULL or character. You can specify here the name of the control
+  group(s) which will be put as the first level(s).
+
+## Value
+
+the GCPlist with an additional column in the sampleINFO data frames
+containing the assigned groups.
+
+## Examples
+
+``` r
+if (FALSE) { # \dontrun{
+
+GCPlist02 <- GCP_AssignGroups(GCPlist = GCPlist01,
+                              automatic_assignment = "groupfirst",
+                              separator_automatic_assignment = "_",
+                              name_column_groups = "Condition",
+                              controlgroup = "S")
+
+
+## to just modify the order of levels of a group already present:
+
+GCPlist02bis <- GCP_AssignGroups(GCPlist = GCPlist02,
+                                 group_names = GCPlist02$sampleINFO$Condition,
+                                 name_column_groups = "Condition",
+                                 factorlevels = c("S", "V"))
+
+} # }
+
+```

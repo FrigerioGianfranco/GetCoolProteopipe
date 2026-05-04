@@ -1,0 +1,79 @@
+# Performing a Fold Change analysis on data, for more than 2 groups
+
+It performs a Fold Change analyses on the proteins intensities,
+performing multiple pair comparisons. Please, be aware that the Fold
+Change analysis should be performed only on positive data! Indeed, all
+protein intensities should be positive, or unreliable results will be
+generated!
+
+## Usage
+
+``` r
+GCP_FoldChange_Multi(
+  GCPlist,
+  name_column_groups = getOption("GetCoolProteopipe.name_column_groups"),
+  group_order = NULL,
+  paired = FALSE,
+  are_log_transf = TRUE,
+  log_base = getOption("GetCoolProteopipe.log_base")
+)
+```
+
+## Arguments
+
+- GCPlist:
+
+  a list created with the ImportOutputMaxQuant function. IMPORTANT: All
+  protein intensities should be positive, or unreliable results will be
+  generated!
+
+- name_column_groups:
+
+  character of length 1. The name of the column of the sampleINFO table
+  containing the sample groups. 3 or more groups should be indicated
+  here.
+
+- group_order:
+
+  NULL or a character. The ordered names of the groups, the first ones
+  in order will be considered as denominator in the ratio of the Fold
+  Change analyses. If NULL, the order of the levels of the factor will
+  be considered.
+
+- paired:
+
+  logical. If FALSE it performs FC on mean of the two groups, for each
+  pair. If TRUE it performs FC for each pair and then compute the mean.
+
+- are_log_transf:
+
+  logical. If the protein intensities are already log-transformed,
+  specify here as TRUE, so the subtraction will be performed instead of
+  the ratio.
+
+- log_base:
+
+  numeric of length 1. Specify here the base of the logarithm to
+  calculate the logFC or, if are_log_transf is TRUE; the base of the
+  logarithm that were used to transform the data.
+
+## Value
+
+The GCPlist with the results of the Fold Change analyses added to the
+proteinINFO data frame.
+
+## Examples
+
+``` r
+if (FALSE) { # \dontrun{
+
+GCPlist14a2 <- GCP_FoldChange_Multi(GCPlist = GCPlist14a1,
+                                    name_column_groups = "Group_multi",
+                                    paired = FALSE,
+                                    are_log_transf = TRUE,
+                                    log_base = 2)
+
+} # }
+
+
+```

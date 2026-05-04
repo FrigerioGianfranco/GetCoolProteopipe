@@ -1,0 +1,88 @@
+# Importing PTMs
+
+Starting from the output of PTMs, it stores the data in a list as the
+GCPlist.
+
+## Usage
+
+``` r
+ImportPTMs(
+  MaxQuant_table_name,
+  samples_info = NULL,
+  fasta_database = NA,
+  prioritize_MaxQuant_names = TRUE,
+  pattern_intensity = "Intensity ",
+  pattern_isoforms = "___"
+)
+```
+
+## Arguments
+
+- MaxQuant_table_name:
+
+  a character vector of length 1 with the name of the MaxQuant table
+  file in the current working directory, which must be in the .txt
+  format.
+
+- samples_info:
+
+  NULL or NA or a character vector of length 1 with the name of the
+  table in the current working directory, containing information for
+  each sample. The table must be in txt, csv, or xslsx format. In
+  particular, the first column of the table must contain the names of
+  the samples exactly as they are in the MaxQuant table.
+
+- fasta_database:
+
+  NULL or NA or either "human" or "mouse", or a name of a table in the
+  current working directory (in .txt or .csv format). You can specify
+  the fasta database to use to fill the missing Protein names and Gene
+  names from the MaxQuant table. If you choose "mouse" or "human", the
+  fasta table implemented were downloaded and reprocessed from Mascot on
+  5 May 2024.
+
+- prioritize_MaxQuant_names:
+
+  logical. If TRUE and if a fasta_database is provided, the final
+  "Protein names" and "Gene names" will be primarily taken from the
+  MaxQuant table (they will be taken from the fasta database only if
+  missing). If FALSE, the opposite will happen.
+
+- pattern_intensity:
+
+  a character vector of length 1. The character pattern that must be
+  uniquely present in the column names of protein intensities.
+
+- pattern_isoforms:
+
+  NULL or a character vector of length 1. If not NULL, this function
+  will import the different isoforms of each peptide as separate rows
+  identified with the specified pattern (as example: "\_\_\_1",
+  "\_\_\_2", "\_\_\_3").
+
+## Value
+
+a GCPlist, i.e.: a list with 3 dataframes (tibbles):
+
+- `intensities`: the intensities.
+
+- `proteinINFO`: all the information for each rows.
+
+- `sampleINFO`: the information about the samples.
+
+## Examples
+
+``` r
+if (FALSE) { # \dontrun{
+
+
+GCPlistPTM00 <- ImportPTMs(MaxQuant_table_name = "PTM FILE NAME.txt",      ## you can just put the name of your file in your current working directory
+                           samples_info = NULL,                             ## also here potentially
+                           fasta_database = "mouse",
+                           prioritize_MaxQuant_names = TRUE,
+                           pattern_intensity = "Intensity ",
+                           pattern_isoforms = "___")
+
+} # }
+
+```

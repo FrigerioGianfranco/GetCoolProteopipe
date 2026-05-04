@@ -1,0 +1,151 @@
+# Compute a Heat Map.
+
+It performs a heat map out of GCPdata.
+
+## Usage
+
+``` r
+GCP_HeatMap(
+  GCPlist,
+  name_column_groups = getOption("GetCoolProteopipe.name_column_groups"),
+  name_column_labels = NULL,
+  name_column_groups_protein = NULL,
+  name_column_labels_protein = NULL,
+  order_samples_by = NULL,
+  order_protein_by = NULL,
+  trnsp = TRUE,
+  cluster_rows = TRUE,
+  cluster_columns = TRUE,
+  name_rows = FALSE,
+  name_columns = FALSE,
+  rotate_name_columns = TRUE,
+  three_heat_colors = c("red", "white", "blue"),
+  set_heat_colors_limits = FALSE,
+  heat_colors_limits = NULL,
+  col_pal_list = getOption("GetCoolProteopipe.col_pal")
+)
+```
+
+## Arguments
+
+- GCPlist:
+
+  a list created with the ImportOutputMaxQuant function.
+
+- name_column_groups:
+
+  NULL or character vector. Name(s) of the column(s) of the sampleINFO
+  table. Specify it if you want to have those groups specified on the
+  heatmap.
+
+- name_column_labels:
+
+  NULL or a character of length 1. The name of the column of sampleINFO
+  containing the sample names. You need to pass it only if you want
+  sample names on the heat map.
+
+- name_column_groups_protein:
+
+  NULL or character vector. Name(s) of the column(s) of the proteinINFO
+  table. Specify it if you want to have those groups specified on the
+  heatmap.
+
+- name_column_labels_protein:
+
+  NULL or a character of length 1. The name of the column of proteinINFO
+  containing the protein names. You need to pass it only if you want
+  sample names on the heat map.
+
+- order_samples_by:
+
+  NULL or character. The name(s) of the column(s) of sampleINFO that you
+  want to use to order the values.
+
+- order_protein_by:
+
+  NULL or character. The name(s) of the column(s) of proteinINFO that
+  you want to use to order the values.
+
+- trnsp:
+
+  logical. If TRUE, proteins will be in rows and samples in columns of
+  the heat map; if FALSE, the opposite.
+
+- cluster_rows:
+
+  logical. If TRUE, a dendrogram built from the hierarchical clustering
+  of distances of row values will be added to the left side of the heat
+  map.
+
+- cluster_columns:
+
+  logical. If TRUE, a dendrogram built from the hierarchical clustering
+  of distances of column values will be added above the heat map.
+
+- name_rows:
+
+  logical. If TRUE, names will be added to rows, on the right of the
+  heat map.
+
+- name_columns:
+
+  logical. if TRUE, names will be added to column, below the heat map.
+
+- rotate_name_columns:
+
+  logical. if TRUE, column names will be rotated vertically (this
+  argument is meaningless if name_columns is FALSE).
+
+- three_heat_colors:
+
+  character of length 3, each specifying a color. These 3 colors will be
+  used as color scale for values of the heat map.
+
+- set_heat_colors_limits:
+
+  logical. If TRUE, the absolute of the minimum or the absolute of the
+  maximum value (which is higher) will be set in positive as the upper
+  limit and in negative as the lower limit for the color gradients of
+  values of the heat map (this will also set the middle color exactly to
+  zero).
+
+- heat_colors_limits:
+
+  NULL or a numeric of length 2. If set_heat_colors_limits is FALSE, you
+  can specify here the limits for the color gradients of values of the
+  heat map (if NULL, the maximum and the minimum values will be used).
+
+- col_pal_list:
+
+  NULL, a character vector, or a list of character vector. If a list,
+  elements should be named as name_column_groups and
+  name_column_groups_protein; each element has to be a character vector
+  containing colors. Those colors will be used for the rectangles of the
+  group classifications. For each element, if NULL, colors will be taken
+  from the pals package (see the function build_long_vector_of_colors).
+
+## Value
+
+a ggplot object.
+
+## Examples
+
+``` r
+if (FALSE) { # \dontrun{
+
+Fig16_The_Heat_Map_sign <- GCP_HeatMap(GCPlist = GCPlist14f,
+                                       name_column_groups = c("Condition", "Replicate"),
+                                       name_column_labels = "Sample",
+                                       name_column_groups_protein = NULL,
+                                       name_column_labels_protein = "Protein names",
+                                       name_rows = FALSE,
+                                       name_columns = TRUE,
+                                       rotate_name_columns = TRUE,
+                                       col_pal_list = list(Condition = c(S = "green", V = "blue"),
+                                                           Replicate = c("lightskyblue", "lightskyblue1", "lightskyblue2", "lightskyblue3", "lightskyblue4")))
+export_figures(Fig16_The_Heat_Map_sign)
+
+} # }
+
+
+```

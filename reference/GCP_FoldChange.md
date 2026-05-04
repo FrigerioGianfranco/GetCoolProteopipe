@@ -1,0 +1,77 @@
+# Performing a Fold Change analysis on data
+
+It performs a Fold Change analyses on the proteins intensities. Please,
+be aware that the Fold Change analysis should be performed only on
+positive data! Indeed, all protein intensities should be positive, or
+unreliable results will be generated!
+
+## Usage
+
+``` r
+GCP_FoldChange(
+  GCPlist,
+  name_column_groups = getOption("GetCoolProteopipe.name_column_groups"),
+  control_group = NULL,
+  paired = FALSE,
+  are_log_transf = TRUE,
+  log_base = getOption("GetCoolProteopipe.log_base")
+)
+```
+
+## Arguments
+
+- GCPlist:
+
+  a list created with the ImportOutputMaxQuant function. IMPORTANT: All
+  protein intensities should be positive, or unreliable results will be
+  generated!
+
+- name_column_groups:
+
+  character of length 1. The name of the column of the sampleINFO table
+  containing the sample groups. Since this is a Fold Change analysis,
+  there must be exactly two groups.
+
+- control_group:
+
+  NULL or a character of length 1. The name of the group to be
+  considered as control group, which will be considered as denominator
+  in the ratio of the Fold Change analysis. If NULL, the first level of
+  the factor will be considered as the control group.
+
+- paired:
+
+  logical. If FALSE it performs FC on mean of the two groups. If TRUE it
+  performs FC for each pair and then compute the mean.
+
+- are_log_transf:
+
+  logical. If the protein intensities are already log-transformed,
+  specify here as TRUE, so the subtraction will be performed instead of
+  the ratio.
+
+- log_base:
+
+  numeric of length 1. Specify here the base of the logarithm to
+  calculate the logFC or, if are_log_transf is TRUE; the base of the
+  logarithm that were used to transform the data.
+
+## Value
+
+The GCPlist with the results of the Fold Change analysis added to the
+proteinINFO data frame.
+
+## Examples
+
+``` r
+if (FALSE) { # \dontrun{
+
+GCPlist14 <- GCP_FoldChange(GCPlist = GCPlist13,
+                            paired = TRUE,
+                            are_log_transf = TRUE,
+                            log_base = 2)
+
+} # }
+
+
+```
