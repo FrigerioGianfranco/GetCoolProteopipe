@@ -66,7 +66,7 @@ A fundamental contribution was made by Chiara Ansermino, who gave her inputs and
 The work has been conducted within the Proteomics and Metabolomics group (ProMeFa) led by Annapaola Andolfo, who gave important inputs, supervised the development of the pipeline and revised the vignettes. The group ProMeFa works at the IRCCS San Raffaele Scientific Institute, Milan, Italy.
 
 
-## Acknowledgement
+## 🏅 Acknowledgement
 
 We acknowledge the entire ProMeFa group for their support. We also thank Edoardo Niccolò Bellini for the initial idea on how to prepare group names, which was integrated into the automatic_assignment option of the GCP_AssignGroups function.
 
