@@ -88,7 +88,7 @@ supervised the development of the pipeline and revised the vignettes.
 The group ProMeFa works at the IRCCS San Raffaele Scientific Institute,
 Milan, Italy.
 
-## Acknowledgement
+## 🏅 Acknowledgement
 
 We acknowledge the entire ProMeFa group for their support. We also thank
 Edoardo Niccolò Bellini for the initial idea on how to prepare group
