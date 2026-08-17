@@ -104,14 +104,14 @@ ImportOutputMaxQuant <- function(MaxQuant_table_name, samples_info = NULL, fasta
 
   if(!(all(c("Protein IDs", "Protein names", "Gene names", "id") %in% colnames(proteinGroup_Raw)))) {stop('MaxQuant_table must have at least the columns named: "Protein IDs", "Protein names", "Gene names", "id"')}
 
-  if (!is.character(proteinGroup_Raw$`Protein IDs`)) stop('The column "Protein IDs" must contain character')
+  if (!is.character(proteinGroup_Raw$`Protein IDs`)) {stop('The column "Protein IDs" must contain character')}
 
-  if (!is.character(proteinGroup_Raw$`Protein names`)) stop('The column "Protein names" must contain character')
+  if (!is.character(proteinGroup_Raw$`Protein names`)) {stop('The column "Protein names" must contain character')}
 
-  if (!is.character(proteinGroup_Raw$`Gene names`)) stop('The column "Gene names" must contain character')
+  if (!is.character(proteinGroup_Raw$`Gene names`)) {stop('The column "Gene names" must contain character')}
 
 
-  if (!is.numeric(proteinGroup_Raw$id)) stop('The column "id" must contain numbers')
+  if (!is.numeric(proteinGroup_Raw$id)) {stop('The column "id" must contain numbers')}
   if (any(duplicated(proteinGroup_Raw$id))) {stop(paste0('The column "id" must not contain duplicates. In particular the following id are present more than once: ',
                                                          paste0(unique(proteinGroup_Raw$id[which(duplicated(proteinGroup_Raw$id))]), collapse = ", ")))}
 

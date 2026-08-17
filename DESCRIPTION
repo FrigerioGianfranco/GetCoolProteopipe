@@ -1,6 +1,6 @@
 Package: GetCoolProteopipe
 Title: Pipeline for the elaboration of proteomics data!
-Version: 0.4.2.4
+Version: 0.5
 Authors@R: c(
     person("Gianfranco", "Frigerio", email = "frigerio.gianfranco@hsr.it", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-3538-1443")),
@@ -11,7 +11,6 @@ Description: Starting from the output of the MaxQuant, this package performs dat
 License: GPL-3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.3
 Depends: R (>= 4.3.1)
 Imports: tidyverse, readxl, writexl, GetFeatistics, pals, ggvenn, ggpubr, ggdendro, PhosR, sva
 Remotes: github::FrigerioGianfranco/GetFeatistics, bioc::PhosR, bioc::sva
@@ -20,3 +19,4 @@ Suggests:
     rmarkdown
 VignetteBuilder: knitr
 URL: https://frigeriogianfranco.github.io/GetCoolProteopipe/
+Config/roxygen2/version: 8.1.0

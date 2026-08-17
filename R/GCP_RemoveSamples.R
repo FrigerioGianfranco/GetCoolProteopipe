@@ -5,6 +5,7 @@
 #' @param GCPlist a list created with the ImportOutputMaxQuant function.
 #' @param remove_samples NULL or a character containing the name of samples to remove.
 #' @param keep_samples NULL or a character containing the name of samples to keep.
+#' @param column_samples an integer number or a charcter of length 1. The number or name of the column to look at the elements passed by remove_samples or keep_samples.
 #' @param remove_groups NULL or a character containing the name of groups to remove.
 #' @param keep_groups NULL or a character containing the name of groups to keep.
 #' @param name_column_groups NULL or character of length 1. The name of the column of the sampleINFO table containing the sample groups. It must be specified if you used remove_groups or keep_groups.
@@ -31,7 +32,8 @@
 #'
 #'
 #' @export
-GCP_RemoveSamples <- function(GCPlist, remove_samples = NULL, keep_samples = NULL, remove_groups = NULL, keep_groups = NULL, name_column_groups = NULL) {
+GCP_RemoveSamples <- function(GCPlist, remove_samples = NULL, keep_samples = NULL, column_samples = 1,
+                              remove_groups = NULL, keep_groups = NULL, name_column_groups = NULL) {
 
   checkGCPlist(GCPlist)
 
@@ -50,31 +52,55 @@ GCP_RemoveSamples <- function(GCPlist, remove_samples = NULL, keep_samples = NUL
     stop("Only one of the arguments among remove_samples, keep_samples, remove_groups, or keep_groups has to be specified")
   } else {
 
+
     samples_to_keep <- pull(GCPlist$sampleINFO, 1)
     change_order <- FALSE
 
 
     if (!is.null(remove_samples)) {
-      if (!is.character(remove_samples)) {stop("remove_samples must be a character vector")}
+
+      if (length(column_samples)!=1) {stop("column_samples must be a character or an integer of length 1")}
+      if (is.na(column_samples)) {stop("column_samples must a character or an integer of length 1, not a missing value")}
+      if (!is.character(column_samples)) {
+        if (!is.numeric(column_samples)) {stop("column_samples must be a character or an integer")}
+        if (column_samples != as.integer(column_samples)) {stop("column_samples must be a character or an integer")}
+        if (column_samples > length(colnames(GCPlist$sampleINFO))) {stop("if a number, column_samples must not be higher than the number of columns of sampleINFO")}
+        if (column_samples < 1) {stop("if a number, column_samples must not be zero or less")}
+      } else {
+        if (length(which(colnames(GCPlist$sampleINFO) == column_samples)) != 1) {stop("The name passed in column_samples must be a name of a column of the sampleINFO dataframe")}
+      }
+
       if (length(remove_samples)<1) {stop("remove_samples must contain valid names")}
       if (any(is.na(remove_samples))) {stop("remove_samples must not contain missing values")}
-      if (!all(remove_samples %in% pull(GCPlist$sampleINFO, 1))) {
-        stop(paste0("Names passed to remove_samples must be names of samples. The following sample names you passed are not present:\n",
-                    paste0(remove_samples[which(!remove_samples %in% pull(GCPlist$sampleINFO, 1))], collapse = "\n")))
+      if (!all(remove_samples %in% pull(GCPlist$sampleINFO, column_samples))) {
+        stop(paste0("The elements passed to remove_samples must be present in the column indicated in column_samples of sampleINFO. The following sample names you passed are not present:\n",
+                    paste0(remove_samples[which(!remove_samples %in% pull(GCPlist$sampleINFO, column_samples))], collapse = "\n")))
       }
 
-      samples_to_keep <- samples_to_keep[which(!samples_to_keep %in% remove_samples)]
+
+      samples_to_keep <- samples_to_keep[which(!pull(GCPlist$sampleINFO, column_samples) %in% remove_samples)]
 
     } else if (!is.null(keep_samples)) {
-      if (!is.character(keep_samples)) {stop("keep_samples must be a character vector")}
-      if (length(keep_samples)<1) {stop("keep_samples must contain valid names")}
-      if (any(is.na(keep_samples))) {stop("keep_samples must not contain missing values")}
-      if (!all(keep_samples %in% pull(GCPlist$sampleINFO, 1))) {
-        stop(paste0("Names passed to keep_samples must be names of samples. The following sample names you passed are not present:\n",
-                    paste0(keep_samples[which(!keep_samples %in% pull(GCPlist$sampleINFO, 1))], collapse = "\n")))
+
+      if (length(column_samples)!=1) {stop("column_samples must be a character or an integer of length 1")}
+      if (is.na(column_samples)) {stop("column_samples must a character or an integer of length 1, not a missing value")}
+      if (!is.character(column_samples)) {
+        if (!is.numeric(column_samples)) {stop("column_samples must be a character or an integer")}
+        if (column_samples != as.integer(column_samples)) {stop("column_samples must be a character or an integer")}
+        if (column_samples > length(colnames(GCPlist$sampleINFO))) {stop("if a number, column_samples must not be higher than the number of columns of sampleINFO")}
+        if (column_samples < 1) {stop("if a number, column_samples must not be zero or less")}
+      } else {
+        if (length(which(colnames(GCPlist$sampleINFO) == column_samples)) != 1) {stop("The name passed in column_samples must be a name of a column of the sampleINFO dataframe")}
       }
 
-      samples_to_keep <- keep_samples
+      if (length(keep_samples)<1) {stop("keep_samples must contain valid names")}
+      if (any(is.na(keep_samples))) {stop("keep_samples must not contain missing values")}
+      if (!all(keep_samples %in% pull(GCPlist$sampleINFO, column_samples))) {
+        stop(paste0("The elements passed to keep_samples must be present in the column indicated in column_samples of sampleINFO. The following sample names you passed are not present:\n",
+                    paste0(keep_samples[which(!keep_samples %in% pull(GCPlist$sampleINFO, column_samples))], collapse = "\n")))
+      }
+
+      samples_to_keep <- samples_to_keep[which(pull(GCPlist$sampleINFO, column_samples) %in% keep_samples)]
       change_order <- TRUE
 
     } else if (!is.null(remove_groups)) {

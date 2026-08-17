@@ -32,6 +32,7 @@ export(GCP_plotPCA)
 export(GCP_ratioPTMprotein)
 export(GCP_ttest)
 export(ImportOutputMaxQuant)
+export(ImportOutputProtDiscov)
 export(ImportPTMs)
 export(checkGCPlist)
 export(set_col_pal)
@@ -41,9 +42,11 @@ import(GetFeatistics)
 import(ggdendro)
 import(ggvenn)
 import(tidyverse)
-importFrom(PhosR,PhosphoExperiment)
-importFrom(PhosR,scImpute)
-importFrom(PhosR,tImpute)
+importFrom(PhosR,
+  PhosphoExperiment,
+  scImpute,
+  tImpute
+)
 importFrom(ggpubr,ggqqplot)
 importFrom(readxl,read_excel)
 importFrom(sva,ComBat)

@@ -90,14 +90,14 @@ ImportPTMs <- function(MaxQuant_table_name, samples_info = NULL, fasta_database 
 
   if(!(all(c("Protein", "Protein names", "Gene names", "id") %in% colnames(proteinGroup_Raw)))) {stop('MaxQuant_table must have at least the columns named: "Protein", "Protein names", "Gene names", "id"')}
 
-  if (!is.character(proteinGroup_Raw$`Protein`)) stop('The column "Protein" must contain character')
+  if (!is.character(proteinGroup_Raw$`Protein`)) {stop('The column "Protein" must contain character')}
 
-  if (!is.character(proteinGroup_Raw$`Protein names`)) stop('The column "Protein names" must contain character')
+  if (!is.character(proteinGroup_Raw$`Protein names`)) {stop('The column "Protein names" must contain character')}
 
-  if (!is.character(proteinGroup_Raw$`Gene names`)) stop('The column "Gene names" must contain character')
+  if (!is.character(proteinGroup_Raw$`Gene names`)) {stop('The column "Gene names" must contain character')}
 
 
-  if (!is.numeric(proteinGroup_Raw$id)) stop('The column "id" must contain numbers')
+  if (!is.numeric(proteinGroup_Raw$id)) {stop('The column "id" must contain numbers')}
 
   column_intesities_names <- colnames(proteinGroup_Raw)[grepl(pattern_intensity, colnames(proteinGroup_Raw))]
 
