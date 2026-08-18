@@ -11,6 +11,7 @@ GCP_RemoveSamples(
   GCPlist,
   remove_samples = NULL,
   keep_samples = NULL,
+  column_samples = 1,
   remove_groups = NULL,
   keep_groups = NULL,
   name_column_groups = NULL
@@ -30,6 +31,12 @@ GCP_RemoveSamples(
 - keep_samples:
 
   NULL or a character containing the name of samples to keep.
+
+- column_samples:
+
+  an integer number or a charcter of length 1. The number or name of the
+  column to look at the elements passed by remove_samples or
+  keep_samples.
 
 - remove_groups:
 

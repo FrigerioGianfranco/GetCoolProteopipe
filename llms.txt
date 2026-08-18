@@ -219,6 +219,8 @@ This package relies on external packages, cited below:
   : performing a t-test on data
 - [`ImportOutputMaxQuant()`](https://frigeriogianfranco.github.io/GetCoolProteopipe/reference/ImportOutputMaxQuant.md)
   : Importing the output of MaxQuant
+- [`ImportOutputProtDiscov()`](https://frigeriogianfranco.github.io/GetCoolProteopipe/reference/ImportOutputProtDiscov.md)
+  : Importing the output of Proteome Discoverer
 - [`ImportPTMs()`](https://frigeriogianfranco.github.io/GetCoolProteopipe/reference/ImportPTMs.md)
   : Importing PTMs
 - [`checkGCPlist()`](https://frigeriogianfranco.github.io/GetCoolProteopipe/reference/checkGCPlist.md)
