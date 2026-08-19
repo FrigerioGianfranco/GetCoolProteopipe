@@ -26,7 +26,8 @@ GCP_plotPCA(
 
 - GCPlist:
 
-  a list created with the ImportOutputMaxQuant function.
+  a list initially created with ImportOutputMaxQuan(), ImportPTMs(), or
+  ImportOutputProtDiscov().
 
 - scores_or_loadings:
 

@@ -22,9 +22,9 @@ GCP_FoldChange(
 
 - GCPlist:
 
-  a list created with the ImportOutputMaxQuant function. IMPORTANT: All
-  protein intensities should be positive, or unreliable results will be
-  generated!
+  a list initially created with ImportOutputMaxQuan(), ImportPTMs(), or
+  ImportOutputProtDiscov(). IMPORTANT: All protein intensities should be
+  positive, or unreliable results will be generated!
 
 - name_column_groups:
 

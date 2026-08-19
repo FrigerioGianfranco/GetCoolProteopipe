@@ -13,7 +13,8 @@ GCP_ratioPTMprotein(GCPlistPTM, GCPlistProteins, are_log_transf = TRUE)
 
 - GCPlistPTM:
 
-  a list created with the ImportPTMs function.
+  a list initially created with ImportOutputMaxQuan(), ImportPTMs(), or
+  ImportOutputProtDiscov().
 
 - GCPlistProteins:
 

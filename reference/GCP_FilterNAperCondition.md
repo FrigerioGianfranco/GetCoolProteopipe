@@ -18,7 +18,8 @@ GCP_FilterNAperCondition(
 
 - GCPlist:
 
-  a list created with the ImportOutputMaxQuant function.
+  a list initially created with ImportOutputMaxQuan(), ImportPTMs(), or
+  ImportOutputProtDiscov().
 
 - ratio:
 

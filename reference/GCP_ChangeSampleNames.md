@@ -17,7 +17,8 @@ GCP_ChangeSampleNames(
 
 - GCPlist:
 
-  a list created with the ImportOutputMaxQuant function.
+  a list initially created with ImportOutputMaxQuan(), ImportPTMs(), or
+  ImportOutputProtDiscov().
 
 - old_names:
 

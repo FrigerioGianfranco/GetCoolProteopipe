@@ -12,7 +12,8 @@ GCP_PCA(GCPlist, center = TRUE, scale. = FALSE)
 
 - GCPlist:
 
-  a list created with the ImportOutputMaxQuant function.
+  a list initially created with ImportOutputMaxQuan(), ImportPTMs(), or
+  ImportOutputProtDiscov().
 
 - center:
 
