@@ -2,7 +2,7 @@
 #'
 #' It takes each valid feature intensity from PTM and it divides it by the relative intensity of the protein; the match is based on the Accession.
 #'
-#' @param GCPlistPTM a list created with the ImportPTMs function.
+#' @param GCPlistPTM a list initially created with ImportOutputMaxQuan(), ImportPTMs(), or ImportOutputProtDiscov().
 #' @param GCPlistProteins a list created with the ImportOutputMaxQuant function.
 #' @param are_log_transf logical. If the intensities are log-transformed, specify here as TRUE, so the subtraction will be performed instead of the ratio.
 #'

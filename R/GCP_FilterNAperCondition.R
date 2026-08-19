@@ -2,7 +2,7 @@
 #'
 #' In the intensities table, it keeps only proteins that are not missing values for a defined ratio in at least one of the specified sample groups.
 #'
-#' @param GCPlist a list created with the ImportOutputMaxQuant function.
+#' @param GCPlist a list initially created with ImportOutputMaxQuan(), ImportPTMs(), or ImportOutputProtDiscov().
 #' @param ratio numeric, between 0 an 1 (included). Ratio of non-missing values, per sample group, wanted to pass this filtration step (the higher this ratio, the less proteins will be kept).
 #' @param name_column_groups NULL or character of length 1. The name of the column of the sampleINFO table containing the sample groups.
 #'

@@ -2,7 +2,7 @@
 #'
 #' Starting from a GCPlist, it removes proteins which intensity is equal to zero in all the samples.
 #'
-#' @param GCPlist a list created with the ImportOutputMaxQuant function.
+#' @param GCPlist a list initially created with ImportOutputMaxQuan(), ImportPTMs(), or ImportOutputProtDiscov().
 #'
 #' @return the GCPlist in which each table has potentially a reduced number of rows.
 #'

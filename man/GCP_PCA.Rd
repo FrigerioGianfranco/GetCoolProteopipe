@@ -7,7 +7,7 @@
 GCP_PCA(GCPlist, center = TRUE, scale. = FALSE)
 }
 \arguments{
-\item{GCPlist}{a list created with the ImportOutputMaxQuant function.}
+\item{GCPlist}{a list initially created with ImportOutputMaxQuan(), ImportPTMs(), or ImportOutputProtDiscov().}
 
 \item{center}{logical. Whether the variables should be shifted to be zero centered (as in the prcomp function).}
 

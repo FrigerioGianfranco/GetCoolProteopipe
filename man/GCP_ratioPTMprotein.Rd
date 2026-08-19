@@ -7,7 +7,7 @@
 GCP_ratioPTMprotein(GCPlistPTM, GCPlistProteins, are_log_transf = TRUE)
 }
 \arguments{
-\item{GCPlistPTM}{a list created with the ImportPTMs function.}
+\item{GCPlistPTM}{a list initially created with ImportOutputMaxQuan(), ImportPTMs(), or ImportOutputProtDiscov().}
 
 \item{GCPlistProteins}{a list created with the ImportOutputMaxQuant function.}
 

@@ -14,7 +14,7 @@ GCP_FoldChange(
 )
 }
 \arguments{
-\item{GCPlist}{a list created with the ImportOutputMaxQuant function. IMPORTANT: All protein intensities should be positive, or unreliable results will be generated!}
+\item{GCPlist}{a list initially created with ImportOutputMaxQuan(), ImportPTMs(), or ImportOutputProtDiscov(). IMPORTANT: All protein intensities should be positive, or unreliable results will be generated!}
 
 \item{name_column_groups}{character of length 1. The name of the column of the sampleINFO table containing the sample groups. Since this is a Fold Change analysis, there must be exactly two groups.}
 

@@ -2,7 +2,7 @@
 #'
 #' It filters the intensities data frame considering certain criteria.
 #'
-#' @param GCPlist a list created with the ImportOutputMaxQuant function.
+#' @param GCPlist a list initially created with ImportOutputMaxQuan(), ImportPTMs(), or ImportOutputProtDiscov().
 #' @param operation character. Operation(s) to be applied considering a column of proteinINFO (for example: "ttest_PvaluesFDR < 0.05"). All the TRUE from the operation will be kept.
 #'
 #' @return The GCPlist with a potentially reduced number of rows in the intensities tables.

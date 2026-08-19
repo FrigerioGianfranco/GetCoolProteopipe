@@ -7,7 +7,7 @@
 GCP_QQplotIntensities(GCPlist, Title = "QQ plot intensities")
 }
 \arguments{
-\item{GCPlist}{a list created with the ImportOutputMaxQuant function.}
+\item{GCPlist}{a list initially created with ImportOutputMaxQuan(), ImportPTMs(), or ImportOutputProtDiscov().}
 
 \item{Title}{NULL or character of length 1. The title you want to ad on the top of the plot.}
 }

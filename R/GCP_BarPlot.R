@@ -2,7 +2,7 @@
 #'
 #' It create bar plots to show the number of valid proteins per samples.
 #'
-#' @param GCPlist a list created with the ImportOutputMaxQuant function.
+#' @param GCPlist a list initially created with ImportOutputMaxQuan(), ImportPTMs(), or ImportOutputProtDiscov().
 #' @param name_column_groups NULL or character of length 1. The name of the column of the sampleINFO table containing the sample groups.
 #' @param col_pal NULL or a character vector containing colors. If NULL, colors from the pals package will be used (see function build_long_vector_of_colors).
 #' @param bar_width NULL or a number. You can pass here the width of the bars.

@@ -2,7 +2,7 @@
 #'
 #' It performs a Fold Change analyses on the proteins intensities, performing multiple pair comparisons. Please, be aware that the Fold Change analysis should be performed only on positive data! Indeed, all protein intensities should be positive, or unreliable results will be generated!
 #'
-#' @param GCPlist a list created with the ImportOutputMaxQuant function. IMPORTANT: All protein intensities should be positive, or unreliable results will be generated!
+#' @param GCPlist a list initially created with ImportOutputMaxQuan(), ImportPTMs(), or ImportOutputProtDiscov(). IMPORTANT: All protein intensities should be positive, or unreliable results will be generated!
 #' @param name_column_groups character of length 1. The name of the column of the sampleINFO table containing the sample groups. 3 or more groups should be indicated here.
 #' @param group_order NULL or a character. The ordered names of the groups, the first ones in order will be considered as denominator in the ratio of the Fold Change analyses. If NULL, the order of the levels of the factor will be considered.
 #' @param paired logical. If FALSE it performs FC on mean of the two groups, for each pair. If TRUE it performs FC for each pair and then compute the mean.

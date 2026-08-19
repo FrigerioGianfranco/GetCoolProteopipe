@@ -2,7 +2,7 @@
 #'
 #' It performs a principal component analysis.
 #'
-#' @param GCPlist a list created with the ImportOutputMaxQuant function.
+#' @param GCPlist a list initially created with ImportOutputMaxQuan(), ImportPTMs(), or ImportOutputProtDiscov().
 #' @param center logical. Whether the variables should be shifted to be zero centered (as in the prcomp function).
 #' @param scale. logical. whether the variables should be scaled to have unit variance before the analysis takes place (as in prcomp function).
 #'

@@ -2,7 +2,7 @@
 #'
 #' It crates a Q-Q plot considering all the intensities of protein from all samples.
 #'
-#' @param GCPlist a list created with the ImportOutputMaxQuant function.
+#' @param GCPlist a list initially created with ImportOutputMaxQuan(), ImportPTMs(), or ImportOutputProtDiscov().
 #' @param Title NULL or character of length 1. The title you want to ad on the top of the plot.
 #'
 #' @return a ggplot object.

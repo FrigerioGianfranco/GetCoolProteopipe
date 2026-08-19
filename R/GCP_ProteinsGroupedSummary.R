@@ -2,7 +2,7 @@
 #'
 #' It creates a small table with the summary of the results of the GCP_ProteinsGrouped function. PLEASE NOTE that you must run the function GCP_ProteinsGrouped before!
 #'
-#' @param GCPlist a list created with the ImportOutputMaxQuant function.
+#' @param GCPlist a list initially created with ImportOutputMaxQuan(), ImportPTMs(), or ImportOutputProtDiscov().
 #' @param name_column_groups character of length 1. The name of the column of the sampleINFO table containing the sample groups.
 #' @param digits_perc NULL or numeric integer of length 1. The number of digits to round the percentages.
 #' @param add_perc_symbol logical. If TRUE, it will add the ' %' symbol at the percentages.

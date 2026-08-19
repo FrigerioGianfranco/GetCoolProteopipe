@@ -2,7 +2,7 @@
 #'
 #' It performs the imputation of missing values, using the same method of the functions scImpute and tImpute from the PhosR package.
 #'
-#' @param GCPlist a list created with the ImportOutputMaxQuant function.
+#' @param GCPlist a list initially created with ImportOutputMaxQuan(), ImportPTMs(), or ImportOutputProtDiscov().
 #' @param quant_rate numeric, between 0 an 1 (included). Quantification rate per group, considered for the scImpute function.
 #' @param name_column_groups NULL or character of length 1. The name of the column of the sampleINFO table containing the sample groups.
 #' @param seed numeric. The value that will be used for set.seed.

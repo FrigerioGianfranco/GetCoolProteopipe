@@ -15,7 +15,7 @@ GCP_RemoveSamples(
 )
 }
 \arguments{
-\item{GCPlist}{a list created with the ImportOutputMaxQuant function.}
+\item{GCPlist}{a list initially created with ImportOutputMaxQuan(), ImportPTMs(), or ImportOutputProtDiscov().}
 
 \item{remove_samples}{NULL or a character containing the name of samples to remove.}
 

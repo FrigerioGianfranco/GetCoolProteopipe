@@ -10,7 +10,7 @@ GCP_LogTransformIntensities(
 )
 }
 \arguments{
-\item{GCPlist}{a list created with the ImportOutputMaxQuant function.}
+\item{GCPlist}{a list initially created with ImportOutputMaxQuan(), ImportPTMs(), or ImportOutputProtDiscov().}
 
 \item{base}{numeric. The base of the logarithm to use.}
 }

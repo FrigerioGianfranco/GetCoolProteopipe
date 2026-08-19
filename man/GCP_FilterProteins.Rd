@@ -7,7 +7,7 @@
 GCP_FilterProteins(GCPlist, operation)
 }
 \arguments{
-\item{GCPlist}{a list created with the ImportOutputMaxQuant function.}
+\item{GCPlist}{a list initially created with ImportOutputMaxQuan(), ImportPTMs(), or ImportOutputProtDiscov().}
 
 \item{operation}{character. Operation(s) to be applied considering a column of proteinINFO (for example: "ttest_PvaluesFDR < 0.05"). All the TRUE from the operation will be kept.}
 }

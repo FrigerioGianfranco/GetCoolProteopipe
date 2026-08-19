@@ -2,7 +2,7 @@
 #'
 #' It creates an additional column in the proteinINFO data frame containing where in which groups proteins are present.
 #'
-#' @param GCPlist a list created with the ImportOutputMaxQuant function.
+#' @param GCPlist a list initially created with ImportOutputMaxQuan(), ImportPTMs(), or ImportOutputProtDiscov().
 #' @param name_column_groups character of length 1. The name of the column of the sampleINFO table containing the sample groups. The sample groups must be between at least 2.
 #'
 #' @return The GCPlist with an additional column in the proteinINFO data frame.

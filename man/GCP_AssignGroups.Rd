@@ -18,7 +18,7 @@ GCP_AssignGroups(
 )
 }
 \arguments{
-\item{GCPlist}{a list created with the ImportOutputMaxQuant function.}
+\item{GCPlist}{a list initially created with ImportOutputMaxQuan(), ImportPTMs(), or ImportOutputProtDiscov()..}
 
 \item{automatic_assignment}{One of the following: "no", "groupfirst", "replicatefirst". If "no" is selected, groups will be assigned considering the other following arguments; if "groupfirst" or "replicatefirst", the groups will be automatically created from sample names, considering the separator passed to separator_automatic_assignment, and an additional column called as name_column_replicates will be also created.}
 

@@ -2,7 +2,7 @@
 #'
 #' Remove samples from both the intensities and  SampleINFO data frames. Only one of the arguments among remove_samples, keep_samples, remove_groups, or keep_groups has to be specified.
 #'
-#' @param GCPlist a list created with the ImportOutputMaxQuant function.
+#' @param GCPlist a list initially created with ImportOutputMaxQuan(), ImportPTMs(), or ImportOutputProtDiscov().
 #' @param remove_samples NULL or a character containing the name of samples to remove.
 #' @param keep_samples NULL or a character containing the name of samples to keep.
 #' @param column_samples an integer number or a charcter of length 1. The number or name of the column to look at the elements passed by remove_samples or keep_samples.

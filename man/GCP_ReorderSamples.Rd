@@ -11,7 +11,7 @@ GCP_ReorderSamples(
 )
 }
 \arguments{
-\item{GCPlist}{a list created with the ImportOutputMaxQuant function.}
+\item{GCPlist}{a list initially created with ImportOutputMaxQuan(), ImportPTMs(), or ImportOutputProtDiscov().}
 
 \item{sample_names_ordered}{NULL or a character or factor vector containing the name of samples with the new desired order.}
 

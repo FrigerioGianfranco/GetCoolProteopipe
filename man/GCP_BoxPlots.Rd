@@ -15,7 +15,7 @@ GCP_BoxPlots(
 )
 }
 \arguments{
-\item{GCPlist}{a list created with the ImportOutputMaxQuant function.}
+\item{GCPlist}{a list initially created with ImportOutputMaxQuan(), ImportPTMs(), or ImportOutputProtDiscov().}
 
 \item{by_samples}{logical. If TRUE, a single box plot graph will be returned with a box for each sample. If FALSE, multiple box plots can be generated for each protein, as specified in the only_these_protid or only_the_first arguments.}
 

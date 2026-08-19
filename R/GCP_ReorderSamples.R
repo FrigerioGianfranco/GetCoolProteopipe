@@ -2,7 +2,7 @@
 #'
 #' Reorder samples in the CGP list.
 #'
-#' @param GCPlist a list created with the ImportOutputMaxQuant function.
+#' @param GCPlist a list initially created with ImportOutputMaxQuan(), ImportPTMs(), or ImportOutputProtDiscov().
 #' @param sample_names_ordered NULL or a character or factor vector containing the name of samples with the new desired order.
 #' @param name_column_groups NULL or a character of length 1. The name of the column of the sampleINFO table containing the sample groups. If sample_names_ordered is NULL, the order will be based on the on such groups.
 #'

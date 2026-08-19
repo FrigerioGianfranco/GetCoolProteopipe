@@ -1,10 +1,11 @@
 #' Importing the output of Proteome Discoverer
 #'
-#' Starting from the output of the Proteome Discoverer, it performs some cleaning such as filtering out proteins that are only identified by site, the reverse and the potential contaminants, then it adds protein names from a fasta database.
+#' Starting from the output of the Proteome Discoverer, it performs some cleaning such as removing samples with all missing values and/or filtering out proteins that are contaminants, then it can also add protein names from a fasta database; finally it creates the GCP list that will be used throughout this pipeline.
 #'
 #' @param ProtDiscov_table_name a character vector of length 1 with the name of the Proteome Discoverer table file, as exported, in the current working directory, which must be in the .txt format.
 #' @param ProtDiscov_InputFiles  NULL or a character vector of length 1 with the name of the Proteome Discoverer input file table, as exported, in the current working directory, which must be in the .txt format.
 #' @param samples_info NULL or NA or a character vector of length 1 with the name of the table in the current working directory, containing information for each sample. The table must be in txt, csv, or xslsx format. In particular, the first column of the table must contain the names of the samples exactly the same considered.
+#' @param raw_or_norm either "raw" or "norm". Choose whether you wish to import the raw abundances or the normalised ones.
 #' @param restore_sample_names logical. If TRUE, you must provide the ProtDiscov_InputFiles and the original sample names will be considered. If FALSE, the Proteome Discoverer sample names (like F1, F2, ...) will be considered.
 #' @param remove_empty_columns logical. If TRUE, samples that have full missing values abundances will be removed.
 #' @param fasta_database NULL or NA or either "human" or "mouse", or a name of a table in the current working directory (in .txt or .csv format). You can specify the fasta database to use to fill the missing Protein names and Gene names from the Proteome Discoverer table. If you choose "mouse" or "human", the fasta table implemented were downloaded and reprocessed from Mascot on 5 May 2024.
@@ -26,6 +27,7 @@
 #' GCPlist00P <- ImportOutputProtDiscov(ProtDiscov_table_name = "Proteome Discoverer OUTPUT FILE NAME.txt",     ## put here the name of the Proteome Discoverer output table present in your current working directory
 #'                                      ProtDiscov_InputFiles = "Proteome Discoverer INPUT FILE NAME.txt",      ## you could also put the name the input file if you want to restore the original sample names
 #'                                      samples_info = NULL,                                                 ## you could put here the file name of a table with further information about your samples
+#'                                      raw_or_norm = "raw",
 #'                                      restore_sample_names = TRUE,
 #'                                      remove_empty_columns = TRUE,
 #'                                      fasta_database = "human",
@@ -37,7 +39,7 @@
 #' @importFrom readxl read_excel
 #'
 #' @export
-ImportOutputProtDiscov <- function(ProtDiscov_table_name, ProtDiscov_InputFiles = NULL, samples_info = NULL, restore_sample_names = TRUE, remove_empty_columns = TRUE, fasta_database = NA, prioritize_ProtDiscov_names = TRUE, remove_contaminants = TRUE) {
+ImportOutputProtDiscov <- function(ProtDiscov_table_name, ProtDiscov_InputFiles = NULL, samples_info = NULL, raw_or_norm = c("raw", "norm"), restore_sample_names = TRUE, remove_empty_columns = TRUE, fasta_database = NA, prioritize_ProtDiscov_names = TRUE, remove_contaminants = TRUE) {
 
   if (length(ProtDiscov_table_name) != 1) {stop("ProtDiscov_table_name must be a character vector of length 1, indicating the name of the Proteome Discoverer table files, in txt format")}
   if (is.na(ProtDiscov_table_name)) {stop("ProtDiscov_table_name must be a character vector of length 1, indicating the name of the Proteome Discoverer table files, in txt format")}
@@ -56,6 +58,13 @@ ImportOutputProtDiscov <- function(ProtDiscov_table_name, ProtDiscov_InputFiles 
       if (!is.character(samples_info)) {stop("samples_info must be a character vector of length 1, indicating the name of the table in the current working directory containing information for each sample files")}
     }
   }
+
+  if (!identical(tolower(raw_or_norm), c("raw", "norm"))) {
+    if (length(raw_or_norm) != 1) {stop('raw_or_norm must be one of "raw", "norm"')}
+    if (is.na(raw_or_norm)) {stop('raw_or_norm must be one of "raw", "norm"')}
+  }
+  raw_or_norm <- tolower(raw_or_norm)
+  raw_or_norm <- match.arg(raw_or_norm, c("raw", "norm"))
 
   if (!is.logical(restore_sample_names)) {stop("restore_sample_names must be either TRUE or FALSE")}
   if (length(restore_sample_names) != 1) {stop("restore_sample_names must be either TRUE or FALSE")}
@@ -128,16 +137,36 @@ ImportOutputProtDiscov <- function(ProtDiscov_table_name, ProtDiscov_InputFiles 
 
 
   colnames_with_intensities <- colnames(proteinGroup_Raw)[which(grepl("Abundance", colnames(proteinGroup_Raw)))]
-  colnames_with_averaged_intensities <- colnames(proteinGroup_Raw)[which(grepl("Abundances Grouped", colnames(proteinGroup_Raw)))]
-  colnames_with_sample_intensities <- colnames_with_intensities[which(!colnames_with_intensities%in%colnames_with_averaged_intensities)]
-
   if (length(colnames_with_intensities) < 1) {stop("There are no 'Abundance' columns in the Proteome Discoverer table!")}
+
+  colnames_with_averaged_intensities <- colnames(proteinGroup_Raw)[which(grepl("Abundances Grouped", colnames(proteinGroup_Raw)))]
+
+  colnames_with_sample_intensities <- colnames_with_intensities[which(!colnames_with_intensities%in%colnames_with_averaged_intensities)]
   if (length(colnames_with_sample_intensities) < 1) {stop("There are no 'Abundance' columns related to specific samples in the Proteome Discoverer table besides the 'Abundances Grouped'!")}
 
-  sample_intensities_names_df <- tibble(original_colnames_with_sample_intensities = colnames_with_sample_intensities,
-                                        names_from_PD = sub("^Abundance\\s+(.*?)\\s+Sample.*$", "\\1", colnames_with_sample_intensities),
-                                        groups_from_PD = sub("^.*Sample\\s+", "", colnames_with_sample_intensities),
-                                        has_all_NA = rep(FALSE, length(colnames_with_sample_intensities)))
+  colnames_with_sample_intensities_normalised <- colnames_with_sample_intensities[which(grepl("Abundances Normalized", colnames_with_sample_intensities))]
+  colnames_with_sample_intensities_raw <- colnames_with_sample_intensities[which(!grepl("Abundances Normalized", colnames_with_sample_intensities))]
+
+  if (raw_or_norm == "raw") {
+    if (length(colnames_with_sample_intensities_raw) < 1) {stop("There are no 'Abundance' columns in the Proteome Discoverer table that can be recognised as raw abundances!")}
+    colnames_with_sample_intensities_chosen <- colnames_with_sample_intensities_raw
+
+    sample_intensities_names_df <- tibble(original_colnames_with_sample_intensities = colnames_with_sample_intensities_raw,
+                                          names_from_PD = sub("^Abundance\\s+(.*?)\\s+Sample.*$", "\\1", colnames_with_sample_intensities_raw),
+                                          groups_from_PD = sub("^.*Sample\\s+", "", colnames_with_sample_intensities_raw),
+                                          has_all_NA = rep(FALSE, length(colnames_with_sample_intensities_raw)))
+  } else if (raw_or_norm == "norm") {
+    if (length(colnames_with_sample_intensities_normalised) < 1) {stop("There are no 'Abundance' columns in the Proteome Discoverer table that can be recognised as normalised abundances!")}
+    colnames_with_sample_intensities_chosen <- colnames_with_sample_intensities_normalised
+
+    sample_intensities_names_df <- tibble(original_colnames_with_sample_intensities = colnames_with_sample_intensities_normalised,
+                                          names_from_PD = sub("^Abundances Normalized\\s+(.*?)\\s+Sample.*$", "\\1", colnames_with_sample_intensities_normalised),
+                                          groups_from_PD = sub("^.*Sample\\s+", "", colnames_with_sample_intensities_normalised),
+                                          has_all_NA = rep(FALSE, length(colnames_with_sample_intensities_normalised)))
+  } else {
+    stop('raw_or_norm must be one of "raw", "norm"')
+  }
+
   if (any(duplicated(sample_intensities_names_df$original_colnames_with_sample_intensities))) {stop("There are duplicated in the Abundance columns of the Proteome Discoverer table..")}
   if (any(duplicated(sample_intensities_names_df$names_from_PD))) {stop("There are duplicated in the Abundance column sample names of the Proteome Discoverer table..")}
 
@@ -195,14 +224,14 @@ ImportOutputProtDiscov <- function(ProtDiscov_table_name, ProtDiscov_InputFiles 
     }
   }
 
-  if (any(map_lgl(select(proteinGroup_Raw, all_of(colnames_with_sample_intensities)), \(z) all(is.na(z))))) {
-    for (iNA in which(colnames_with_sample_intensities %in% names(map_lgl(select(proteinGroup_Raw, all_of(colnames_with_sample_intensities)), \(z) all(is.na(z)))[which(map_lgl(select(proteinGroup_Raw, all_of(colnames_with_sample_intensities)), \(z) all(is.na(z))))]))) {
+  if (any(map_lgl(select(proteinGroup_Raw, all_of(colnames_with_sample_intensities_chosen)), \(z) all(is.na(z))))) {
+    for (iNA in which(colnames_with_sample_intensities_chosen %in% names(map_lgl(select(proteinGroup_Raw, all_of(colnames_with_sample_intensities_chosen)), \(z) all(is.na(z)))[which(map_lgl(select(proteinGroup_Raw, all_of(colnames_with_sample_intensities_chosen)), \(z) all(is.na(z))))]))) {
       sample_intensities_names_df[iNA, "has_all_NA"] <- TRUE
-      proteinGroup_Raw[,colnames_with_sample_intensities[iNA]] <- as.numeric(pull(proteinGroup_Raw, colnames_with_sample_intensities[iNA]))
+      proteinGroup_Raw[,colnames_with_sample_intensities_chosen[iNA]] <- as.numeric(pull(proteinGroup_Raw, colnames_with_sample_intensities_chosen[iNA]))
     }
   }
 
-  if (!(all(map_lgl(select(proteinGroup_Raw, all_of(colnames_with_sample_intensities)), is.numeric)))) {
+  if (!(all(map_lgl(select(proteinGroup_Raw, all_of(colnames_with_sample_intensities_chosen)), is.numeric)))) {
     stop("all the Abundance columns must contain numerical data")
   }
 
@@ -226,7 +255,7 @@ ImportOutputProtDiscov <- function(ProtDiscov_table_name, ProtDiscov_InputFiles 
 
   proteinGroup_Raw_acc <- proteinGroup_Raw[, which(!colnames(proteinGroup_Raw)%in%colnames_with_sample_intensities)]
 
-  the_intensity_df <- proteinGroup_Raw[, c(1, which(colnames(proteinGroup_Raw)%in%colnames_with_sample_intensities))]
+  the_intensity_df <- proteinGroup_Raw[, c(1, which(colnames(proteinGroup_Raw)%in%colnames_with_sample_intensities_chosen))]
 
   if (!real_sample_names_used) {
     sample_names_used <- sample_intensities_names_df$names_from_PD
@@ -421,6 +450,15 @@ ImportOutputProtDiscov <- function(ProtDiscov_table_name, ProtDiscov_InputFiles 
   final_list <- list(intensities = the_intensity_df[which(the_intensity_df$protid %in% proteinGroup_Raw_added_cut$protid),],
                      proteinINFO = proteinGroup_Raw_added_cut,
                      sampleINFO = samples_info_considered)
+
+
+  if (raw_or_norm == "raw") {
+    cat("\n -- raw intensities are being imported --\n\n")
+  } else if (raw_or_norm == "norm") {
+    cat("\n -- normalised intensities are being imported --\n\n")
+  } else {
+    stop('raw_or_norm must be one of "raw", "norm"')
+  }
 
   return(final_list)
 }

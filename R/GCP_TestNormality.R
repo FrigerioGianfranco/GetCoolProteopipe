@@ -2,7 +2,7 @@
 #'
 #' It performs the Shapiro-Wilk test and print out a density plot and a qqplot.
 #'
-#' @param GCPlist a list created with the ImportOutputMaxQuant function.
+#' @param GCPlist a list initially created with ImportOutputMaxQuan(), ImportPTMs(), or ImportOutputProtDiscov().
 #' @param print_DensityPlot logical. If TRUE, a PDF with the density plots will be created in the current working directory.
 #' @param print_QQPlot logical. If TRUE, a PDF with the Q-Q plots will be created in the current working directory.
 #' @param print_only_these_protid NULL or a character vector of protid. Only the density/q-q-plot of the specified protid will be exported in the pdf files.

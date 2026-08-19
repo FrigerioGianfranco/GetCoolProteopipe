@@ -2,7 +2,7 @@
 #'
 #' It creates venn diagrams to show the overlapping proteins per sample group.
 #'
-#' @param GCPlist a list created with the ImportOutputMaxQuant function.
+#' @param GCPlist a list initially created with ImportOutputMaxQuan(), ImportPTMs(), or ImportOutputProtDiscov().
 #' @param name_column_groups character of length 1. The name of the column of the sampleINFO table containing the sample groups. The sample groups must be between 2 and 4.
 #' @param col_pal NULL or a character vector containing colors. If NULL, colors from the pals package will be used (see function build_long_vector_of_colors).
 #' @param consider_genenames logical. If TRUE, the gene names will be considered to perform the grouping, instead of the protid.

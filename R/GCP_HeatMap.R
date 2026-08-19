@@ -2,7 +2,7 @@
 #'
 #' It performs a heat map out of GCPdata.
 #'
-#' @param GCPlist a list created with the ImportOutputMaxQuant function.
+#' @param GCPlist a list initially created with ImportOutputMaxQuan(), ImportPTMs(), or ImportOutputProtDiscov().
 #' @param name_column_groups NULL or character vector. Name(s) of the column(s) of the sampleINFO table. Specify it if you want to have those groups specified on the heatmap.
 #' @param name_column_labels NULL or a character of length 1. The name of the column of sampleINFO containing the sample names. You need to pass it only if you want sample names on the heat map.
 #' @param name_column_groups_protein NULL or character vector. Name(s) of the column(s) of the proteinINFO table. Specify it if you want to have those groups specified on the heatmap.

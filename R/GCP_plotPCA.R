@@ -2,7 +2,7 @@
 #'
 #' It plots a principal component analysis.
 #'
-#' @param GCPlist a list created with the ImportOutputMaxQuant function.
+#' @param GCPlist a list initially created with ImportOutputMaxQuan(), ImportPTMs(), or ImportOutputProtDiscov().
 #' @param scores_or_loadings one of the following: "scores", "loadings". Specify here if you want to plot the scores or the loadings.
 #' @param PC_to_plot character of length 2. Specify here the two principal components to plot.
 #' @param center logical. Whether the variables should be shifted to be zero centered (as in the prcomp function).

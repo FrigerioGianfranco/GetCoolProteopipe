@@ -13,7 +13,7 @@ GCP_ScaleIntensities(
 )
 }
 \arguments{
-\item{GCPlist}{a list created with the ImportOutputMaxQuant function.}
+\item{GCPlist}{a list initially created with ImportOutputMaxQuan(), ImportPTMs(), or ImportOutputProtDiscov().}
 
 \item{subtract}{NULL, or "shift_median", or "mean", or "median". Specify it to subtract the mean or median value to all values. If "shift_median", an offset will be subtracted in order to center the medians to the global median.}
 

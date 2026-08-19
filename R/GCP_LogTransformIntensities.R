@@ -2,7 +2,7 @@
 #'
 #' It log-transforms all the intensities of the intensities table.
 #'
-#' @param GCPlist a list created with the ImportOutputMaxQuant function.
+#' @param GCPlist a list initially created with ImportOutputMaxQuan(), ImportPTMs(), or ImportOutputProtDiscov().
 #' @param base numeric. The base of the logarithm to use.
 #'
 #' @return a GCPlist list with log-transformed data intensity table.

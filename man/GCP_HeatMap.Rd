@@ -25,7 +25,7 @@ GCP_HeatMap(
 )
 }
 \arguments{
-\item{GCPlist}{a list created with the ImportOutputMaxQuant function.}
+\item{GCPlist}{a list initially created with ImportOutputMaxQuan(), ImportPTMs(), or ImportOutputProtDiscov().}
 
 \item{name_column_groups}{NULL or character vector. Name(s) of the column(s) of the sampleINFO table. Specify it if you want to have those groups specified on the heatmap.}
 

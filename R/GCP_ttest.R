@@ -2,7 +2,7 @@
 #'
 #' It performs a t-test analyses on the proteins intensities.
 #'
-#' @param GCPlist a list created with the ImportOutputMaxQuant function.
+#' @param GCPlist a list initially created with ImportOutputMaxQuan(), ImportPTMs(), or ImportOutputProtDiscov().
 #' @param name_column_groups character of length 1. The name of the column of the sampleINFO table containing the sample groups. Since this is a t-test, there must be exactly two groups.
 #' @param paired logical. If FALSE it performs non-paired t-tests. If TRUE it performs paired t-tests.
 #' @param FDR logical. If TRUE, after performing the t-tests, it also correct p-values across the different proteins with a false discovery rate multiple comparison correction (method "fdr" of the function p.adjust).

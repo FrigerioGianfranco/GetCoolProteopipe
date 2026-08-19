@@ -13,7 +13,7 @@ GCP_NAimputation(
 )
 }
 \arguments{
-\item{GCPlist}{a list created with the ImportOutputMaxQuant function.}
+\item{GCPlist}{a list initially created with ImportOutputMaxQuan(), ImportPTMs(), or ImportOutputProtDiscov().}
 
 \item{quant_rate}{numeric, between 0 an 1 (included). Quantification rate per group, considered for the scImpute function.}
 

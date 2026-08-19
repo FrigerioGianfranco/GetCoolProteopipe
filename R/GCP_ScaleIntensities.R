@@ -2,7 +2,7 @@
 #'
 #' In the intensities data table, it scale all the intensities as specified.
 #'
-#' @param GCPlist a list created with the ImportOutputMaxQuant function.
+#' @param GCPlist a list initially created with ImportOutputMaxQuan(), ImportPTMs(), or ImportOutputProtDiscov().
 #' @param subtract NULL, or "shift_median", or "mean", or "median". Specify it to subtract the mean or median value to all values. If "shift_median", an offset will be subtracted in order to center the medians to the global median.
 #' @param divide NULL, or "sqrt_sd", or "sd", or "maxmin". Specify it to divide all values by the standard deviation, by the square root of the standard deviation, or by the range (max-min).
 #' @param by_sample logical. If TRUE, the centering and scaling will be column-wise (per sample); if FALSE; row-wise (per protein).

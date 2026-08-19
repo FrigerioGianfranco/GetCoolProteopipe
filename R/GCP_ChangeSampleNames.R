@@ -2,7 +2,7 @@
 #'
 #' Change the name of some samples.
 #'
-#' @param GCPlist a list created with the ImportOutputMaxQuant function.
+#' @param GCPlist a list initially created with ImportOutputMaxQuan(), ImportPTMs(), or ImportOutputProtDiscov().
 #' @param old_names character containing the name of samples you want to modify.
 #' @param new_names character containing the new name of samples.
 #' @param old_new_names_table alternatively, you can bass here a table with old names in the first column and new names in the second column. If you pass an argument here, this will be considered instead of old_names and new_names.

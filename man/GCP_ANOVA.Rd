@@ -12,7 +12,7 @@ GCP_ANOVA(
 )
 }
 \arguments{
-\item{GCPlist}{a list created with the ImportOutputMaxQuant function.}
+\item{GCPlist}{a list initially created with ImportOutputMaxQuan(), ImportPTMs(), or ImportOutputProtDiscov().}
 
 \item{name_column_groups}{character of length 1. The name of the column of the sampleINFO table containing the sample groups. Since this is an ANOVA, there must be at least three groups.}
 

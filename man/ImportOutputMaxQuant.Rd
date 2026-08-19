@@ -41,7 +41,7 @@ a GCPlist, i.e.: a list with 3 dataframes (tibbles):
 }
 }
 \description{
-Starting from the output of the MaxQuant, it performs some cleaning such as filtering out proteins that are only identified by site, the reverse and the potential contaminants, then it adds protein names from a fasta database.
+Starting from the output of the MaxQuant, it performs some cleaning such as filtering out proteins that are only identified by site, the reverse and the potential contaminants, then it adds protein names from a fasta database; finally it creates the GCP list that will be used throughout this pipeline.
 }
 \examples{
 \dontrun{

@@ -2,7 +2,7 @@
 #'
 #' In the intensities table, it replaces all zeros with missing values.
 #'
-#' @param GCPlist a list created with the ImportOutputMaxQuant function.
+#' @param GCPlist a list initially created with ImportOutputMaxQuan(), ImportPTMs(), or ImportOutputProtDiscov().
 #'
 #' @return a GCPlist list with zero replaced with NAs in the data intensity table.
 #'

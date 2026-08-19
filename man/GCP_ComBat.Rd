@@ -7,7 +7,7 @@
 GCP_ComBat(GCPlist, batch = "Batch", ...)
 }
 \arguments{
-\item{GCPlist}{a list created with the ImportOutputMaxQuant function.}
+\item{GCPlist}{a list initially created with ImportOutputMaxQuan(), ImportPTMs(), or ImportOutputProtDiscov().}
 
 \item{batch}{character of length 1 OR a numeric/factor vector. The name of the column of the sampleINFO table containing the batch indications OR a numeric or factor vector containing the batch indications, that will also be added as column in the sampleINFO data frame under a new 'batch' column.}
 

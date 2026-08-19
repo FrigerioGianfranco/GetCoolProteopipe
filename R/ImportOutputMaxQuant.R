@@ -1,6 +1,6 @@
 #' Importing the output of MaxQuant
 #'
-#' Starting from the output of the MaxQuant, it performs some cleaning such as filtering out proteins that are only identified by site, the reverse and the potential contaminants, then it adds protein names from a fasta database.
+#' Starting from the output of the MaxQuant, it performs some cleaning such as filtering out proteins that are only identified by site, the reverse and the potential contaminants, then it adds protein names from a fasta database; finally it creates the GCP list that will be used throughout this pipeline.
 #'
 #' @param MaxQuant_table_name a character vector of length 1 with the name of the MaxQuant table file in the current working directory, which must be in the .txt format.
 #' @param samples_info NULL or NA or a character vector of length 1 with the name of the table in the current working directory, containing information for each sample. The table must be in txt, csv, or xslsx format. In particular, the first column of the table must contain the names of the samples exactly as they are in the MaxQuant table.

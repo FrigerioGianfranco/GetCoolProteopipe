@@ -11,7 +11,7 @@ GCP_FilterNAperCondition(
 )
 }
 \arguments{
-\item{GCPlist}{a list created with the ImportOutputMaxQuant function.}
+\item{GCPlist}{a list initially created with ImportOutputMaxQuan(), ImportPTMs(), or ImportOutputProtDiscov().}
 
 \item{ratio}{numeric, between 0 an 1 (included). Ratio of non-missing values, per sample group, wanted to pass this filtration step (the higher this ratio, the less proteins will be kept).}
 

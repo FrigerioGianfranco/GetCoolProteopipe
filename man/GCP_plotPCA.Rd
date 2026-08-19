@@ -21,7 +21,7 @@ GCP_plotPCA(
 )
 }
 \arguments{
-\item{GCPlist}{a list created with the ImportOutputMaxQuant function.}
+\item{GCPlist}{a list initially created with ImportOutputMaxQuan(), ImportPTMs(), or ImportOutputProtDiscov().}
 
 \item{scores_or_loadings}{one of the following: "scores", "loadings". Specify here if you want to plot the scores or the loadings.}
 

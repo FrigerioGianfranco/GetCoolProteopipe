@@ -2,7 +2,7 @@
 #'
 #' It creates box plots showing the distribution of proteins in each group.
 #'
-#' @param GCPlist a list created with the ImportOutputMaxQuant function.
+#' @param GCPlist a list initially created with ImportOutputMaxQuan(), ImportPTMs(), or ImportOutputProtDiscov().
 #' @param by_samples logical. If TRUE, a single box plot graph will be returned with a box for each sample. If FALSE, multiple box plots can be generated for each protein, as specified in the only_these_protid or only_the_first arguments.
 #' @param name_column_groups NULL or character of length 1. The name of the column of the sampleINFO table containing the sample groups.
 #' @param col_pal NULL or a character vector containing colors. If NULL, colors from the pals package will be used. To see the colors, run build_long_vector_of_colors().

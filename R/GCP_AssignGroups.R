@@ -2,7 +2,7 @@
 #'
 #' It assigns each samples to a desired groups.
 #'
-#' @param GCPlist a list created with the ImportOutputMaxQuant function.
+#' @param GCPlist a list initially created with ImportOutputMaxQuan(), ImportPTMs(), or ImportOutputProtDiscov()..
 #' @param automatic_assignment One of the following: "no", "groupfirst", "replicatefirst". If "no" is selected, groups will be assigned considering the other following arguments; if "groupfirst" or "replicatefirst", the groups will be automatically created from sample names, considering the separator passed to separator_automatic_assignment, and an additional column called as name_column_replicates will be also created.
 #' @param separator_automatic_assignment character of length 1. If automatic_assignment is "groupfirst" or "replicatefirst", this separator will be used to distinguish group from sample names. Example: if sample names are "control_01", "control_02", "disease_03", "disease_04"; automatic_assignment is "groupfirst"; and separator_automatic_assignment is "_", the samples "control_01", "control_02", will be assigned to the "control" group and the samples "disease_03", "disease_04" will be assigned to the "disease" group. An additional column, called as name_column_replicates, with "01", "02", "03", "04" will be also created.
 #' @param sample_names character vector containing the existing name of samples (Will be considered if automatic_assignment is "no").

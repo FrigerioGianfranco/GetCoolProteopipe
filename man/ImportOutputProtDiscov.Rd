@@ -8,6 +8,7 @@ ImportOutputProtDiscov(
   ProtDiscov_table_name,
   ProtDiscov_InputFiles = NULL,
   samples_info = NULL,
+  raw_or_norm = c("raw", "norm"),
   restore_sample_names = TRUE,
   remove_empty_columns = TRUE,
   fasta_database = NA,
@@ -21,6 +22,8 @@ ImportOutputProtDiscov(
 \item{ProtDiscov_InputFiles}{NULL or a character vector of length 1 with the name of the Proteome Discoverer input file table, as exported, in the current working directory, which must be in the .txt format.}
 
 \item{samples_info}{NULL or NA or a character vector of length 1 with the name of the table in the current working directory, containing information for each sample. The table must be in txt, csv, or xslsx format. In particular, the first column of the table must contain the names of the samples exactly the same considered.}
+
+\item{raw_or_norm}{either "raw" or "norm". Choose whether you wish to import the raw abundances or the normalised ones.}
 
 \item{restore_sample_names}{logical. If TRUE, you must provide the ProtDiscov_InputFiles and the original sample names will be considered. If FALSE, the Proteome Discoverer sample names (like F1, F2, ...) will be considered.}
 
@@ -41,7 +44,7 @@ a GCPlist, i.e.: a list with 3 dataframes (tibbles):
 }
 }
 \description{
-Starting from the output of the Proteome Discoverer, it performs some cleaning such as filtering out proteins that are only identified by site, the reverse and the potential contaminants, then it adds protein names from a fasta database.
+Starting from the output of the Proteome Discoverer, it performs some cleaning such as removing samples with all missing values and/or filtering out proteins that are contaminants, then it can also add protein names from a fasta database; finally it creates the GCP list that will be used throughout this pipeline.
 }
 \examples{
 \dontrun{
@@ -49,6 +52,7 @@ Starting from the output of the Proteome Discoverer, it performs some cleaning s
 GCPlist00P <- ImportOutputProtDiscov(ProtDiscov_table_name = "Proteome Discoverer OUTPUT FILE NAME.txt",     ## put here the name of the Proteome Discoverer output table present in your current working directory
                                      ProtDiscov_InputFiles = "Proteome Discoverer INPUT FILE NAME.txt",      ## you could also put the name the input file if you want to restore the original sample names
                                      samples_info = NULL,                                                 ## you could put here the file name of a table with further information about your samples
+                                     raw_or_norm = "raw",
                                      restore_sample_names = TRUE,
                                      remove_empty_columns = TRUE,
                                      fasta_database = "human",
