@@ -28,6 +28,14 @@
   : Performing a Fold Change analysis on data
 - [`GCP_FoldChange_Multi()`](https://frigeriogianfranco.github.io/GetCoolProteopipe/reference/GCP_FoldChange_Multi.md)
   : Performing a Fold Change analysis on data, for more than 2 groups
+- [`GCP_GO()`](https://frigeriogianfranco.github.io/GetCoolProteopipe/reference/GCP_GO.md)
+  : Performing Gene Ontology (GO) Enrichment Analyses
+- [`GCP_GO_barplot()`](https://frigeriogianfranco.github.io/GetCoolProteopipe/reference/GCP_GO_barplot.md)
+  : Produce bar plot graphs out of Gene Ontologies (GO) results.
+- [`GCP_GO_dotplot()`](https://frigeriogianfranco.github.io/GetCoolProteopipe/reference/GCP_GO_dotplot.md)
+  : Produce dot plot graphs out of Gene Ontologies (GO) results.
+- [`GCP_GO_export()`](https://frigeriogianfranco.github.io/GetCoolProteopipe/reference/GCP_GO_export.md)
+  : Export Gene Ontology (GO) results to Excel.
 - [`GCP_HeatMap()`](https://frigeriogianfranco.github.io/GetCoolProteopipe/reference/GCP_HeatMap.md)
   : Compute a Heat Map.
 - [`GCP_LogTransformIntensities()`](https://frigeriogianfranco.github.io/GetCoolProteopipe/reference/GCP_LogTransformIntensities.md)
@@ -42,6 +50,8 @@
   : Get a summary out after the GCP_ProteinsGrouped function.
 - [`GCP_QQplotIntensities()`](https://frigeriogianfranco.github.io/GetCoolProteopipe/reference/GCP_QQplotIntensities.md)
   : Plotting an overall Q-Q plot
+- [`GCP_RemoveAllNA()`](https://frigeriogianfranco.github.io/GetCoolProteopipe/reference/GCP_RemoveAllNA.md)
+  : Remove samples with all missing values intensities
 - [`GCP_RemoveAllZero()`](https://frigeriogianfranco.github.io/GetCoolProteopipe/reference/GCP_RemoveAllZero.md)
   : Remove samples with all zero intensities
 - [`GCP_RemoveSamples()`](https://frigeriogianfranco.github.io/GetCoolProteopipe/reference/GCP_RemoveSamples.md)

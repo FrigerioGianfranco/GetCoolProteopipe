@@ -13,7 +13,7 @@ ImportOutputProtDiscov(
   ProtDiscov_table_name,
   ProtDiscov_InputFiles = NULL,
   samples_info = NULL,
-  raw_or_norm = c("raw", "norm"),
+  abundances_to_import = c("raw", "norm", "grouped"),
   restore_sample_names = TRUE,
   remove_empty_columns = TRUE,
   fasta_database = NA,
@@ -44,10 +44,11 @@ ImportOutputProtDiscov(
   particular, the first column of the table must contain the names of
   the samples exactly the same considered.
 
-- raw_or_norm:
+- abundances_to_import:
 
-  either "raw" or "norm". Choose whether you wish to import the raw
-  abundances or the normalised ones.
+  either "raw", "norm", or "grouped". Choose whether you wish to import
+  the raw abundances, the normalised, or the grouped ones in the
+  'intensities' data frame.
 
 - restore_sample_names:
 
@@ -99,7 +100,7 @@ if (FALSE) { # \dontrun{
 GCPlist00P <- ImportOutputProtDiscov(ProtDiscov_table_name = "Proteome Discoverer OUTPUT FILE NAME.txt",     ## put here the name of the Proteome Discoverer output table present in your current working directory
                                      ProtDiscov_InputFiles = "Proteome Discoverer INPUT FILE NAME.txt",      ## you could also put the name the input file if you want to restore the original sample names
                                      samples_info = NULL,                                                 ## you could put here the file name of a table with further information about your samples
-                                     raw_or_norm = "raw",
+                                     abundances_to_import = "raw",
                                      restore_sample_names = TRUE,
                                      remove_empty_columns = TRUE,
                                      fasta_database = "human",

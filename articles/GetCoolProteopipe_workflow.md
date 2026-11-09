@@ -878,10 +878,10 @@ GCPlist11 <- GCP_ttest(GCPlist = GCPlist10,
 #> 
 #> 
 #> The following columns have been added to the proteinINFO table:
-#>  ttest_Pvalues
-#>  ttest_PvaluesFDR
-#>  ttest_group_diff
-#>  ttest_group_diff_FDR
+#>  ttest_V_vs_S_Pvalues
+#>  ttest_V_vs_S_PvaluesFDR
+#>  ttest_V_vs_S_group_diff
+#>  ttest_V_vs_S_group_diff_FDR
 ```
 
 We might want to also look at the Fold Change with the function
@@ -996,8 +996,8 @@ X-axis? Easy-job with *GCP_Volcano*!
 ``` r
 
 Fig13_Volcano_plot <- GCP_Volcano(GCPlist = GCPlist12,
-                                  x_val = "logFC",
-                                  y_val = "ttest_Pvalues",
+                                  x_val = "V_vs_S_logFC",
+                                  y_val = "ttest_V_vs_S_Pvalues",
                                   pcutoff_colored = 0.05,
                                   pcutoff_line = 0.05,
                                   pcutoff_prot_label = 0.005,
@@ -1028,11 +1028,11 @@ significant proteins with *GCP_FilterProteins*:
 ``` r
 
 GCPlist12f <- GCP_FilterProteins(GCPlist = GCPlist12,
-                                 operation = "ttest_Pvalues < 0.05")
+                                 operation = "ttest_V_vs_S_Pvalues < 0.05")
 #> 
 #>                                         intensities
 #> Initially, the number of proteins were         1339
-#> after ttest_Pvalues < 0.05                       23
+#> after ttest_V_vs_S_Pvalues < 0.05                23
 ```
 
 And so we run *GCP_HeatMap*. I know it’s a function with a of

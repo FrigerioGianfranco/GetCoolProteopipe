@@ -18,6 +18,10 @@
 <url><loc>https://frigeriogianfranco.github.io/GetCoolProteopipe/reference/GCP_FilterProteins.html</loc></url>
 <url><loc>https://frigeriogianfranco.github.io/GetCoolProteopipe/reference/GCP_FoldChange.html</loc></url>
 <url><loc>https://frigeriogianfranco.github.io/GetCoolProteopipe/reference/GCP_FoldChange_Multi.html</loc></url>
+<url><loc>https://frigeriogianfranco.github.io/GetCoolProteopipe/reference/GCP_GO.html</loc></url>
+<url><loc>https://frigeriogianfranco.github.io/GetCoolProteopipe/reference/GCP_GO_barplot.html</loc></url>
+<url><loc>https://frigeriogianfranco.github.io/GetCoolProteopipe/reference/GCP_GO_dotplot.html</loc></url>
+<url><loc>https://frigeriogianfranco.github.io/GetCoolProteopipe/reference/GCP_GO_export.html</loc></url>
 <url><loc>https://frigeriogianfranco.github.io/GetCoolProteopipe/reference/GCP_HeatMap.html</loc></url>
 <url><loc>https://frigeriogianfranco.github.io/GetCoolProteopipe/reference/GCP_LogTransformIntensities.html</loc></url>
 <url><loc>https://frigeriogianfranco.github.io/GetCoolProteopipe/reference/GCP_NAimputation.html</loc></url>
@@ -25,6 +29,7 @@
 <url><loc>https://frigeriogianfranco.github.io/GetCoolProteopipe/reference/GCP_ProteinsGrouped.html</loc></url>
 <url><loc>https://frigeriogianfranco.github.io/GetCoolProteopipe/reference/GCP_ProteinsGroupedSummary.html</loc></url>
 <url><loc>https://frigeriogianfranco.github.io/GetCoolProteopipe/reference/GCP_QQplotIntensities.html</loc></url>
+<url><loc>https://frigeriogianfranco.github.io/GetCoolProteopipe/reference/GCP_RemoveAllNA.html</loc></url>
 <url><loc>https://frigeriogianfranco.github.io/GetCoolProteopipe/reference/GCP_RemoveAllZero.html</loc></url>
 <url><loc>https://frigeriogianfranco.github.io/GetCoolProteopipe/reference/GCP_RemoveSamples.html</loc></url>
 <url><loc>https://frigeriogianfranco.github.io/GetCoolProteopipe/reference/GCP_ReorderSamples.html</loc></url>
