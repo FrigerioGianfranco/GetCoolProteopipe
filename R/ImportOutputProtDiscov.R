@@ -5,7 +5,7 @@
 #' @param ProtDiscov_table_name a character vector of length 1 with the name of the Proteome Discoverer table file, as exported, in the current working directory, which must be in the .txt format.
 #' @param ProtDiscov_InputFiles  NULL or a character vector of length 1 with the name of the Proteome Discoverer input file table, as exported, in the current working directory, which must be in the .txt format.
 #' @param samples_info NULL or NA or a character vector of length 1 with the name of the table in the current working directory, containing information for each sample. The table must be in txt, csv, or xslsx format. In particular, the first column of the table must contain the names of the samples exactly the same considered.
-#' @param raw_or_norm either "raw" or "norm". Choose whether you wish to import the raw abundances or the normalised ones.
+#' @param abundances_to_import either "raw", "norm", or "grouped". Choose whether you wish to import the raw abundances, the normalised, or the grouped ones in the 'intensities' data frame.
 #' @param restore_sample_names logical. If TRUE, you must provide the ProtDiscov_InputFiles and the original sample names will be considered. If FALSE, the Proteome Discoverer sample names (like F1, F2, ...) will be considered.
 #' @param remove_empty_columns logical. If TRUE, samples that have full missing values abundances will be removed.
 #' @param fasta_database NULL or NA or either "human" or "mouse", or a name of a table in the current working directory (in .txt or .csv format). You can specify the fasta database to use to fill the missing Protein names and Gene names from the Proteome Discoverer table. If you choose "mouse" or "human", the fasta table implemented were downloaded and reprocessed from Mascot on 5 May 2024.
@@ -27,7 +27,7 @@
 #' GCPlist00P <- ImportOutputProtDiscov(ProtDiscov_table_name = "Proteome Discoverer OUTPUT FILE NAME.txt",     ## put here the name of the Proteome Discoverer output table present in your current working directory
 #'                                      ProtDiscov_InputFiles = "Proteome Discoverer INPUT FILE NAME.txt",      ## you could also put the name the input file if you want to restore the original sample names
 #'                                      samples_info = NULL,                                                 ## you could put here the file name of a table with further information about your samples
-#'                                      raw_or_norm = "raw",
+#'                                      abundances_to_import = "raw",
 #'                                      restore_sample_names = TRUE,
 #'                                      remove_empty_columns = TRUE,
 #'                                      fasta_database = "human",
@@ -39,7 +39,7 @@
 #' @importFrom readxl read_excel
 #'
 #' @export
-ImportOutputProtDiscov <- function(ProtDiscov_table_name, ProtDiscov_InputFiles = NULL, samples_info = NULL, raw_or_norm = c("raw", "norm"), restore_sample_names = TRUE, remove_empty_columns = TRUE, fasta_database = NA, prioritize_ProtDiscov_names = TRUE, remove_contaminants = TRUE) {
+ImportOutputProtDiscov <- function(ProtDiscov_table_name, ProtDiscov_InputFiles = NULL, samples_info = NULL, abundances_to_import = c("raw", "norm", "grouped"), restore_sample_names = TRUE, remove_empty_columns = TRUE, fasta_database = NA, prioritize_ProtDiscov_names = TRUE, remove_contaminants = TRUE) {
 
   if (length(ProtDiscov_table_name) != 1) {stop("ProtDiscov_table_name must be a character vector of length 1, indicating the name of the Proteome Discoverer table files, in txt format")}
   if (is.na(ProtDiscov_table_name)) {stop("ProtDiscov_table_name must be a character vector of length 1, indicating the name of the Proteome Discoverer table files, in txt format")}
@@ -59,12 +59,12 @@ ImportOutputProtDiscov <- function(ProtDiscov_table_name, ProtDiscov_InputFiles 
     }
   }
 
-  if (!identical(tolower(raw_or_norm), c("raw", "norm"))) {
-    if (length(raw_or_norm) != 1) {stop('raw_or_norm must be one of "raw", "norm"')}
-    if (is.na(raw_or_norm)) {stop('raw_or_norm must be one of "raw", "norm"')}
+  if (!identical(tolower(abundances_to_import), c("raw", "norm", "grouped"))) {
+    if (length(abundances_to_import) != 1) {stop('abundances_to_import must be one of "raw", "norm", "grouped"')}
+    if (is.na(abundances_to_import)) {stop('abundances_to_import must be one of "raw", "norm", "grouped"')}
   }
-  raw_or_norm <- tolower(raw_or_norm)
-  raw_or_norm <- match.arg(raw_or_norm, c("raw", "norm"))
+  abundances_to_import <- tolower(abundances_to_import)
+  abundances_to_import <- match.arg(abundances_to_import, c("raw", "norm", "grouped"))
 
   if (!is.logical(restore_sample_names)) {stop("restore_sample_names must be either TRUE or FALSE")}
   if (length(restore_sample_names) != 1) {stop("restore_sample_names must be either TRUE or FALSE")}
@@ -112,7 +112,7 @@ ImportOutputProtDiscov <- function(ProtDiscov_table_name, ProtDiscov_InputFiles 
     if (any(duplicated(PD_InputFiles_tab$`File ID`))) {stop("There are duplicated in the 'File ID' column of the ProtDiscov_InputFiles table")}
   }
 
-  if(!(all(c("Accession", "Description", "Gene Symbol") %in% colnames(proteinGroup_Raw)))) {stop('ProtDiscov_table must have at least the columns named: "Accession", "Description", "Gene Symbol"')}
+  if (!(all(c("Accession", "Description", "Gene Symbol") %in% colnames(proteinGroup_Raw)))) {stop('ProtDiscov_table must have at least the columns named: "Accession", "Description", "Gene Symbol"')}
   if (!is.character(proteinGroup_Raw$`Accession`)) {stop('The column "Accession" must contain character')}
   if (!is.character(proteinGroup_Raw$`Description`)) {stop('The column "Description" must contain character')}
   if (!is.character(proteinGroup_Raw$`Gene Symbol`)) {stop('The column "Gene Symbol" must contain character')}
@@ -142,12 +142,11 @@ ImportOutputProtDiscov <- function(ProtDiscov_table_name, ProtDiscov_InputFiles 
   colnames_with_averaged_intensities <- colnames(proteinGroup_Raw)[which(grepl("Abundances Grouped", colnames(proteinGroup_Raw)))]
 
   colnames_with_sample_intensities <- colnames_with_intensities[which(!colnames_with_intensities%in%colnames_with_averaged_intensities)]
-  if (length(colnames_with_sample_intensities) < 1) {stop("There are no 'Abundance' columns related to specific samples in the Proteome Discoverer table besides the 'Abundances Grouped'!")}
 
   colnames_with_sample_intensities_normalised <- colnames_with_sample_intensities[which(grepl("Abundances Normalized", colnames_with_sample_intensities))]
   colnames_with_sample_intensities_raw <- colnames_with_sample_intensities[which(!grepl("Abundances Normalized", colnames_with_sample_intensities))]
 
-  if (raw_or_norm == "raw") {
+  if (abundances_to_import == "raw") {
     if (length(colnames_with_sample_intensities_raw) < 1) {stop("There are no 'Abundance' columns in the Proteome Discoverer table that can be recognised as raw abundances!")}
     colnames_with_sample_intensities_chosen <- colnames_with_sample_intensities_raw
 
@@ -155,7 +154,7 @@ ImportOutputProtDiscov <- function(ProtDiscov_table_name, ProtDiscov_InputFiles 
                                           names_from_PD = sub("^Abundance\\s+(.*?)\\s+Sample.*$", "\\1", colnames_with_sample_intensities_raw),
                                           groups_from_PD = sub("^.*Sample\\s+", "", colnames_with_sample_intensities_raw),
                                           has_all_NA = rep(FALSE, length(colnames_with_sample_intensities_raw)))
-  } else if (raw_or_norm == "norm") {
+  } else if (abundances_to_import == "norm") {
     if (length(colnames_with_sample_intensities_normalised) < 1) {stop("There are no 'Abundance' columns in the Proteome Discoverer table that can be recognised as normalised abundances!")}
     colnames_with_sample_intensities_chosen <- colnames_with_sample_intensities_normalised
 
@@ -163,8 +162,18 @@ ImportOutputProtDiscov <- function(ProtDiscov_table_name, ProtDiscov_InputFiles 
                                           names_from_PD = sub("^Abundances Normalized\\s+(.*?)\\s+Sample.*$", "\\1", colnames_with_sample_intensities_normalised),
                                           groups_from_PD = sub("^.*Sample\\s+", "", colnames_with_sample_intensities_normalised),
                                           has_all_NA = rep(FALSE, length(colnames_with_sample_intensities_normalised)))
+
+  } else if (abundances_to_import == "grouped") {
+    if (length(colnames_with_averaged_intensities) < 1) {stop("There are no 'Abundance' columns in the Proteome Discoverer table that can be recognised as grouped abundances!")}
+    colnames_with_sample_intensities_chosen <- colnames_with_averaged_intensities
+
+    sample_intensities_names_df <- tibble(original_colnames_with_sample_intensities = colnames_with_averaged_intensities,
+                                          names_from_PD = sub("^Abundances Grouped ", "", colnames_with_averaged_intensities),
+                                          groups_from_PD = rep(NA_character_, length(colnames_with_averaged_intensities)),
+                                          has_all_NA = rep(FALSE, length(colnames_with_averaged_intensities)))
+
   } else {
-    stop('raw_or_norm must be one of "raw", "norm"')
+    stop('abundances_to_import must be one of "raw", "norm", "grouped"')
   }
 
   if (any(duplicated(sample_intensities_names_df$original_colnames_with_sample_intensities))) {stop("There are duplicated in the Abundance columns of the Proteome Discoverer table..")}
@@ -174,52 +183,58 @@ ImportOutputProtDiscov <- function(ProtDiscov_table_name, ProtDiscov_InputFiles 
 
   if (!is.null(ProtDiscov_InputFiles)) {
 
-    file_pattern_to_find <- "^.*\\\\([^\\\\]+)\\.raw$"
+    if (abundances_to_import == "grouped") {
+      cat('\n\nSince abundances_to_import is "grouped", ProtDiscov_InputFiles and restore_sample_names were not considered.\n\n')
+    } else {
 
-    names_from_File_Name_vctr <- ifelse(grepl(file_pattern_to_find, pull(PD_InputFiles_tab, "File Name")),
-                                        sub(file_pattern_to_find, "\\1", pull(PD_InputFiles_tab, "File Name")),
-                                        NA_character_)
+      file_pattern_to_find <- "^.*\\\\([^\\\\]+)\\.raw$"
 
-    sample_intensities_names_df <- add_column(sample_intensities_names_df,
-                                              names_from_File_Name = rep(NA_character_, nrow(sample_intensities_names_df)))
-    for (i_sindf in seq(nrow(sample_intensities_names_df))) {
-      if (sample_intensities_names_df$names_from_PD[i_sindf] %in% PD_InputFiles_tab$`File ID`) {
-        sample_intensities_names_df$names_from_File_Name[i_sindf] <- names_from_File_Name_vctr[which(PD_InputFiles_tab$`File ID`==sample_intensities_names_df$names_from_PD[i_sindf])]
-      }
-    }
+      names_from_File_Name_vctr <- ifelse(grepl(file_pattern_to_find, pull(PD_InputFiles_tab, "File Name")),
+                                          sub(file_pattern_to_find, "\\1", pull(PD_InputFiles_tab, "File Name")),
+                                          NA_character_)
 
-    if (restore_sample_names) {
-      real_sample_names_used <- TRUE
-
-      if (any(is.na(sample_intensities_names_df$names_from_File_Name))) {
-        NA_info_to_print <- character()
-        for (i_NA_orig_names in which(is.na(sample_intensities_names_df$names_from_File_Name))) {
-          NA_info_to_print <- c(NA_info_to_print, paste0(sample_intensities_names_df$names_from_PD[i_NA_orig_names], " : ", sample_intensities_names_df$names_from_File_Name[i_NA_orig_names]))
+      sample_intensities_names_df <- add_column(sample_intensities_names_df,
+                                                names_from_File_Name = rep(NA_character_, nrow(sample_intensities_names_df)))
+      for (i_sindf in seq(nrow(sample_intensities_names_df))) {
+        if (sample_intensities_names_df$names_from_PD[i_sindf] %in% PD_InputFiles_tab$`File ID`) {
+          sample_intensities_names_df$names_from_File_Name[i_sindf] <- names_from_File_Name_vctr[which(PD_InputFiles_tab$`File ID`==sample_intensities_names_df$names_from_PD[i_sindf])]
         }
-        stop(paste0("Sample names cannot be restored as there are names that cannot be matched or are NAs in the sample names from the InputFiles table:\n",
-                    paste0(NA_info_to_print, collapse = "\n"),
-                    "\n\n...You could also set the argument restore_sample_names as FALSE to avoid this error!"))
       }
 
-      if (any(sample_intensities_names_df$names_from_File_Name == "")) {
-        empty_info_to_print <- character()
-        for (i_empty_orig_names in which(sample_intensities_names_df$names_from_File_Name == "")) {
-          empty_info_to_print <- c(empty_info_to_print, paste0(sample_intensities_names_df$names_from_PD[i_empty_orig_names], " : ", sample_intensities_names_df$names_from_File_Name[i_empty_orig_names]))
-        }
-        stop(paste0("Sample names cannot be restored as there are empty names generated from the InputFiles table:\n",
-                    paste0(empty_info_to_print, collapse = "\n"),
-                    "\n\n...You could also set the argument restore_sample_names as FALSE to avoid this error!"))
-      }
+      if (restore_sample_names) {
 
-      if (any(duplicated(sample_intensities_names_df$names_from_File_Name))) {
-        sample_intensities_names_df_dupl_index <- which(sample_intensities_names_df$names_from_File_Name%in%unique(sample_intensities_names_df$names_from_File_Name[which(duplicated(sample_intensities_names_df$names_from_File_Name))]))
-        duplicated_info_to_print <- character()
-        for (i_dupl in sample_intensities_names_df_dupl_index) {
-          duplicated_info_to_print <- c(duplicated_info_to_print, paste0(sample_intensities_names_df$names_from_PD[i_dupl], " : ", sample_intensities_names_df$names_from_File_Name[i_dupl]))
+        real_sample_names_used <- TRUE
+
+        if (any(is.na(sample_intensities_names_df$names_from_File_Name))) {
+          NA_info_to_print <- character()
+          for (i_NA_orig_names in which(is.na(sample_intensities_names_df$names_from_File_Name))) {
+            NA_info_to_print <- c(NA_info_to_print, paste0(sample_intensities_names_df$names_from_PD[i_NA_orig_names], " : ", sample_intensities_names_df$names_from_File_Name[i_NA_orig_names]))
+          }
+          stop(paste0("Sample names cannot be restored as there are names that cannot be matched or are NAs in the sample names from the InputFiles table:\n",
+                      paste0(NA_info_to_print, collapse = "\n"),
+                      "\n\n...You could also set the argument restore_sample_names as FALSE to avoid this error!"))
         }
-        stop(paste0("Sample names cannot be restored as there are duplicated in the sample names from the InputFiles table:\n",
-                    paste0(duplicated_info_to_print, collapse = "\n"),
-                    "\n\n...You could also set the argument restore_sample_names as FALSE to avoid this error!"))
+
+        if (any(sample_intensities_names_df$names_from_File_Name == "")) {
+          empty_info_to_print <- character()
+          for (i_empty_orig_names in which(sample_intensities_names_df$names_from_File_Name == "")) {
+            empty_info_to_print <- c(empty_info_to_print, paste0(sample_intensities_names_df$names_from_PD[i_empty_orig_names], " : ", sample_intensities_names_df$names_from_File_Name[i_empty_orig_names]))
+          }
+          stop(paste0("Sample names cannot be restored as there are empty names generated from the InputFiles table:\n",
+                      paste0(empty_info_to_print, collapse = "\n"),
+                      "\n\n...You could also set the argument restore_sample_names as FALSE to avoid this error!"))
+        }
+
+        if (any(duplicated(sample_intensities_names_df$names_from_File_Name))) {
+          sample_intensities_names_df_dupl_index <- which(sample_intensities_names_df$names_from_File_Name%in%unique(sample_intensities_names_df$names_from_File_Name[which(duplicated(sample_intensities_names_df$names_from_File_Name))]))
+          duplicated_info_to_print <- character()
+          for (i_dupl in sample_intensities_names_df_dupl_index) {
+            duplicated_info_to_print <- c(duplicated_info_to_print, paste0(sample_intensities_names_df$names_from_PD[i_dupl], " : ", sample_intensities_names_df$names_from_File_Name[i_dupl]))
+          }
+          stop(paste0("Sample names cannot be restored as there are duplicated in the sample names from the InputFiles table:\n",
+                      paste0(duplicated_info_to_print, collapse = "\n"),
+                      "\n\n...You could also set the argument restore_sample_names as FALSE to avoid this error!"))
+        }
       }
     }
   }
@@ -252,8 +267,12 @@ ImportOutputProtDiscov <- function(ProtDiscov_table_name, ProtDiscov_InputFiles 
                                  protid = protid_vctr,
                                  .before = 1)
 
+  if (abundances_to_import=="raw" | abundances_to_import=="norm") {
+    proteinGroup_Raw_acc <- proteinGroup_Raw[, which(!colnames(proteinGroup_Raw)%in%colnames_with_sample_intensities)]
+  } else {
+    proteinGroup_Raw_acc <- proteinGroup_Raw[, which(!colnames(proteinGroup_Raw)%in%c(colnames_with_sample_intensities, colnames_with_sample_intensities_chosen))]
+  }
 
-  proteinGroup_Raw_acc <- proteinGroup_Raw[, which(!colnames(proteinGroup_Raw)%in%colnames_with_sample_intensities)]
 
   the_intensity_df <- proteinGroup_Raw[, c(1, which(colnames(proteinGroup_Raw)%in%colnames_with_sample_intensities_chosen))]
 
@@ -264,13 +283,20 @@ ImportOutputProtDiscov <- function(ProtDiscov_table_name, ProtDiscov_InputFiles 
       colnames(the_intensity_df)[id_col_intensity_df] <- sample_intensities_names_df$names_from_PD[which(sample_intensities_names_df$original_colnames_with_sample_intensities==colnames(the_intensity_df)[id_col_intensity_df])]
     }
 
-    starting_sampleINFO <- tibble(Sample = sample_names_used,
-                                  Groups_from_PD = as.factor(sample_intensities_names_df$groups_from_PD))
-    if (!is.null(ProtDiscov_InputFiles)) {
-      starting_sampleINFO <- add_column(starting_sampleINFO,
-                                        names_from_File_Name = sample_intensities_names_df$names_from_File_Name,
-                                        .after = 1)
+    if (abundances_to_import=="raw" | abundances_to_import=="norm") {
+      starting_sampleINFO <- tibble(Sample = sample_names_used,
+                                    Groups_from_PD = as.factor(sample_intensities_names_df$groups_from_PD))
+
+      if (!is.null(ProtDiscov_InputFiles)) {
+        starting_sampleINFO <- add_column(starting_sampleINFO,
+                                          names_from_File_Name = sample_intensities_names_df$names_from_File_Name,
+                                          .after = 1)
+      }
+
+    } else {
+      starting_sampleINFO <- tibble(Sample = sample_names_used)
     }
+
   } else {
     sample_names_used <- sample_intensities_names_df$names_from_File_Name
 
@@ -296,7 +322,11 @@ ImportOutputProtDiscov <- function(ProtDiscov_table_name, ProtDiscov_InputFiles 
 
 
       if (!all(pull(samples_info_loaded, 1) %in% sample_names_used)) {
-        stop("The names contained in the first column of the samples_info table are not matching with the sample names we are considering here\n\n...You could also leave the argument samples_info as NULL to avoid this error!")
+        stop(paste0('The names contained in the first column of the samples_info table are not matching with the sample names we are considering here!\n\nThe names in the first column of the samples_info table are:\n',
+                    paste0(pull(samples_info_loaded, 1), collapse = '", "'),
+                    '"\nWhile the sample names considered here are:\n"',
+                    paste0(sample_names_used, collapse = '", "'),
+                    '"\n'))
       }
 
       if (any(duplicated(pull(samples_info_loaded, 1)))) {stop("The names of samples from the first column of samples_info must not contain duplicate")}
@@ -452,12 +482,14 @@ ImportOutputProtDiscov <- function(ProtDiscov_table_name, ProtDiscov_InputFiles 
                      sampleINFO = samples_info_considered)
 
 
-  if (raw_or_norm == "raw") {
+  if (abundances_to_import == "raw") {
     cat("\n -- raw intensities are being imported --\n\n")
-  } else if (raw_or_norm == "norm") {
+  } else if (abundances_to_import == "norm") {
     cat("\n -- normalised intensities are being imported --\n\n")
+  } else if (abundances_to_import == "grouped") {
+    cat("\n -- grouped intensities are being imported --\n\n")
   } else {
-    stop('raw_or_norm must be one of "raw", "norm"')
+    stop('abundances_to_import must be one of "raw", "norm", "grouped"')
   }
 
   return(final_list)

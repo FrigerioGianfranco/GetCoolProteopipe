@@ -43,6 +43,14 @@ GCP_ANOVA <- function(GCPlist, name_column_groups = getOption("GetCoolProteopipe
   if (length(levels(pull(GCPlist$sampleINFO, name_column_groups))) < 3) {
     stop(paste0("To perform an ANOVA, you must have at least 3 groups! The groups in '", name_column_groups, "' are:\n", paste0(levels(pull(GCPlist$sampleINFO, name_column_groups)), collapse = "\n")))
   }
+  if (any(grepl("-", levels(pull(GCPlist$sampleINFO, name_column_groups))))) {
+    groups_with_hypn <- levels(pull(GCPlist$sampleINFO, name_column_groups))[which(grepl("-", levels(pull(GCPlist$sampleINFO, name_column_groups))))]
+    if (length(groups_with_hypn)==1) {
+      stop(paste0("The names of groups specified with 'name_column_groups' must not contain '-'.\n The group with problem is the following:\n  ", groups_with_hypn))
+    } else {
+      stop(paste0("The names of groups specified with 'name_column_groups' must not contain '-'.\n The groups with problems are the following:\n  ", paste0(groups_with_hypn, collapse = "\n  ")))
+    }
+  }
 
   if (length(FDR)!=1) {stop("FDR must be exclusively TRUE or FALSE")}
   if (!is.logical(FDR)) {stop("FDR must be exclusively TRUE or FALSE")}

@@ -46,6 +46,14 @@ GCP_ttest <- function(GCPlist, name_column_groups = getOption("GetCoolProteopipe
   if (length(levels(pull(GCPlist$sampleINFO, name_column_groups))) != 2) {
     stop(paste0("To perform a t-test, you must have exactly 2 groups! The groups in '", name_column_groups, "' are:\n", paste0(levels(pull(GCPlist$sampleINFO, name_column_groups)), collapse = "\n")))
   }
+  if (any(grepl("-", levels(pull(GCPlist$sampleINFO, name_column_groups))))) {
+    groups_with_hypn <- levels(pull(GCPlist$sampleINFO, name_column_groups))[which(grepl("-", levels(pull(GCPlist$sampleINFO, name_column_groups))))]
+    if (length(groups_with_hypn)==1) {
+      stop(paste0("The names of groups specified with 'name_column_groups' must not contain '-'.\n The group with problem is the following:\n  ", groups_with_hypn))
+    } else {
+      stop(paste0("The names of groups specified with 'name_column_groups' must not contain '-'.\n The groups with problems are the following:\n  ", paste0(groups_with_hypn, collapse = "\n  ")))
+    }
+  }
 
 
   if (length(paired)!=1) {stop("paired must be exclusively TRUE or FALSE")}
@@ -93,7 +101,9 @@ GCP_ttest <- function(GCPlist, name_column_groups = getOption("GetCoolProteopipe
                                                     pcutoff = pcutoff,
                                                     filter_sign = FALSE)
   colnames(the_ttest_table)[1] <- "protid"
-  colnames(the_ttest_table)[which(colnames(the_ttest_table)!="protid")] <- paste0("ttest_", colnames(the_ttest_table)[which(colnames(the_ttest_table)!="protid")])
+  colnames(the_ttest_table)[which(colnames(the_ttest_table)!="protid")] <- paste0("ttest_",
+                                                                                  levels(pull(df_intensities_wg, name_column_groups))[2], "_vs_", levels(pull(df_intensities_wg, name_column_groups))[1], "_",
+                                                                                  colnames(the_ttest_table)[which(colnames(the_ttest_table)!="protid")])
 
   colnames_noprotid <- colnames(the_ttest_table)[which(colnames(the_ttest_table)!="protid")]
   colnames_noprotid_present <- colnames_noprotid[which(colnames_noprotid %in% colnames(GCPlist$proteinINFO))]
