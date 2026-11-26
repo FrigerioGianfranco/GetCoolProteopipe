@@ -21,9 +21,11 @@ Before installing, ensure the following are installed:
 Then open R (or RStudio) and run the following in the R console:
 
 ```{r, eval=FALSE}
-if (!require("devtools", quietly = TRUE)) {install.packages("devtools")}
+if (!requireNamespace("pak", quietly = TRUE)) {
+  install.packages("pak")
+}
 
-devtools::install_github("FrigerioGianfranco/GetCoolProteopipe", dependencies = TRUE)
+pak::pkg_install("FrigerioGianfranco/GetCoolProteopipe", dependencies = TRUE)
 ```
 
 Follow the on-screen instructions to install all the dependencies.
