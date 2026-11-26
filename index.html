@@ -64,8 +64,8 @@
 <li>Git</li>
 </ul>
 <p>Then open R (or RStudio) and run the following in the R console:</p>
-<p>```{r, eval=FALSE} if (!require(“devtools”, quietly = TRUE)) {install.packages(“devtools”)}</p>
-<p>devtools::install_github(“FrigerioGianfranco/GetCoolProteopipe”, dependencies = TRUE) ```</p>
+<p>```{r, eval=FALSE} if (!requireNamespace(“pak”, quietly = TRUE)) { install.packages(“pak”) }</p>
+<p>pak::pkg_install(“FrigerioGianfranco/GetCoolProteopipe”, dependencies = TRUE) ```</p>
 <p>Follow the on-screen instructions to install all the dependencies.</p>
 </div>
 <div class="section level2">
